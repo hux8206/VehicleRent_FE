@@ -1660,6 +1660,31 @@ export const api = {
       }
     },
 
+    getRefunds: async (
+      filters?: { search?: string; status?: number; fromDate?: string; toDate?: string }
+    ): Promise<Booking[]> => {
+      try {
+        const params = new URLSearchParams();
+        if (filters) {
+          if (filters.search) params.append("search", filters.search);
+          if (filters.status !== undefined) params.append("status", String(filters.status));
+          if (filters.fromDate) params.append("fromDate", filters.fromDate);
+          if (filters.toDate) params.append("toDate", filters.toDate);
+        }
+        const qs = params.toString() ? `?${params.toString()}` : "";
+        return await request<Booking[]>(`/admin/transactions/refunds${qs}`);
+      } catch {
+        return [];
+      }
+    },
+
+    reviewRefund: async (bookingId: number, dto: { refundStatus: number; adminNote?: string }) => {
+      return await request<{ message: string; booking: Booking }>(`/admin/transactions/refunds/${bookingId}/status`, {
+        method: "PATCH",
+        body: JSON.stringify(dto),
+      });
+    },
+
     promotions: {
       getAll: async () => {
         try {

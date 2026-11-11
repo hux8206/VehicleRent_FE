@@ -34,6 +34,9 @@ import {
   Search,
   Building2,
   Loader2,
+  ShieldAlert,
+  Info,
+  HelpCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format24hDateTime } from "@/components/common/datetime-24h-picker";
@@ -66,6 +69,46 @@ const VIETNAM_BANKS = [
   "OCB (Phương Đông)",
   "Khác (Tự nhập)",
 ];
+
+const getRefundPolicyInfo = (b: Booking) => {
+  const startTimeMs = new Date(b.startTime).getTime();
+  const nowMs = Date.now();
+  const diffHours = (startTimeMs - nowMs) / (1000 * 60 * 60);
+  const deposit = Number(b.depositAmount) || 0;
+
+  let percent = 0;
+  let tier = 3;
+  let tierLabel = "Dưới 6h: Không hoàn cọc (0%)";
+  let badgeColor =
+    "text-rose-700 bg-rose-50 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800";
+  let refundAmt = 0;
+
+  if (diffHours >= 24) {
+    percent = 100;
+    tier = 1;
+    refundAmt = deposit;
+    tierLabel = "Trước ≥24h: Hoàn 100% cọc";
+    badgeColor =
+      "text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800";
+  } else if (diffHours >= 6) {
+    percent = 50;
+    tier = 2;
+    refundAmt = Math.round(deposit * 0.5);
+    tierLabel = "Trước 6h-24h: Hoàn 50% cọc";
+    badgeColor =
+      "text-amber-700 bg-amber-50 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800";
+  }
+
+  return {
+    diffHours: Math.max(0, diffHours),
+    tier,
+    percent,
+    refundAmt,
+    deposit,
+    tierLabel,
+    badgeColor,
+  };
+};
 
 export default function CustomerBookingsPage() {
   const { user } = useAuth();
@@ -240,7 +283,11 @@ export default function CustomerBookingsPage() {
       return;
     }
 
-    if (cancelModalBooking.status === 1 || cancelModalBooking.status === 2) {
+    const policy = getRefundPolicyInfo(cancelModalBooking);
+    const requiresBank =
+      (cancelModalBooking.status === 1 || cancelModalBooking.status === 2) && policy.percent > 0;
+
+    if (requiresBank) {
       if (!bankName) {
         toast.error("Vui lòng chọn hoặc nhập tên ngân hàng nhận tiền hoàn cọc!");
         return;
@@ -657,16 +704,35 @@ export default function CustomerBookingsPage() {
                           </>
                         )}
 
-                        {(b.status === 1 || b.status === 2) && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleOpenCancelModal(b)}
-                            className="text-xs text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50 h-8 rounded-lg cursor-pointer font-medium gap-1.5"
-                          >
-                            <XCircle className="h-3.5 w-3.5" /> Hủy đơn & Hoàn cọc
-                          </Button>
-                        )}
+                        {(b.status === 1 || b.status === 2) && (() => {
+                          const policy = getRefundPolicyInfo(b);
+                          return (
+                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                              {/* Policy preview pill beside cancel button */}
+                              <div
+                                className={`text-[11px] font-semibold border px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs ${policy.badgeColor}`}
+                                title={`Quy định hoàn cọc: Hủy trước ≥24h hoàn 100%, 6h-24h hoàn 50%, <6h không hoàn cọc (0%). Đơn này còn ${policy.diffHours.toFixed(1)} giờ.`}
+                              >
+                                <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
+                                <span>
+                                  Hoàn <strong>{policy.percent}%</strong> ({policy.refundAmt.toLocaleString("vi-VN")} đ)
+                                </span>
+                                <span className="text-[10px] opacity-75 font-normal hidden lg:inline">
+                                  (Quy định: ≥24h: 100% | 6h-24h: 50% | &lt;6h: 0%)
+                                </span>
+                              </div>
+
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleOpenCancelModal(b)}
+                                className="text-xs text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50 h-8 rounded-lg cursor-pointer font-medium gap-1.5 shrink-0"
+                              >
+                                <XCircle className="h-3.5 w-3.5" /> Hủy đơn & Hoàn cọc
+                              </Button>
+                            </div>
+                          );
+                        })()}
 
                         {isCompleted && (
                           b.review ? (
@@ -888,149 +954,240 @@ export default function CustomerBookingsPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleConfirmCancelWithRefund} className="p-5 sm:p-6 space-y-4">
-              {/* Refund Info Banner */}
-              <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-xl flex items-center justify-between text-xs">
-                <div>
-                  <span className="text-slate-600 block">Số tiền cọc sẽ được hoàn lại:</span>
-                  <span className="text-base font-black text-blue-700">
-                    {Number(cancelModalBooking.depositAmount).toLocaleString("vi-VN")} đ
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[11px] text-slate-500 block">Dòng xe:</span>
-                  <span className="font-bold text-slate-800">
-                    {cancelModalBooking.bookingDetails?.[0]?.model?.name || "Xe đã đặt"}
-                  </span>
-                </div>
-              </div>
+            {(() => {
+              const policy = getRefundPolicyInfo(cancelModalBooking);
+              return (
+                <form onSubmit={handleConfirmCancelWithRefund} className="p-5 sm:p-6 space-y-4">
+                  {/* 3-Tier Policy Visual Grid */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                        <ShieldAlert className="h-4 w-4 text-blue-600" />
+                        <span>Quy định hoàn tiền cọc khi hủy xe</span>
+                      </div>
+                      <span className="text-[11px] text-slate-500 font-medium">
+                        Còn <strong className="text-blue-700">{policy.diffHours.toFixed(1)}h</strong> trước giờ nhận
+                      </span>
+                    </div>
 
-              {/* Cancellation Reason */}
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-slate-800">
-                  Lý do hủy đơn <span className="text-red-500">*</span>
-                </Label>
-                <select
-                  value={cancelReasonSelect}
-                  onChange={(e) => setCancelReasonSelect(e.target.value)}
-                  className="w-full text-xs h-9 rounded-xl border border-slate-200 bg-white px-3 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {CANCEL_REASONS.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
+                    <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                      {/* Tier 1 */}
+                      <div
+                        className={`p-2.5 rounded-xl border transition-all ${
+                          policy.tier === 1
+                            ? "bg-emerald-50 border-emerald-400 ring-2 ring-emerald-400/30 text-emerald-950 font-semibold"
+                            : "bg-slate-50/70 border-slate-200 text-slate-500 opacity-60"
+                        }`}
+                      >
+                        <div className="text-[10px] uppercase font-bold tracking-wider">Trước ≥ 24h</div>
+                        <div className="text-base font-black text-emerald-700 mt-0.5">Hoàn 100%</div>
+                        <div className="text-[10px] mt-0.5">
+                          {policy.tier === 1 ? "Đang áp dụng ✓" : "Hoàn toàn bộ"}
+                        </div>
+                      </div>
 
-                {(cancelReasonSelect === "Lý do khác" || cancelReasonCustom) && (
-                  <Input
-                    placeholder="Nhập chi tiết lý do của bạn..."
-                    value={cancelReasonCustom}
-                    onChange={(e) => setCancelReasonCustom(e.target.value)}
-                    className="text-xs h-9 rounded-xl mt-1.5"
-                    required={cancelReasonSelect === "Lý do khác"}
-                  />
-                )}
-              </div>
+                      {/* Tier 2 */}
+                      <div
+                        className={`p-2.5 rounded-xl border transition-all ${
+                          policy.tier === 2
+                            ? "bg-amber-50 border-amber-400 ring-2 ring-amber-400/30 text-amber-950 font-semibold"
+                            : "bg-slate-50/70 border-slate-200 text-slate-500 opacity-60"
+                        }`}
+                      >
+                        <div className="text-[10px] uppercase font-bold tracking-wider">Trước 6h - 24h</div>
+                        <div className="text-base font-black text-amber-700 mt-0.5">Hoàn 50%</div>
+                        <div className="text-[10px] mt-0.5">
+                          {policy.tier === 2 ? "Đang áp dụng ✓" : "Bù 50% nhà xe"}
+                        </div>
+                      </div>
 
-              {/* Bank Details for Refund */}
-              <div className="space-y-3 pt-2 border-t border-slate-100">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                  <Building2 className="h-4 w-4 text-blue-600" />
-                  <span>Thông tin tài khoản nhận tiền hoàn cọc</span>
-                </div>
-
-                <div className="space-y-1">
-                  <Label className="text-xs text-slate-700">
-                    Ngân hàng thụ hưởng <span className="text-red-500">*</span>
-                  </Label>
-                  <select
-                    value={refundBankNameSelect}
-                    onChange={(e) => setRefundBankNameSelect(e.target.value)}
-                    className="w-full text-xs h-9 rounded-xl border border-slate-200 bg-white px-3 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {VIETNAM_BANKS.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-
-                  {refundBankNameSelect === "Khác (Tự nhập)" && (
-                    <Input
-                      placeholder="Nhập tên ngân hàng của bạn..."
-                      value={refundBankNameCustom}
-                      onChange={(e) => setRefundBankNameCustom(e.target.value)}
-                      className="text-xs h-9 rounded-xl mt-1.5"
-                      required
-                    />
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs text-slate-700">
-                      Số tài khoản <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      type="text"
-                      placeholder="VD: 0987654321..."
-                      value={refundAccountNumber}
-                      onChange={(e) => setRefundAccountNumber(e.target.value)}
-                      className="text-xs h-9 font-mono font-bold rounded-xl"
-                      required
-                    />
+                      {/* Tier 3 */}
+                      <div
+                        className={`p-2.5 rounded-xl border transition-all ${
+                          policy.tier === 3
+                            ? "bg-rose-50 border-rose-400 ring-2 ring-rose-400/30 text-rose-950 font-semibold"
+                            : "bg-slate-50/70 border-slate-200 text-slate-500 opacity-60"
+                        }`}
+                      >
+                        <div className="text-[10px] uppercase font-bold tracking-wider">Dưới &lt; 6h</div>
+                        <div className="text-base font-black text-rose-700 mt-0.5">Hoàn 0%</div>
+                        <div className="text-[10px] mt-0.5">
+                          {policy.tier === 3 ? "Đang áp dụng ✓" : "Không hoàn cọc"}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-slate-700">
-                      Tên chủ tài khoản <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      type="text"
-                      placeholder="VD: NGUYEN VAN A"
-                      value={refundAccountName}
-                      onChange={(e) => setRefundAccountName(e.target.value.toUpperCase())}
-                      className="text-xs h-9 uppercase font-bold rounded-xl"
-                      required
-                    />
+
+                  {/* Refund Calculation Summary Banner */}
+                  <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-xl flex items-center justify-between text-xs">
+                    <div>
+                      <div className="text-[11px] text-slate-600">
+                        Cọc đã đóng:{" "}
+                        <strong className="text-slate-900 font-semibold">
+                          {policy.deposit.toLocaleString("vi-VN")} đ
+                        </strong>{" "}
+                        (Tỷ lệ hoàn: <strong className="text-blue-700">{policy.percent}%</strong>)
+                      </div>
+                      <div className="text-xs text-slate-700 mt-0.5">
+                        Số tiền hoàn về:{" "}
+                        <span className="text-base font-black text-blue-700">
+                          {policy.refundAmt.toLocaleString("vi-VN")} đ
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[11px] text-slate-500 block">Dòng xe:</span>
+                      <span className="font-bold text-slate-800">
+                        {cancelModalBooking.bookingDetails?.[0]?.model?.name || "Xe đã đặt"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Warning box */}
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-800 flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                <p className="leading-relaxed">
-                  Lưu ý: Sau khi xác nhận hủy, xe đã giữ sẽ được tự động mở lại cho khách hàng khác thuê. Nhà xe và quản trị viên sẽ đối soát thông tin tài khoản và tiến hành chuyển khoản hoàn lại tiền cọc cho bạn.
-                </p>
-              </div>
+                  {/* Cancellation Reason */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-slate-800">
+                      Lý do hủy đơn <span className="text-red-500">*</span>
+                    </Label>
+                    <select
+                      value={cancelReasonSelect}
+                      onChange={(e) => setCancelReasonSelect(e.target.value)}
+                      className="w-full text-xs h-9 rounded-xl border border-slate-200 bg-white px-3 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {CANCEL_REASONS.map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
 
-              <DialogFooter className="p-0 pt-2 flex flex-row items-center justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setCancelModalBooking(null)}
-                  disabled={isSubmittingCancel}
-                  className="h-9 text-xs rounded-xl"
-                >
-                  Đóng
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmittingCancel}
-                  className="h-9 px-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl gap-1.5 cursor-pointer"
-                >
-                  {isSubmittingCancel ? (
-                    <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      <span>Đang xử lý...</span>
-                    </>
+                    {(cancelReasonSelect === "Lý do khác" || cancelReasonCustom) && (
+                      <Input
+                        placeholder="Nhập chi tiết lý do của bạn..."
+                        value={cancelReasonCustom}
+                        onChange={(e) => setCancelReasonCustom(e.target.value)}
+                        className="text-xs h-9 rounded-xl mt-1.5"
+                        required={cancelReasonSelect === "Lý do khác"}
+                      />
+                    )}
+                  </div>
+
+                  {/* Bank Details (Only required if refundAmt > 0) */}
+                  {policy.percent > 0 ? (
+                    <div className="space-y-3 pt-2 border-t border-slate-100">
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                        <Building2 className="h-4 w-4 text-blue-600" />
+                        <span>Thông tin tài khoản nhận tiền hoàn cọc ({policy.refundAmt.toLocaleString("vi-VN")} đ)</span>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-xs text-slate-700">
+                          Ngân hàng thụ hưởng <span className="text-red-500">*</span>
+                        </Label>
+                        <select
+                          value={refundBankNameSelect}
+                          onChange={(e) => setRefundBankNameSelect(e.target.value)}
+                          className="w-full text-xs h-9 rounded-xl border border-slate-200 bg-white px-3 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          {VIETNAM_BANKS.map((b) => (
+                            <option key={b} value={b}>
+                              {b}
+                            </option>
+                          ))}
+                        </select>
+
+                        {refundBankNameSelect === "Khác (Tự nhập)" && (
+                          <Input
+                            placeholder="Nhập tên ngân hàng của bạn..."
+                            value={refundBankNameCustom}
+                            onChange={(e) => setRefundBankNameCustom(e.target.value)}
+                            className="text-xs h-9 rounded-xl mt-1.5"
+                            required
+                          />
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label className="text-xs text-slate-700">
+                            Số tài khoản <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            type="text"
+                            placeholder="VD: 0987654321..."
+                            value={refundAccountNumber}
+                            onChange={(e) => setRefundAccountNumber(e.target.value)}
+                            className="text-xs h-9 font-mono font-bold rounded-xl"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-slate-700">
+                            Tên chủ tài khoản <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            type="text"
+                            placeholder="VD: NGUYEN VAN A"
+                            value={refundAccountName}
+                            onChange={(e) => setRefundAccountName(e.target.value.toUpperCase())}
+                            className="text-xs h-9 uppercase font-bold rounded-xl"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
                   ) : (
-                    <span>Xác nhận hủy & Hoàn cọc</span>
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 flex items-start gap-2">
+                      <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="block font-bold">Lưu ý về quy định hủy sát giờ (&lt; 6h):</strong>
+                        <p className="mt-0.5 text-[11px] text-rose-700 leading-relaxed">
+                          Do đơn đặt xe bị hủy cách giờ nhận xe dưới 6 tiếng, toàn bộ tiền cọc ({policy.deposit.toLocaleString("vi-VN")} đ) được đối tác nhà xe giữ để bù đắp chi phí giữ xe và chuẩn bị phương tiện. Bạn không cần cung cấp tài khoản ngân hàng.
+                        </p>
+                      </div>
+                    </div>
                   )}
-                </Button>
-              </DialogFooter>
-            </form>
+
+                  {/* Warning box */}
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-800 flex items-start gap-2">
+                    <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                    <p className="leading-relaxed">
+                      Lưu ý: Sau khi xác nhận hủy, xe đã giữ sẽ được tự động mở lại cho khách hàng khác thuê.
+                      {policy.percent > 0 && " Quản trị viên sàn sẽ đối soát thông tin tài khoản và tiến hành chuyển khoản hoàn lại tiền cọc cho bạn theo quy định."}
+                    </p>
+                  </div>
+
+                  <DialogFooter className="p-0 pt-2 flex flex-row items-center justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setCancelModalBooking(null)}
+                      disabled={isSubmittingCancel}
+                      className="h-9 text-xs rounded-xl"
+                    >
+                      Đóng
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={isSubmittingCancel}
+                      className="h-9 px-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl gap-1.5 cursor-pointer"
+                    >
+                      {isSubmittingCancel ? (
+                        <>
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          <span>Đang xử lý...</span>
+                        </>
+                      ) : (
+                        <span>
+                          {policy.percent > 0
+                            ? `Xác nhận hủy & Hoàn ${policy.refundAmt.toLocaleString("vi-VN")} đ`
+                            : "Xác nhận hủy đặt xe"}
+                        </span>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              );
+            })()}
           </DialogContent>
         </Dialog>
       )}
