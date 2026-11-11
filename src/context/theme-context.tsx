@@ -1,10 +1,11 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from "next-themes";
 
 export type Theme = "light" | "dark" | "system";
 
-interface ThemeContextType {
+export interface ThemeContextType {
   theme: Theme;
   resolvedTheme: "light" | "dark";
   setTheme: (theme: Theme) => void;
@@ -14,70 +15,13 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
-  const [mounted, setMounted] = useState<boolean>(false);
+function ThemeBridge({ children }: { children: React.ReactNode }) {
+  const { theme, resolvedTheme, setTheme } = useNextTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("theme") as Theme | null;
-      if (stored === "light" || stored === "dark" || stored === "system") {
-        setThemeState(stored);
-      } else {
-        setThemeState("light");
-      }
-    } catch {
-      setThemeState("light");
-    }
     setMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
-    const root = document.documentElement;
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    const applyTheme = () => {
-      let activeTheme: "light" | "dark" = "light";
-      if (theme === "system") {
-        activeTheme = mediaQuery.matches ? "dark" : "light";
-      } else {
-        activeTheme = theme;
-      }
-
-      setResolvedTheme(activeTheme);
-
-      if (activeTheme === "dark") {
-        root.classList.add("dark");
-        root.classList.remove("light");
-        root.style.colorScheme = "dark";
-      } else {
-        root.classList.remove("dark");
-        root.classList.add("light");
-        root.style.colorScheme = "light";
-      }
-    };
-
-    applyTheme();
-
-    const handleChange = () => {
-      if (theme === "system") {
-        applyTheme();
-      }
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, [theme, mounted]);
-
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
-    try {
-      localStorage.setItem("theme", newTheme);
-    } catch {}
-  };
 
   const toggleTheme = () => {
     const next = resolvedTheme === "dark" ? "light" : "dark";
@@ -85,9 +29,30 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme, mounted }}>
+    <ThemeContext.Provider
+      value={{
+        theme: (theme as Theme) || "system",
+        resolvedTheme: (resolvedTheme as "light" | "dark") || "light",
+        setTheme: (t: Theme) => setTheme(t),
+        toggleTheme,
+        mounted,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
+  );
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <ThemeBridge>{children}</ThemeBridge>
+    </NextThemesProvider>
   );
 }
 
@@ -98,4 +63,3 @@ export function useTheme() {
   }
   return context;
 }
-

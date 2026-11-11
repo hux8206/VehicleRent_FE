@@ -51,6 +51,7 @@ import {
   Phone,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/context/language-context";
 
 const getBankShortName = (bankName: string = "") => {
   const b = bankName.toLowerCase();
@@ -74,6 +75,7 @@ const getBankShortName = (bankName: string = "") => {
 };
 
 export default function AdminTransactionsPage() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<"payouts" | "payments" | "wallet" | "refunds">("payouts");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -108,7 +110,7 @@ export default function AdminTransactionsPage() {
   const handleCopyText = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
     setCopiedKey(key);
-    toast.success(`Đã sao chép: ${text}`);
+    toast.success(`${t("toast_copied_generic", "Đã sao chép:")} ${text}`);
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
@@ -344,16 +346,16 @@ export default function AdminTransactionsPage() {
   const totalPayosRevenue = successPayments.reduce((acc, cur) => acc + Number(cur.amount), 0);
 
   return (
-    <div className="py-8 sm:py-10 bg-slate-50/60 min-h-screen">
+    <div className="py-8 sm:py-10 bg-slate-50/60 dark:bg-slate-950 min-h-screen">
       <div className="container max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Quản Lý Giao Dịch & Dòng Tiền Toàn Sàn
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+              {t("admin_tx_title", "Quản Lý Giao Dịch & Dòng Tiền Toàn Sàn")}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Giám sát dòng tiền cọc PayOS, xử lý yêu cầu rút tiền của đối tác và tra cứu biến động số dư ví.
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              {t("admin_tx_desc", "Giám sát dòng tiền cọc PayOS, xử lý yêu cầu rút tiền của đối tác và tra cứu biến động số dư ví.")}
             </p>
           </div>
 
@@ -363,18 +365,18 @@ export default function AdminTransactionsPage() {
               size="sm"
               onClick={fetchData}
               disabled={isLoading}
-              className="text-xs font-semibold rounded-xl h-9 gap-1.5 bg-white shadow-xs"
+              className="text-xs font-semibold rounded-xl h-9 gap-1.5 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xs cursor-pointer"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
-              Làm mới
+              {t("admin_tx_refresh", "Làm mới")}
             </Button>
             <Link href="/admin">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs font-semibold rounded-xl h-9 text-slate-600"
+                className="text-xs font-semibold rounded-xl h-9 text-slate-600 dark:text-slate-400 cursor-pointer"
               >
-                Về Báo Cáo Sàn
+                {t("admin_tx_back_report", "Về Báo Cáo Sàn")}
               </Button>
             </Link>
           </div>
@@ -382,28 +384,28 @@ export default function AdminTransactionsPage() {
 
         {/* Priority Pending Payout Banner */}
         {pendingPayouts.length > 0 && (
-          <div className="rounded-2xl border border-amber-300 bg-amber-50/90 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-amber-950 shadow-xs">
+          <div className="rounded-2xl border border-amber-300 dark:border-amber-800 bg-amber-50/90 dark:bg-amber-950/40 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-amber-950 dark:text-amber-200 shadow-xs">
             <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-amber-500/20 text-amber-800 flex items-center justify-center shrink-0">
+              <div className="h-11 w-11 rounded-2xl bg-amber-500/20 text-amber-800 dark:text-amber-400 flex items-center justify-center shrink-0">
                 <ShieldAlert className="h-6 w-6" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-amber-600 text-white border-none text-[10px] font-black uppercase">
-                    Cần phê duyệt ngay
+                    {t("admin_tx_urgent_action", "Cần phê duyệt ngay")}
                   </Badge>
-                  <span className="text-xs font-bold text-amber-800">
-                    {pendingPayouts.length} yêu cầu rút tiền
+                  <span className="text-xs font-bold text-amber-800 dark:text-amber-400">
+                    {pendingPayouts.length} {t("admin_tx_payout_requests", "yêu cầu rút tiền")}
                   </span>
                 </div>
-                <h4 className="font-extrabold text-base text-amber-950 mt-0.5">
-                  Tổng tiền yêu cầu giải ngân:{" "}
-                  <span className="font-mono text-emerald-800">
+                <h4 className="font-extrabold text-base text-amber-950 dark:text-amber-200 mt-0.5">
+                  {t("admin_tx_total_payout_amount", "Tổng tiền yêu cầu giải ngân:")}{" "}
+                  <span className="font-mono text-emerald-800 dark:text-emerald-400">
                     {totalPendingPayoutAmount.toLocaleString("vi-VN")} VNĐ
                   </span>
                 </h4>
-                <p className="text-xs text-amber-800/90 mt-0.5">
-                  Vui lòng đối soát và chuyển khoản vào tài khoản ngân hàng chính chủ của đối tác trước khi duyệt.
+                <p className="text-xs text-amber-800/90 dark:text-amber-300 mt-0.5">
+                  {t("admin_tx_payout_hint", "Vui lòng đối soát và chuyển khoản vào tài khoản ngân hàng chính chủ của đối tác trước khi duyệt.")}
                 </p>
               </div>
             </div>
@@ -416,35 +418,35 @@ export default function AdminTransactionsPage() {
               }}
               className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs shrink-0 cursor-pointer"
             >
-              Xem {pendingPayouts.length} yêu cầu chờ duyệt
+              {t("admin_tx_view_pending_payouts", "Xem")} {pendingPayouts.length} {t("admin_tx_payouts_waiting", "yêu cầu chờ duyệt")}
             </Button>
           </div>
         )}
 
         {/* Priority Pending Refund Requests Banner */}
         {pendingRefunds.length > 0 && (
-          <div className="rounded-2xl border border-rose-300 bg-rose-50/90 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-rose-950 shadow-xs">
+          <div className="rounded-2xl border border-rose-300 dark:border-rose-800 bg-rose-50/90 dark:bg-rose-950/40 p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-rose-950 dark:text-rose-200 shadow-xs">
             <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-rose-500/20 text-rose-700 flex items-center justify-center shrink-0">
+              <div className="h-11 w-11 rounded-2xl bg-rose-500/20 text-rose-700 dark:text-rose-400 flex items-center justify-center shrink-0">
                 <RotateCcw className="h-6 w-6" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-rose-600 text-white border-none text-[10px] font-black uppercase">
-                    Yêu cầu hoàn cọc khách hủy xe
+                    {t("admin_tx_refund_banner_badge", "Yêu cầu hoàn cọc khách hủy xe")}
                   </Badge>
-                  <span className="text-xs font-bold text-rose-800">
-                    {pendingRefunds.length} đơn chờ chuyển khoản hoàn cọc
+                  <span className="text-xs font-bold text-rose-800 dark:text-rose-400">
+                    {pendingRefunds.length} {t("admin_tx_refunds_waiting", "đơn chờ chuyển khoản hoàn cọc")}
                   </span>
                 </div>
-                <h4 className="font-extrabold text-base text-rose-950 mt-0.5">
-                  Tổng tiền cọc cần hoàn trả khách:{" "}
-                  <span className="font-mono text-rose-700">
+                <h4 className="font-extrabold text-base text-rose-950 dark:text-rose-200 mt-0.5">
+                  {t("admin_tx_total_refund_amount", "Tổng tiền cọc cần hoàn trả khách:")}{" "}
+                  <span className="font-mono text-rose-700 dark:text-rose-400">
                     {totalPendingRefundAmount.toLocaleString("vi-VN")} VNĐ
                   </span>
                 </h4>
-                <p className="text-xs text-rose-800/90 mt-0.5">
-                  Khách hàng hủy đặt xe theo đúng chính sách hoàn cọc. Vui lòng kiểm tra STK ngân hàng hoặc quét VietQR để hoàn tiền cho khách.
+                <p className="text-xs text-rose-800/90 dark:text-rose-300 mt-0.5">
+                  {t("admin_tx_refund_hint", "Khách hàng hủy đặt xe theo đúng chính sách hoàn cọc. Vui lòng kiểm tra STK ngân hàng hoặc quét VietQR để hoàn tiền cho khách.")}
                 </p>
               </div>
             </div>
@@ -457,7 +459,7 @@ export default function AdminTransactionsPage() {
               }}
               className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs shrink-0 cursor-pointer"
             >
-              Xem {pendingRefunds.length} đơn chờ hoàn cọc
+              {t("admin_tx_view_pending_refunds", "Xem")} {pendingRefunds.length} {t("admin_tx_refunds_waiting_short", "đơn chờ hoàn cọc")}
             </Button>
           </div>
         )}
@@ -465,102 +467,102 @@ export default function AdminTransactionsPage() {
         {/* 5 Overview Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {/* Card 1 */}
-          <Card className="rounded-2xl border-slate-200/80 shadow-xs bg-white p-5 space-y-2">
+          <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 p-5 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Thu cọc qua PayOS
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {t("admin_tx_card_payos_rev", "Thu cọc qua PayOS")}
               </span>
-              <div className="h-8 w-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                 <Receipt className="h-4 w-4" />
               </div>
             </div>
-            <div className="text-2xl font-black text-slate-900 font-mono">
+            <div className="text-2xl font-black text-slate-900 dark:text-slate-100 font-mono">
               {totalPayosRevenue.toLocaleString("vi-VN")} đ
             </div>
-            <div className="text-[11px] text-slate-500 flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3 text-emerald-600" />
-              <span>{successPayments.length} giao dịch thành công</span>
+            <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+              <span>{successPayments.length} {t("admin_tx_success_transactions", "giao dịch thành công")}</span>
             </div>
           </Card>
 
           {/* Card 2 */}
-          <Card className="rounded-2xl border-slate-200/80 shadow-xs bg-white p-5 space-y-2">
+          <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 p-5 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Rút tiền chờ duyệt
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {t("admin_tx_card_pending_payout", "Rút tiền chờ duyệt")}
               </span>
-              <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                 <Clock className="h-4 w-4" />
               </div>
             </div>
-            <div className="text-2xl font-black text-amber-700 font-mono">
+            <div className="text-2xl font-black text-amber-700 dark:text-amber-400 font-mono">
               {totalPendingPayoutAmount.toLocaleString("vi-VN")} đ
             </div>
-            <div className="text-[11px] text-amber-800 font-medium">
-              {pendingPayouts.length} lệnh chờ duyệt chi
+            <div className="text-[11px] text-amber-800 dark:text-amber-400 font-medium">
+              {pendingPayouts.length} {t("admin_tx_payout_waiting_label", "lệnh chờ duyệt chi")}
             </div>
           </Card>
 
           {/* Card 3: Yêu cầu hoàn cọc */}
-          <Card className="rounded-2xl border-slate-200/80 shadow-xs bg-white p-5 space-y-2">
+          <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 p-5 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Hoàn cọc chờ xử lý
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {t("admin_tx_card_pending_refund", "Hoàn cọc chờ xử lý")}
               </span>
-              <div className="h-8 w-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center">
                 <RotateCcw className="h-4 w-4" />
               </div>
             </div>
-            <div className="text-2xl font-black text-rose-700 font-mono">
+            <div className="text-2xl font-black text-rose-700 dark:text-rose-400 font-mono">
               {totalPendingRefundAmount.toLocaleString("vi-VN")} đ
             </div>
-            <div className="text-[11px] text-rose-800 font-medium">
-              {pendingRefunds.length} đơn khách chờ nhận hoàn
+            <div className="text-[11px] text-rose-800 dark:text-rose-400 font-medium">
+              {pendingRefunds.length} {t("admin_tx_refund_waiting_label", "đơn khách chờ nhận hoàn")}
             </div>
           </Card>
 
           {/* Card 4 */}
-          <Card className="rounded-2xl border-slate-200/80 shadow-xs bg-white p-5 space-y-2">
+          <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 p-5 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Đã giải ngân rút ví
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {t("admin_tx_card_approved_payout", "Đã giải ngân rút ví")}
               </span>
-              <div className="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                 <DollarSign className="h-4 w-4" />
               </div>
             </div>
-            <div className="text-2xl font-black text-emerald-700 font-mono">
+            <div className="text-2xl font-black text-emerald-700 dark:text-emerald-400 font-mono">
               {totalApprovedPayoutAmount.toLocaleString("vi-VN")} đ
             </div>
-            <div className="text-[11px] text-slate-500">
-              {approvedPayouts.length} lượt rút tiền đã chi trả
+            <div className="text-[11px] text-slate-500 dark:text-slate-400">
+              {approvedPayouts.length} {t("admin_tx_payouts_completed_label", "lượt rút tiền đã chi trả")}
             </div>
           </Card>
 
           {/* Card 5 */}
-          <Card className="rounded-2xl border-slate-200/80 shadow-xs bg-white p-5 space-y-2">
+          <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 p-5 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Tổng biến động ví
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {t("admin_tx_card_wallet_tx", "Tổng biến động ví")}
               </span>
-              <div className="h-8 w-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
                 <ArrowUpRight className="h-4 w-4" />
               </div>
             </div>
-            <div className="text-2xl font-black text-purple-700 font-mono">
-              {walletHistories.length} lượt
+            <div className="text-2xl font-black text-purple-700 dark:text-purple-400 font-mono">
+              {walletHistories.length} {t("admin_tx_turns_label", "lượt")}
             </div>
-            <div className="text-[11px] text-slate-500">
-              Nạp ví, hoa hồng 10%, hoàn cọc
+            <div className="text-[11px] text-slate-500 dark:text-slate-400">
+              {t("admin_tx_wallet_sub", "Nạp ví, hoa hồng 10%, hoàn cọc")}
             </div>
           </Card>
         </div>
 
         {/* ─── TAB NAVIGATION & ADVANCED FILTERS ─── */}
-        <Card className="rounded-2xl border-slate-200/80 shadow-xs bg-white overflow-hidden space-y-4 p-5 sm:p-6">
+        <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 overflow-hidden space-y-4 p-5 sm:p-6">
           {/* Top Tabs */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
-            <div className="flex flex-wrap items-center gap-2 bg-slate-100 p-1.5 rounded-2xl w-fit">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+            <div className="flex flex-wrap items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl w-fit">
               <button
                 type="button"
                 onClick={() => {
@@ -569,12 +571,12 @@ export default function AdminTransactionsPage() {
                 }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   activeTab === "refunds"
-                    ? "bg-white text-slate-900 shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
-                <RotateCcw className="h-4 w-4 text-rose-600" />
-                <span>Yêu Cầu Hoàn Cọc</span>
+                <RotateCcw className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+                <span>{t("admin_tab_refunds", "Yêu Cầu Hoàn Cọc")}</span>
                 {pendingRefunds.length > 0 ? (
                   <span className="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-black animate-pulse">
                     {pendingRefunds.length}
@@ -594,12 +596,12 @@ export default function AdminTransactionsPage() {
                 }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   activeTab === "payouts"
-                    ? "bg-white text-slate-900 shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
-                <DollarSign className="h-4 w-4 text-emerald-600" />
-                <span>Yêu Cầu Rút Tiền</span>
+                <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <span>{t("admin_tab_payouts", "Yêu Cầu Rút Tiền")}</span>
                 {pendingPayouts.length > 0 && (
                   <span className="bg-amber-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-black">
                     {pendingPayouts.length}
@@ -615,12 +617,12 @@ export default function AdminTransactionsPage() {
                 }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   activeTab === "payments"
-                    ? "bg-white text-slate-900 shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
-                <Receipt className="h-4 w-4 text-blue-600" />
-                <span>Giao Dịch PayOS ({payments.length})</span>
+                <Receipt className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span>{t("admin_tab_payments", "Giao Dịch PayOS")} ({payments.length})</span>
               </button>
 
               <button
@@ -631,19 +633,19 @@ export default function AdminTransactionsPage() {
                 }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   activeTab === "wallet"
-                    ? "bg-white text-slate-900 shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
-                <ArrowUpRight className="h-4 w-4 text-purple-600" />
-                <span>Biến Động Số Dư Ví ({walletHistories.length})</span>
+                <ArrowUpRight className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                <span>{t("admin_tab_wallet_history", "Biến Động Số Dư Ví")} ({walletHistories.length})</span>
               </button>
             </div>
 
             {/* Results Counter */}
-            <div className="text-xs font-semibold text-slate-500">
-              Hiển thị:{" "}
-              <span className="font-bold text-slate-900 font-mono">
+            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              {t("admin_tx_display_count", "Hiển thị:")}{" "}
+              <span className="font-bold text-slate-900 dark:text-slate-100 font-mono">
                 {activeTab === "refunds"
                   ? filteredRefunds.length
                   : activeTab === "payouts"
@@ -652,7 +654,7 @@ export default function AdminTransactionsPage() {
                   ? filteredPayments.length
                   : filteredWalletHistories.length}
               </span>{" "}
-              bản ghi
+              {t("admin_tx_records_label", "bản ghi")}
             </div>
           </div>
 
@@ -665,16 +667,16 @@ export default function AdminTransactionsPage() {
                 type="text"
                 placeholder={
                   activeTab === "refunds"
-                    ? "Tìm mã đơn BK-..., khách, SĐT, STK, ngân hàng, dòng xe..."
+                    ? t("admin_search_refund_ph", "Tìm mã đơn BK-..., khách, SĐT, STK, ngân hàng, dòng xe...")
                     : activeTab === "payouts"
-                    ? "Tìm theo mã #PO, tên đối tác, STK, ngân hàng, SĐT..."
+                    ? t("admin_search_payout_ph", "Tìm theo mã #PO, tên đối tác, STK, ngân hàng, SĐT...")
                     : activeTab === "payments"
-                    ? "Tìm theo mã đơn BK-..., mã giao dịch TX-..., khách, SĐT..."
-                    : "Tìm theo nội dung, tên đối tác, số điện thoại..."
+                    ? t("admin_search_payment_ph", "Tìm theo mã đơn BK-..., mã giao dịch TX-..., khách, SĐT...")
+                    : t("admin_search_wallet_ph", "Tìm theo nội dung, tên đối tác, số điện thoại...")
                 }
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9.5 text-xs h-10 rounded-xl bg-slate-50/50"
+                className="pl-9.5 text-xs h-10 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
               />
             </div>
 
@@ -684,8 +686,8 @@ export default function AdminTransactionsPage() {
                 type="date"
                 value={fromDate}
                 onChange={(e) => setFromDate(e.target.value)}
-                className="text-xs h-10 rounded-xl bg-slate-50/50"
-                title="Từ ngày"
+                className="text-xs h-10 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
+                title={t("bookings_from_date", "Từ ngày")}
               />
             </div>
 
@@ -695,8 +697,8 @@ export default function AdminTransactionsPage() {
                 type="date"
                 value={toDate}
                 onChange={(e) => setToDate(e.target.value)}
-                className="text-xs h-10 rounded-xl bg-slate-50/50"
-                title="Đến ngày"
+                className="text-xs h-10 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
+                title={t("bookings_to_date", "Đến ngày")}
               />
             </div>
 
@@ -705,36 +707,36 @@ export default function AdminTransactionsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full h-10 text-xs font-semibold px-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-800"
+                className="w-full h-10 text-xs font-semibold px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-200"
               >
-                <option value="ALL">Tất cả trạng thái</option>
+                <option value="ALL">{t("bookings_tab_all", "Tất cả trạng thái")}</option>
                 {activeTab === "refunds" && (
                   <>
-                    <option value="0">Chờ hoàn tiền (Pending)</option>
-                    <option value="1">Đã hoàn cọc (Refunded)</option>
-                    <option value="2">Từ chối hoàn cọc (Rejected)</option>
+                    <option value="0">{t("refund_status_pending", "Chờ hoàn tiền (Pending)")}</option>
+                    <option value="1">{t("refund_status_refunded", "Đã hoàn cọc (Refunded)")}</option>
+                    <option value="2">{t("refund_status_rejected", "Từ chối hoàn cọc (Rejected)")}</option>
                   </>
                 )}
                 {activeTab === "payouts" && (
                   <>
-                    <option value="0">Chờ duyệt (Pending)</option>
-                    <option value="1">Đã chi tiền (Approved)</option>
-                    <option value="2">Đã từ chối (Rejected)</option>
+                    <option value="0">{t("payout_status_pending", "Chờ duyệt (Pending)")}</option>
+                    <option value="1">{t("payout_status_approved", "Đã chi tiền (Approved)")}</option>
+                    <option value="2">{t("payout_status_rejected", "Đã từ chối (Rejected)")}</option>
                   </>
                 )}
                 {activeTab === "payments" && (
                   <>
-                    <option value="1">Thành công (Success)</option>
-                    <option value="0">Đang chờ (Pending)</option>
-                    <option value="2">Thất bại (Failed)</option>
+                    <option value="1">{t("payment_status_success", "Thành công (Success)")}</option>
+                    <option value="0">{t("payment_status_pending", "Đang chờ (Pending)")}</option>
+                    <option value="2">{t("payment_status_failed", "Thất bại (Failed)")}</option>
                   </>
                 )}
                 {activeTab === "wallet" && (
                   <>
-                    <option value="0">Nạp ví (Deposit)</option>
-                    <option value="1">Trừ hoa hồng sàn 10%</option>
-                    <option value="2">Hoàn tiền (Refund)</option>
-                    <option value="3">Rút tiền (Withdrawal)</option>
+                    <option value="0">{t("wallet_type_deposit", "Nạp ví (Deposit)")}</option>
+                    <option value="1">{t("wallet_type_commission", "Trừ hoa hồng sàn 10%")}</option>
+                    <option value="2">{t("wallet_type_refund", "Hoàn tiền (Refund)")}</option>
+                    <option value="3">{t("wallet_type_withdrawal", "Rút tiền (Withdrawal)")}</option>
                   </>
                 )}
               </select>
@@ -746,8 +748,8 @@ export default function AdminTransactionsPage() {
                 variant="outline"
                 size="sm"
                 onClick={handleResetFilters}
-                className="w-full h-10 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900"
-                title="Đặt lại bộ lọc"
+                className="w-full h-10 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-slate-700 cursor-pointer"
+                title={t("bookings_btn_reset_filter", "Đặt lại bộ lọc")}
               >
                 <RotateCcw className="h-3.5 w-3.5" />
               </Button>
@@ -1440,49 +1442,49 @@ export default function AdminTransactionsPage() {
 
         return (
           <Dialog open={!!vietQrModalRefund} onOpenChange={() => setVietQrModalRefund(null)}>
-            <DialogContent className="max-w-md rounded-2xl p-6 text-center space-y-4">
+            <DialogContent className="max-w-md rounded-2xl p-6 text-center space-y-4 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
               <DialogHeader>
-                <DialogTitle className="text-base font-bold flex items-center justify-center gap-2">
-                  <QrCode className="h-5 w-5 text-blue-600" />
-                  <span>Quét VietQR Chuyển Tiền Hoàn Cọc</span>
+                <DialogTitle className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center justify-center gap-2">
+                  <QrCode className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <span>{t("vietqr_modal_admin_title", "Quét VietQR Chuyển Tiền Hoàn Cọc")}</span>
                 </DialogTitle>
-                <DialogDescription className="text-xs">
-                  Mã đơn: <span className="font-mono font-bold text-slate-900">{vietQrModalRefund.bookingCode}</span> • Khách: <strong>{vietQrModalRefund.customer?.fullName}</strong>
+                <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+                  {t("vietqr_modal_booking_code", "Mã đơn:")} <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{vietQrModalRefund.bookingCode}</span> • {t("vietqr_modal_customer_name", "Khách:")} <strong>{vietQrModalRefund.customer?.fullName}</strong>
                 </DialogDescription>
               </DialogHeader>
 
               {/* QR Image Box */}
               <div className="flex flex-col items-center">
-                <div className="w-56 h-56 bg-slate-50 border rounded-2xl p-2 flex items-center justify-center shadow-xs">
+                <div className="w-56 h-56 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-2 flex items-center justify-center shadow-xs">
                   <img
                     src={qrUrl}
                     alt="VietQR hoàn cọc"
-                    className="w-full h-full object-contain rounded-xl"
+                    className="w-full h-full object-contain rounded-xl bg-white p-1"
                   />
                 </div>
-                <p className="text-[11px] text-slate-500 mt-2">
-                  Mở app ngân hàng bất kỳ để quét mã và chuyển tiền trong 5 giây
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2">
+                  {t("vietqr_modal_scan_hint", "Mở app ngân hàng bất kỳ để quét mã và chuyển tiền trong 5 giây")}
                 </p>
               </div>
 
               {/* Bank Details with Copy Buttons */}
-              <div className="p-3.5 bg-slate-50 rounded-2xl border text-xs space-y-2 text-left">
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 text-xs space-y-2 text-left">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Ngân hàng:</span>
-                  <strong className="text-blue-700 font-bold">{vietQrModalRefund.refundBankName}</strong>
+                  <span className="text-slate-500 dark:text-slate-400">{t("vietqr_modal_bank", "Ngân hàng:")}</span>
+                  <strong className="text-blue-700 dark:text-blue-400 font-bold">{vietQrModalRefund.refundBankName}</strong>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Số tài khoản:</span>
-                  <div className="flex items-center gap-1.5 font-mono font-bold text-slate-900">
+                  <span className="text-slate-500 dark:text-slate-400">{t("vietqr_modal_account_num", "Số tài khoản:")}</span>
+                  <div className="flex items-center gap-1.5 font-mono font-bold text-slate-900 dark:text-slate-100">
                     <span>{accountNo}</span>
                     <button
                       type="button"
                       onClick={() => handleCopyText(accountNo, "modal-stk")}
-                      className="p-1 hover:bg-slate-200 rounded cursor-pointer"
+                      className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer"
                     >
                       {copiedKey === "modal-stk" ? (
-                        <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                       ) : (
                         <Copy className="h-3.5 w-3.5 text-slate-500" />
                       )}
@@ -1491,28 +1493,28 @@ export default function AdminTransactionsPage() {
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Chủ tài khoản:</span>
-                  <strong className="text-slate-900 uppercase font-bold">{accountName}</strong>
+                  <span className="text-slate-500 dark:text-slate-400">{t("vietqr_modal_account_name", "Chủ tài khoản:")}</span>
+                  <strong className="text-slate-900 dark:text-slate-100 uppercase font-bold">{accountName}</strong>
                 </div>
 
-                <div className="flex justify-between items-center border-t pt-2">
-                  <span className="text-slate-500 font-medium">Số tiền hoàn:</span>
-                  <strong className="font-mono text-base font-black text-blue-700">
+                <div className="flex justify-between items-center border-t border-slate-200 dark:border-slate-700 pt-2">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">{t("cancel_modal_refund_amount", "Số tiền hoàn:")}</span>
+                  <strong className="font-mono text-base font-black text-blue-700 dark:text-blue-400">
                     {refundAmt.toLocaleString("vi-VN")} VNĐ
                   </strong>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Nội dung chuyển khoản:</span>
-                  <div className="flex items-center gap-1.5 font-mono text-[11px] text-slate-700">
+                  <span className="text-slate-500 dark:text-slate-400">{t("vietqr_modal_memo", "Nội dung chuyển khoản:")}</span>
+                  <div className="flex items-center gap-1.5 font-mono text-[11px] text-slate-700 dark:text-slate-300">
                     <span>{addInfo}</span>
                     <button
                       type="button"
                       onClick={() => handleCopyText(addInfo, "modal-memo")}
-                      className="p-1 hover:bg-slate-200 rounded cursor-pointer"
+                      className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded cursor-pointer"
                     >
                       {copiedKey === "modal-memo" ? (
-                        <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        <Check className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                       ) : (
                         <Copy className="h-3.5 w-3.5 text-slate-500" />
                       )}
@@ -1521,14 +1523,14 @@ export default function AdminTransactionsPage() {
                 </div>
               </div>
 
-              <DialogFooter className="flex flex-col sm:flex-row gap-2">
+              <DialogFooter className="flex flex-col sm:flex-row gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setVietQrModalRefund(null)}
-                  className="rounded-xl flex-1 text-xs"
+                  className="rounded-xl flex-1 text-xs border-slate-200 dark:border-slate-700"
                 >
-                  Đóng
+                  {t("cancel_modal_close", "Đóng")}
                 </Button>
                 <Button
                   size="sm"
@@ -1538,17 +1540,17 @@ export default function AdminTransactionsPage() {
                         refundStatus: 1,
                         adminNote: "Đã quét VietQR chuyển khoản hoàn cọc thành công",
                       });
-                      toast.success("🎉 Đã xác nhận hoàn tiền cọc cho khách thành công!");
+                      toast.success(t("admin_tx_refund_success_toast", "🎉 Đã xác nhận hoàn tiền cọc cho khách thành công!"));
                       setVietQrModalRefund(null);
                       await fetchData();
                     } catch (err: any) {
-                      toast.error(err.message || "Lỗi khi cập nhật trạng thái");
+                      toast.error(err.message || t("admin_tx_status_error", "Lỗi khi cập nhật trạng thái"));
                     }
                   }}
-                  className="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex-1 text-xs gap-1.5 cursor-pointer"
+                  className="rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex-1 text-xs gap-1.5 cursor-pointer shadow-xs"
                 >
                   <CheckCircle2 className="h-4 w-4" />
-                  <span>Xác nhận đã chuyển tiền</span>
+                  <span>{t("vietqr_modal_confirm_sent", "Xác nhận đã chuyển tiền")}</span>
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -1559,102 +1561,100 @@ export default function AdminTransactionsPage() {
       {/* ─── REVIEW REFUND DIALOG ─── */}
       {selectedRefund && (
         <Dialog open={!!selectedRefund} onOpenChange={() => setSelectedRefund(null)}>
-          <DialogContent className="max-w-md rounded-2xl p-6 space-y-4">
+          <DialogContent className="max-w-md rounded-2xl p-6 space-y-4 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
             <DialogHeader>
-              <DialogTitle className="text-base font-bold flex items-center gap-2">
+              <DialogTitle className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-slate-100">
                 <RotateCcw
                   className={`h-5 w-5 ${
-                    reviewRefundAction === 1 ? "text-emerald-600" : "text-rose-600"
+                    reviewRefundAction === 1 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                   }`}
                 />
                 {reviewRefundAction === 1
-                  ? "Xác Nhận Đã Hoàn Cọc Cho Khách"
-                  : "Từ Chối Hoàn Tiền Cọc"}
+                  ? t("admin_confirm_refund_title", "Xác Nhận Đã Hoàn Cọc Cho Khách")
+                  : t("admin_reject_refund_title", "Từ Chối Hoàn Tiền Cọc")}
               </DialogTitle>
-              <DialogDescription className="text-xs">
-                Đơn đặt xe: <span className="font-mono font-bold text-slate-900">{selectedRefund.bookingCode}</span> • Khách: <strong>{selectedRefund.customer?.fullName}</strong>
+              <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+                {t("vietqr_modal_booking_code", "Đơn đặt xe:")} <span className="font-mono font-bold text-slate-900 dark:text-slate-100">{selectedRefund.bookingCode}</span> • {t("vietqr_modal_customer_name", "Khách:")} <strong>{selectedRefund.customer?.fullName}</strong>
               </DialogDescription>
             </DialogHeader>
 
-            <div className="p-4 bg-slate-50 rounded-2xl border space-y-2 text-xs">
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-500">Khách hàng:</span>
-                <strong className="text-slate-900">
+                <span className="text-slate-500 dark:text-slate-400">{t("vietqr_modal_customer_name", "Khách hàng:")}</span>
+                <strong className="text-slate-900 dark:text-slate-100">
                   {selectedRefund.customer?.fullName} ({selectedRefund.customer?.phone})
                 </strong>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Nhà xe đối tác:</span>
-                <strong className="text-slate-900">{selectedRefund.store?.storeName}</strong>
+                <span className="text-slate-500 dark:text-slate-400">{t("bookings_partner_store", "Nhà xe đối tác:")}</span>
+                <strong className="text-slate-900 dark:text-slate-100">{selectedRefund.store?.storeName}</strong>
               </div>
               {selectedRefund.refundBankName && (
                 <>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Ngân hàng thụ hưởng:</span>
-                    <strong className="text-blue-700">{selectedRefund.refundBankName}</strong>
+                    <span className="text-slate-500 dark:text-slate-400">{t("cancel_modal_bank_name", "Ngân hàng thụ hưởng:")}</span>
+                    <strong className="text-blue-700 dark:text-blue-400">{selectedRefund.refundBankName}</strong>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Số tài khoản:</span>
-                    <strong className="font-mono text-slate-900">
+                    <span className="text-slate-500 dark:text-slate-400">{t("cancel_modal_bank_account", "Số tài khoản:")}</span>
+                    <strong className="font-mono text-slate-900 dark:text-slate-100">
                       {selectedRefund.refundAccountNumber}
                     </strong>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Tên chủ tài khoản:</span>
-                    <strong className="text-slate-900 uppercase">
+                    <span className="text-slate-500 dark:text-slate-400">{t("cancel_modal_account_name", "Tên chủ tài khoản:")}</span>
+                    <strong className="text-slate-900 dark:text-slate-100 uppercase">
                       {selectedRefund.refundAccountName}
                     </strong>
                   </div>
                 </>
               )}
-              <div className="flex justify-between border-t pt-2">
-                <span className="text-slate-500">Số tiền cọc hoàn lại:</span>
-                <strong className="font-mono text-base font-black text-blue-700">
+              <div className="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-2">
+                <span className="text-slate-500 dark:text-slate-400">{t("cancel_modal_refund_amount", "Số tiền cọc hoàn lại:")}</span>
+                <strong className="font-mono text-base font-black text-blue-700 dark:text-blue-400">
                   {Number(selectedRefund.refundAmount || 0).toLocaleString("vi-VN")} VNĐ
                 </strong>
               </div>
               {selectedRefund.cancelReason && (
-                <div className="text-[11px] text-slate-500 italic border-t pt-1">
-                  Lý do khách hủy: "{selectedRefund.cancelReason}"
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 italic border-t border-slate-200 dark:border-slate-700 pt-1">
+                  {t("cancel_modal_reason_label", "Lý do khách hủy:")} "{selectedRefund.cancelReason}"
                 </div>
               )}
             </div>
 
             {reviewRefundAction === 2 && (
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-800 flex items-start gap-2">
-                <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-[11px] text-amber-800 dark:text-amber-300 flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <p>
-                  Lưu ý: Khi từ chối hoàn cọc, số tiền cọc (
-                  {Number(selectedRefund.refundAmount || 0).toLocaleString("vi-VN")} đ) sẽ được
-                  tự động hoàn lại vào ví số dư của đối tác nhà xe.
+                  {t("admin_refund_reject_notice", "Lưu ý: Khi từ chối hoàn cọc, số tiền cọc sẽ được tự động hoàn lại vào ví số dư của đối tác nhà xe.")}
                 </p>
               </div>
             )}
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Ghi chú xác nhận / Lý do từ chối:</Label>
+              <Label className="text-xs font-semibold text-slate-700 dark:text-slate-300">{t("admin_refund_note_label", "Ghi chú xác nhận / Lý do từ chối:")}</Label>
               <Input
                 type="text"
                 value={reviewRefundNote}
                 onChange={(e) => setReviewRefundNote(e.target.value)}
                 placeholder={
                   reviewRefundAction === 1
-                    ? "Nhập mã giao dịch ngân hàng hoặc ghi chú..."
-                    : "Nhập lý do từ chối hoàn tiền cọc..."
+                    ? t("admin_refund_note_approve_ph", "Nhập mã giao dịch ngân hàng hoặc ghi chú...")
+                    : t("admin_refund_note_reject_ph", "Nhập lý do từ chối hoàn tiền cọc...")
                 }
-                className="text-xs h-10 rounded-xl"
+                className="text-xs h-10 rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
               />
             </div>
 
-            <DialogFooter className="flex gap-2">
+            <DialogFooter className="flex gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setSelectedRefund(null)}
                 disabled={isSubmittingRefundReview}
-                className="rounded-xl"
+                className="rounded-xl border-slate-200 dark:border-slate-700"
               >
-                Hủy bỏ
+                {t("cancel_modal_close", "Hủy bỏ")}
               </Button>
               <Button
                 size="sm"

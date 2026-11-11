@@ -5,6 +5,7 @@ import Link from "next/link";
 import { VehicleModel } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/context/language-context";
 import {
   Dialog,
   DialogContent,
@@ -39,12 +40,13 @@ export function VehicleCompareModal({
   onRemoveVehicle,
   onClearAll,
 }: VehicleCompareModalProps) {
+  const { t } = useLanguage();
   const typeLabels: Record<number, string> = {
-    0: "Xe số",
-    1: "Tay ga",
-    2: "Côn tay",
-    3: "Xe điện",
-    4: "Ô tô tự lái",
+    0: t("vehicle_type_scooter_manual", "Xe số"),
+    1: t("vehicle_type_scooter_auto", "Tay ga"),
+    2: t("vehicle_type_clutch", "Côn tay"),
+    3: t("vehicle_type_electric", "Xe điện"),
+    4: t("vehicle_type_car", "Ô tô tự lái"),
   };
 
   const typeSpecs: Record<
@@ -96,15 +98,15 @@ export function VehicleCompareModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl rounded-2xl p-6 sm:p-8 max-h-[92vh] overflow-y-auto bg-white border border-slate-200">
-        <DialogHeader className="pb-3 border-b border-slate-100 space-y-1">
+      <DialogContent className="max-w-4xl rounded-2xl p-6 sm:p-8 max-h-[92vh] overflow-y-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <DialogHeader className="pb-3 border-b border-slate-100 dark:border-slate-800 space-y-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+              <div className="h-9 w-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
                 <Scale className="h-5 w-5" />
               </div>
-              <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">
-                So Sánh Đối Đầu Trực Quan ({vehicles.length}/3 Dòng Xe)
+              <DialogTitle className="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                {t("compare_modal_title", "So Sánh Đối Đầu Trực Quan")} ({vehicles.length}/3 {t("booking_days", "Dòng Xe")})
               </DialogTitle>
             </div>
             {vehicles.length > 0 && (
@@ -112,23 +114,23 @@ export function VehicleCompareModal({
                 variant="ghost"
                 size="sm"
                 onClick={onClearAll}
-                className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl"
+                className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/60 rounded-xl cursor-pointer"
               >
-                Xóa tất cả
+                {t("compare_clear_all", "Xóa tất cả")}
               </Button>
             )}
           </div>
-          <DialogDescription className="text-xs text-slate-500">
-            Đối chiếu chi tiết giá thuê, mức cọc, mức tiêu hao nhiên liệu và địa hình tối ưu để chọn chiếc xe phù hợp nhu cầu.
+          <DialogDescription className="text-xs text-slate-500 dark:text-slate-400">
+            {t("compare_modal_desc", "Đối chiếu chi tiết giá thuê, mức cọc, mức tiêu hao nhiên liệu và địa hình tối ưu để chọn chiếc xe phù hợp nhu cầu.")}
           </DialogDescription>
         </DialogHeader>
 
         {vehicles.length === 0 ? (
           <div className="py-16 text-center space-y-3">
-            <Bike className="h-12 w-12 text-slate-300 mx-auto" />
-            <h4 className="text-base font-bold text-slate-700">Chưa chọn xe nào để so sánh</h4>
+            <Bike className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto" />
+            <h4 className="text-base font-bold text-slate-700 dark:text-slate-300">{t("compare_empty_title", "Chưa chọn xe nào để so sánh")}</h4>
             <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              Hãy nhấn nút "So sánh" trên các thẻ xe ở trang chủ để đưa vào bảng đối chiếu này (tối đa 3 xe cùng lúc).
+              {t("compare_empty_desc", "Hãy nhấn nút \"So sánh\" trên các thẻ xe ở trang chủ để đưa vào bảng đối chiếu này (tối đa 3 xe cùng lúc).")}
             </p>
           </div>
         ) : (
@@ -145,21 +147,21 @@ export function VehicleCompareModal({
                 return (
                   <div
                     key={v.id}
-                    className="p-5 rounded-2xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-md transition-all space-y-4 flex flex-col justify-between relative group"
+                    className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-md transition-all space-y-4 flex flex-col justify-between relative group"
                   >
                     {/* Remove button */}
                     <button
                       type="button"
                       onClick={() => onRemoveVehicle(v.id)}
-                      className="absolute top-3 right-3 h-7 w-7 rounded-full bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-500 flex items-center justify-center transition-colors z-10"
-                      title="Xóa khỏi bảng so sánh"
+                      className="absolute top-3 right-3 h-7 w-7 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-950/60 hover:text-red-600 text-slate-500 flex items-center justify-center transition-colors z-10 cursor-pointer"
+                      title={t("compare_remove_from_table", "Xóa khỏi bảng so sánh")}
                     >
                       <X className="h-4 w-4" />
                     </button>
 
                     <div className="space-y-3">
                       {/* Image */}
-                      <div className="h-36 w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-100 relative">
+                      <div className="h-36 w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 relative">
                         <img
                           src={coverImg}
                           alt={`Ảnh so sánh xe ${v.brand ? v.brand + " " : ""}${v.name || ""}`}
@@ -175,74 +177,74 @@ export function VehicleCompareModal({
                       {/* Title & Brand */}
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] px-2 py-0.5">
-                            {typeLabels[v.type] || "Xe máy"}
+                          <Badge className="bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800 text-[10px] px-2 py-0.5">
+                            {typeLabels[v.type] || t("vehicle_type_motorbike", "Xe máy")}
                           </Badge>
-                          <span className="text-[11px] font-bold text-slate-500 uppercase">
+                          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase">
                             {v.brand}
                           </span>
                         </div>
-                        <h4 className="font-extrabold text-base text-slate-900 mt-1 line-clamp-1">
+                        <h4 className="font-extrabold text-base text-slate-900 dark:text-slate-100 mt-1 line-clamp-1">
                           {v.name}
                         </h4>
-                        <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5 truncate">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5 truncate">
                           <MapPin className="h-3 w-3 text-blue-600 shrink-0" />
-                          <span className="truncate">{v.store?.storeName || "Nhà xe đối tác"}</span>
+                          <span className="truncate">{v.store?.storeName || t("bookings_partner_store", "Nhà xe đối tác")}</span>
                         </p>
                       </div>
 
                       {/* Price Highlight */}
-                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-baseline justify-between">
-                        <span className="text-xs text-slate-500 font-medium">Giá thuê:</span>
+                      <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex items-baseline justify-between">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t("booking_daily_rate", "Giá thuê:")}</span>
                         <div>
-                          <strong className="text-lg font-black text-blue-600">
+                          <strong className="text-lg font-black text-blue-600 dark:text-blue-400">
                             {Number(v.rentPrice).toLocaleString("vi-VN")} đ
                           </strong>
-                          <span className="text-xs text-slate-400">/ngày</span>
+                          <span className="text-xs text-slate-400">/{t("booking_days", "ngày")}</span>
                         </div>
                       </div>
 
                       {/* Detailed Specs Table */}
-                      <div className="space-y-2 text-xs text-slate-600">
-                        <div className="pb-1.5 border-b border-slate-100 flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1">
-                            <Fuel className="h-3.5 w-3.5 text-amber-500" /> Nhiên liệu:
+                      <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                        <div className="pb-1.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                            <Fuel className="h-3.5 w-3.5 text-amber-500" /> {t("compare_fuel", "Nhiên liệu:")}
                           </span>
-                          <span className="font-semibold text-slate-800 text-right">{spec.fuelUsage}</span>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-right">{spec.fuelUsage}</span>
                         </div>
 
-                        <div className="pb-1.5 border-b border-slate-100 flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1">
-                            <Luggage className="h-3.5 w-3.5 text-blue-500" /> Cốp xe:
+                        <div className="pb-1.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                            <Luggage className="h-3.5 w-3.5 text-blue-500" /> {t("compare_trunk", "Cốp xe:")}
                           </span>
-                          <span className="font-semibold text-slate-800 text-right truncate max-w-[140px]" title={spec.trunkCapacity}>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-right truncate max-w-[140px]" title={spec.trunkCapacity}>
                             {spec.trunkCapacity}
                           </span>
                         </div>
 
-                        <div className="pb-1.5 border-b border-slate-100 flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1">
-                            <Gauge className="h-3.5 w-3.5 text-indigo-500" /> Địa hình:
+                        <div className="pb-1.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                            <Gauge className="h-3.5 w-3.5 text-indigo-500" /> {t("compare_terrain", "Địa hình:")}
                           </span>
-                          <span className="font-semibold text-slate-800 text-right truncate max-w-[140px]" title={spec.terrain}>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-right truncate max-w-[140px]" title={spec.terrain}>
                             {spec.terrain}
                           </span>
                         </div>
 
-                        <div className="pb-1.5 border-b border-slate-100 flex items-center justify-between">
-                          <span className="text-slate-500 flex items-center gap-1">
-                            <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> Khóa xe:
+                        <div className="pb-1.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                          <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                            <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> {t("compare_lock", "Khóa xe:")}
                           </span>
-                          <span className="font-semibold text-slate-800 text-right truncate max-w-[140px]">
+                          <span className="font-semibold text-slate-800 dark:text-slate-200 text-right truncate max-w-[140px]">
                             {spec.keyType}
                           </span>
                         </div>
 
                         <div className="pt-1">
-                          <span className="text-xs font-bold text-slate-700 block mb-1">
-                            Điểm nổi trội:
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                            {t("compare_advantage", "Điểm nổi trội:")}
                           </span>
-                          <p className="text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200 leading-relaxed font-medium">
+                          <p className="text-[11px] text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 p-2 rounded-lg border border-emerald-200 dark:border-emerald-800 leading-relaxed font-medium">
                             ✓ {spec.advantage}
                           </p>
                         </div>
@@ -252,8 +254,8 @@ export function VehicleCompareModal({
                     {/* Book Button */}
                     <div className="pt-2">
                       <Link href={`/vehicles/${v.id}`} onClick={onClose} className="block">
-                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-10 rounded-xl gap-1.5 shadow-xs transition-colors">
-                          <span>Xem Chi Tiết & Đặt Xe</span>
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-10 rounded-xl gap-1.5 shadow-xs transition-colors cursor-pointer">
+                          <span>{t("compare_view_details", "Xem Chi Tiết & Đặt Xe")}</span>
                           <ArrowRight className="h-3.5 w-3.5" />
                         </Button>
                       </Link>
@@ -283,25 +285,26 @@ export function FloatingCompareBar({
   onRemoveVehicle,
   onClearAll,
 }: FloatingCompareBarProps) {
+  const { t } = useLanguage();
   if (vehicles.length === 0) return null;
 
   return (
     <div className="fixed bottom-6 inset-x-0 z-40 flex justify-center px-4 pointer-events-none animate-in fade-in slide-in-from-bottom-5 duration-300">
-      <div className="pointer-events-auto bg-white/95 backdrop-blur-md text-slate-900 border border-slate-200/90 rounded-2xl p-3 sm:px-5 sm:py-3 shadow-xl flex flex-wrap items-center justify-between gap-4 max-w-2xl w-full">
+      <div className="pointer-events-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-md text-slate-900 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-3 sm:px-5 sm:py-3 shadow-xl flex flex-wrap items-center justify-between gap-4 max-w-2xl w-full">
         {/* Left: Selected vehicles pills */}
-        <div className="flex items-center gap-2.5 overflow-x-auto">
-          <div className="h-8 w-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar">
+          <div className="h-8 w-8 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
             <Scale className="h-4 w-4" />
           </div>
-          <span className="text-xs font-bold text-slate-700 hidden sm:inline whitespace-nowrap">
-            So sánh ({vehicles.length}/3):
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300 hidden sm:inline whitespace-nowrap">
+            {t("compare_short_label", "So sánh")} ({vehicles.length}/3):
           </span>
 
           <div className="flex items-center gap-2">
             {vehicles.map((v) => (
               <div
                 key={v.id}
-                className="flex items-center gap-1.5 bg-slate-100 border border-slate-200 rounded-full pl-1.5 pr-2 py-1 text-xs text-slate-800"
+                className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full pl-1.5 pr-2 py-1 text-xs text-slate-800 dark:text-slate-200"
               >
                 <img
                   src={
@@ -312,14 +315,14 @@ export function FloatingCompareBar({
                   alt={`Thu nhỏ dòng xe ${v.name || ""}`}
                   className="h-5 w-5 rounded-full object-cover"
                 />
-                <span className="font-semibold max-w-[90px] sm:max-w-[120px] truncate text-[11px] text-slate-800">
+                <span className="font-semibold max-w-[90px] sm:max-w-[120px] truncate text-[11px] text-slate-800 dark:text-slate-200">
                   {v.name}
                 </span>
                 <button
                   type="button"
                   aria-label={`Bỏ so sánh dòng xe ${v.name}`}
                   onClick={() => onRemoveVehicle(v.id)}
-                  className="text-slate-400 hover:text-red-500 rounded-full p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                  className="text-slate-400 hover:text-red-500 rounded-full p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -334,17 +337,17 @@ export function FloatingCompareBar({
             type="button"
             size="sm"
             onClick={onOpenModal}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-9 px-4 rounded-xl shadow-xs gap-1.5"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-9 px-4 rounded-xl shadow-xs gap-1.5 cursor-pointer"
           >
-            <span>So Sánh Chi Tiết</span>
+            <span>{t("compare_btn_detailed", "So Sánh Chi Tiết")}</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Button>
 
           <button
             type="button"
             onClick={onClearAll}
-            className="text-slate-400 hover:text-slate-700 text-xs p-1"
-            title="Đóng thanh so sánh"
+            className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs p-1 cursor-pointer"
+            title={t("compare_close_bar", "Đóng thanh so sánh")}
           >
             <X className="h-4 w-4" />
           </button>

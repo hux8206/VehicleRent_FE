@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
+import { useLanguage } from "@/context/language-context";
 import { api } from "@/lib/api";
 import {
   MessageSquare,
@@ -69,6 +70,7 @@ const RATING_LABELS: Record<number, { text: string; color: string }> = {
 
 export default function CustomerFeedbackPage() {
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -97,7 +99,7 @@ export default function CustomerFeedbackPage() {
     setErrorMessage(null);
 
     if (!fullName.trim() || !email.trim() || !subject.trim() || !content.trim()) {
-      setErrorMessage("Vui lòng điền đầy đủ các thông tin bắt buộc (*)");
+      setErrorMessage(t("toast_fill_required", "Vui lòng điền đầy đủ các thông tin bắt buộc (*)"));
       return;
     }
 
@@ -117,7 +119,7 @@ export default function CustomerFeedbackPage() {
       setIsSuccess(true);
     } catch (err: any) {
       setErrorMessage(
-        err?.message || "Không thể gửi ý kiến đóng góp lúc này. Vui lòng thử lại sau ít phút."
+        err?.message || t("feedback_error_generic", "Không thể gửi ý kiến đóng góp lúc này. Vui lòng thử lại sau ít phút.")
       );
     } finally {
       setIsSubmitting(false);
@@ -134,36 +136,35 @@ export default function CustomerFeedbackPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 py-10 sm:py-16">
+    <div className="min-h-screen bg-slate-50/70 dark:bg-slate-950 py-10 sm:py-16">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* Breadcrumb / Back button */}
         <div className="mb-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Quay lại trang chủ</span>
+            <span>{t("nav_home", "Quay lại trang chủ")}</span>
           </Link>
         </div>
 
         {/* Header Section */}
         <div className="text-center space-y-3 mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-bold shadow-2xs">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-800 text-blue-700 dark:text-blue-400 text-xs font-bold shadow-2xs">
             <MessageSquare className="w-3.5 h-3.5" />
-            <span>Hòm Thư Lắng Nghe & Cải Tiến Liên Tục</span>
+            <span>{t("feedback_badge", "Hòm Thư Lắng Nghe & Cải Tiến Liên Tục")}</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
-            Đóng Góp Ý Kiến & Phản Hồi
+          <h1 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-slate-100 tracking-tight">
+            {t("feedback_title", "Đóng Góp Ý Kiến & Phản Hồi")}
           </h1>
-          <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Mỗi ý kiến của bạn là động lực và cơ sở để Ban Quản Trị nâng cấp chất lượng xe, tối ưu
-            quy trình giao nhận và hoàn thiện trải nghiệm dịch vụ.
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            {t("feedback_desc", "Mỗi ý kiến của bạn là động lực và cơ sở để Ban Quản Trị nâng cấp chất lượng xe, tối ưu quy trình giao nhận và hoàn thiện trải nghiệm dịch vụ.")}
           </p>
         </div>
 
         {/* Content Card */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xl shadow-slate-200/50 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xl overflow-hidden">
           {isSuccess ? (
             /* Success State */
             <div className="p-8 sm:p-14 text-center space-y-6">
@@ -268,8 +269,8 @@ export default function CustomerFeedbackPage() {
 
               {/* 2. Chọn chủ đề góp ý */}
               <div className="space-y-3">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Chọn lĩnh vực bạn muốn đóng góp ý kiến <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  {t("feedback_type", "Chọn lĩnh vực bạn muốn đóng góp ý kiến")} <span className="text-red-500">*</span>
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {CATEGORIES.map((cat) => {
@@ -281,25 +282,25 @@ export default function CustomerFeedbackPage() {
                         onClick={() => setCategory(cat.id)}
                         className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${
                           isSelected
-                            ? "border-blue-600 bg-blue-50/60 ring-2 ring-blue-600/20 shadow-xs"
-                            : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                            ? "border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 ring-2 ring-blue-600/20 shadow-xs"
+                            : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/50 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50/50"
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-1">
                           <Icon
                             className={`w-4 h-4 ${
-                              isSelected ? "text-blue-600" : "text-slate-500"
+                              isSelected ? "text-blue-600 dark:text-blue-400" : "text-slate-500 dark:text-slate-400"
                             }`}
                           />
                           <span
                             className={`text-xs font-bold ${
-                              isSelected ? "text-blue-900" : "text-slate-800"
+                              isSelected ? "text-blue-900 dark:text-blue-200" : "text-slate-800 dark:text-slate-200"
                             }`}
                           >
                             {cat.label}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
                           {cat.desc}
                         </p>
                       </div>
@@ -311,29 +312,29 @@ export default function CustomerFeedbackPage() {
               {/* 3. Tiêu đề và Nội dung chi tiết */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    Tiêu đề ý kiến <span className="text-red-500">*</span>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    {t("feedback_subject", "Tiêu đề ý kiến")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder="Tóm tắt ngắn gọn ý kiến hoặc vấn đề của bạn..."
-                    className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all"
+                    className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-800/50 text-xs font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    Nội dung chi tiết <span className="text-red-500">*</span>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    {t("feedback_content", "Nội dung chi tiết")} <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     rows={5}
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Mô tả cụ thể trải nghiệm, các điểm bạn thấy hài lòng hoặc những chi tiết cần cải thiện..."
-                    className="w-full p-4 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all leading-relaxed"
+                    className="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-800/50 text-xs font-medium text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all leading-relaxed"
                     required
                   />
                   <p className="text-[11px] text-slate-400 mt-1">
@@ -343,50 +344,50 @@ export default function CustomerFeedbackPage() {
               </div>
 
               {/* 4. Thông tin người gửi */}
-              <div className="space-y-4 pt-4 border-t border-slate-100">
-                <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   Thông tin người gửi (để Ban Quản Trị phản hồi lại bạn)
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      Họ và tên <span className="text-red-500">*</span>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                      {t("auth_fullname", "Họ và tên")} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Nguyễn Văn A"
-                      className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all"
+                      className="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-800/50 text-xs font-medium text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      Email liên hệ <span className="text-red-500">*</span>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                      {t("auth_email", "Email liên hệ")} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="email@example.com"
-                      className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all"
+                      className="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-800/50 text-xs font-medium text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">
-                      Số điện thoại <span className="text-slate-400 font-normal">(tùy chọn)</span>
+                    <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                      {t("auth_phone", "Số điện thoại")} <span className="text-slate-400 font-normal">(tùy chọn)</span>
                     </label>
                     <input
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="0912 345 678"
-                      className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50/40 text-xs font-medium text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all"
+                      className="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-800/50 text-xs font-medium text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all"
                     />
                   </div>
                 </div>
@@ -394,8 +395,8 @@ export default function CustomerFeedbackPage() {
 
               {/* Cam kết bảo mật & Nút Gửi */}
               <div className="pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>Bảo mật danh tính & thông tin liên hệ theo Nghị định 13/2023/NĐ-CP</span>
                 </div>
 
@@ -407,12 +408,12 @@ export default function CustomerFeedbackPage() {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Đang gửi ý kiến...</span>
+                      <span>{t("feedback_sending", "Đang gửi ý kiến...")}</span>
                     </>
                   ) : (
                     <>
                       <Send className="w-4 h-4" />
-                      <span>Gửi ý kiến đóng góp</span>
+                      <span>{t("feedback_submit", "Gửi ý kiến đóng góp")}</span>
                     </>
                   )}
                 </button>

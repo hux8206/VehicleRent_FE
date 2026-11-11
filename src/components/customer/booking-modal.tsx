@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { VehicleModel, Promotion, api } from "@/lib/api";
 import { useAuth } from "@/context/auth-context";
+import { useLanguage } from "@/context/language-context";
 import {
   Dialog,
   DialogContent,
@@ -63,6 +64,7 @@ export function BookingModal({
 }: BookingModalProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   // Form states
   const [step, setStep] = useState<"form" | "payment">("form");
@@ -359,21 +361,21 @@ export function BookingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl w-[95vw] sm:w-full max-h-[92vh] flex flex-col p-0 overflow-hidden rounded-2xl border border-slate-200 shadow-2xl">
+      <DialogContent className="max-w-2xl w-[95vw] sm:w-full max-h-[92vh] flex flex-col p-0 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-2xl">
         {/* Header - Fixed at top */}
-        <DialogHeader className="shrink-0 p-5 sm:p-6 pb-4 border-b bg-slate-50/80">
+        <DialogHeader className="shrink-0 p-5 sm:p-6 pb-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80">
           <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+            <Badge variant="outline" className="text-xs bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
               {step === "form" ? "Bước 1/2: Xác thực & Đặt xe" : "Bước 2/2: Giữ xe 10 phút & Quét VietQR"}
             </Badge>
           </div>
-          <DialogTitle className="text-xl font-bold text-slate-900">
-            {step === "form" ? `Đặt xe ${model.name}` : "Thanh toán VietQR động"}
+          <DialogTitle className="text-xl font-bold text-slate-900 dark:text-slate-100">
+            {step === "form" ? t("booking_modal_title", `Đặt xe ${model.name}`) : t("vietqr_modal_customer_title", "Thanh toán VietQR động")}
           </DialogTitle>
-          <DialogDescription className="text-xs text-slate-600">
+          <DialogDescription className="text-xs text-slate-600 dark:text-slate-400">
             {step === "form"
-              ? "Cung cấp hình ảnh GPLX 2 mặt và chọn phương thức nhận xe để khởi tạo phiên giữ chỗ."
-              : "Hệ thống đang tạm khóa xe trong 10 phút. Quét mã QR bằng ứng dụng ngân hàng số."}
+              ? t("booking_modal_desc", "Cung cấp thông tin nhận xe để khởi tạo phiên giữ chỗ.")
+              : t("vietqr_modal_scan_hint", "Hệ thống đang tạm khóa xe trong 10 phút. Quét mã QR bằng ứng dụng ngân hàng số.")}
           </DialogDescription>
         </DialogHeader>
 
@@ -382,62 +384,62 @@ export function BookingModal({
           {step === "form" ? (
             <form id="booking-form" onSubmit={handleCreateBooking} className="space-y-5">
               {/* Summary Banner */}
-              <div className="rounded-2xl border bg-blue-50/50 border-blue-100 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+              <div className="rounded-2xl border bg-blue-50/50 dark:bg-blue-950/30 border-blue-100 dark:border-blue-900/50 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-900 text-sm">{model.name}</span>
+                    <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">{model.name}</span>
                     {quantity > 1 && (
                       <Badge className="bg-blue-600 text-white text-[10px] px-2 py-0.5">
                         x{quantity} xe
                       </Badge>
                     )}
                   </div>
-                  <div className="text-slate-500 mt-1 flex flex-wrap items-center gap-2">
-                    <span className="flex items-center gap-1.5 font-semibold text-slate-800">
-                      <Calendar className="h-3.5 w-3.5 text-blue-600" />
-                      {format24hDateTime(startTime)} → {format24hDateTime(endTime)} ({isTimeValid ? `${dayRent} ngày` : "Thời gian không hợp lệ"})
+                  <div className="text-slate-500 dark:text-slate-400 mt-1 flex flex-wrap items-center gap-2">
+                    <span className="flex items-center gap-1.5 font-semibold text-slate-800 dark:text-slate-200">
+                      <Calendar className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                      {format24hDateTime(startTime)} → {format24hDateTime(endTime)} ({isTimeValid ? `${dayRent} ${t("booking_days", "ngày")}` : "Thời gian không hợp lệ"})
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
-                      <Clock className="h-3 w-3 text-slate-600" />
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700">
+                      <Clock className="h-3 w-3 text-slate-600 dark:text-slate-400" />
                       Mở cửa: {storeOpenTime} - {storeCloseTime}
                     </span>
                   </div>
                 </div>
-                <div className="text-left sm:text-right sm:border-l sm:pl-4 border-blue-200">
-                  <span className="text-slate-500 text-[11px] block">Tổng tiền cọc cần thanh toán:</span>
-                  <div className="text-lg font-black text-blue-700">
+                <div className="text-left sm:text-right sm:border-l sm:pl-4 border-blue-200 dark:border-blue-900/60">
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block">{t("booking_deposit_rate", "Tổng tiền cọc cần thanh toán:")}</span>
+                  <div className="text-lg font-black text-blue-700 dark:text-blue-400">
                     {isTimeValid ? `${depositAmount.toLocaleString("vi-VN")} đ` : "0 đ"}
                   </div>
                 </div>
               </div>
 
               {/* Vehicle Quantity Selector */}
-              <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200/90 rounded-2xl">
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/60 border border-slate-200/90 dark:border-slate-700 rounded-2xl">
                 <div>
-                  <Label className="text-xs font-bold text-slate-800 block">Số lượng xe cần thuê</Label>
-                  <span className="text-[11px] text-slate-500">
-                    Điểm thuê này hiện có <strong className="text-blue-600 font-bold">{maxAvailable}</strong> xe sẵn sàng
+                  <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 block">{t("booking_quantity", "Số lượng xe cần thuê")}</Label>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Điểm thuê này hiện có <strong className="text-blue-600 dark:text-blue-400 font-bold">{maxAvailable}</strong> xe sẵn sàng
                   </span>
                 </div>
-                <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-xl border border-slate-200 shadow-2xs">
+                <div className="flex items-center gap-2 bg-white dark:bg-slate-900 px-2 py-1 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-40"
+                    className="h-7 w-7 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 disabled:opacity-40"
                     disabled={quantity <= 1}
                     onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
                   >
                     <Minus className="h-3.5 w-3.5" />
                   </Button>
-                  <span className="w-8 text-center font-extrabold text-sm text-slate-900 select-none">
+                  <span className="w-8 text-center font-extrabold text-sm text-slate-900 dark:text-slate-100 select-none">
                     {quantity}
                   </span>
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 rounded-lg text-slate-600 hover:text-blue-600 hover:bg-blue-50 disabled:opacity-40"
+                    className="h-7 w-7 rounded-lg text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 disabled:opacity-40"
                     disabled={quantity >= maxAvailable}
                     onClick={() => setQuantity((prev) => Math.min(maxAvailable, prev + 1))}
                   >
@@ -474,21 +476,21 @@ export function BookingModal({
 
               {/* Pickup Option */}
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-800">Hình thức nhận xe</Label>
+                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">{t("booking_delivery_opt", "Hình thức nhận xe")}</Label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setPickupType(0)}
                     className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1 ${
                       pickupType === 0
-                        ? "border-blue-600 bg-blue-50/50 text-blue-900 ring-2 ring-blue-600/30"
-                        : "border-slate-200 hover:border-slate-300 text-slate-700 bg-white"
+                        ? "border-blue-600 dark:border-blue-500 bg-blue-50/50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 ring-2 ring-blue-600/30"
+                        : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/80"
                     }`}
                   >
                     <div className="font-bold text-xs flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5 text-blue-600" /> Nhận tại cửa hàng
+                      <MapPin className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" /> {t("booking_pickup_store", "Nhận tại cửa hàng")}
                     </div>
-                    <div className="text-[11px] text-slate-500 mt-1 truncate">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">
                       {model.store?.address || "Địa chỉ nhà xe đối tác"}
                     </div>
                   </button>
@@ -497,14 +499,14 @@ export function BookingModal({
                     onClick={() => setPickupType(1)}
                     className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1 ${
                       pickupType === 1
-                        ? "border-blue-600 bg-blue-50/50 text-blue-900 ring-2 ring-blue-600/30"
-                        : "border-slate-200 hover:border-slate-300 text-slate-700 bg-white"
+                        ? "border-blue-600 dark:border-blue-500 bg-blue-50/50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 ring-2 ring-blue-600/30"
+                        : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/80"
                     }`}
                   >
                     <div className="font-bold text-xs flex items-center gap-1.5">
-                      <ShieldCheck className="h-3.5 w-3.5 text-blue-600" /> Giao xe tận nơi
+                      <ShieldCheck className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" /> {t("booking_doorstep", "Giao xe tận nơi")}
                     </div>
-                    <div className="text-[11px] text-slate-500 mt-1">
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
                       Giao đến khách sạn / sân bay / địa chỉ của bạn
                     </div>
                   </button>
@@ -513,37 +515,37 @@ export function BookingModal({
                 {pickupType === 1 && (
                   <div className="pt-1.5">
                     <Input
-                      placeholder="Nhập địa chỉ giao xe chi tiết (ví dụ: Khách sạn Mường Thanh, 123 Võ Nguyên Giáp)..."
+                      placeholder={t("booking_delivery_placeholder", "Nhập địa chỉ giao xe chi tiết (ví dụ: Khách sạn Mường Thanh, 123 Võ Nguyên Giáp)...")}
                       value={deliveryAddress}
                       onChange={(e) => setDeliveryAddress(e.target.value)}
                       required
-                      className="text-xs h-10 rounded-xl"
+                      className="text-xs h-10 rounded-xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100"
                     />
                   </div>
                 )}
               </div>
 
               {/* Driver License Legal Notice & Confirmation */}
-              <div className="rounded-2xl border-2 border-amber-300/80 bg-gradient-to-br from-amber-50/90 via-orange-50/40 to-amber-50/70 p-4 sm:p-5 space-y-3.5 shadow-xs">
+              <div className="rounded-2xl border-2 border-amber-300/80 dark:border-amber-700/60 bg-gradient-to-br from-amber-50/90 via-orange-50/40 to-amber-50/70 dark:from-amber-950/30 dark:via-orange-950/20 dark:to-amber-950/30 p-4 sm:p-5 space-y-3.5 shadow-xs">
                 <div className="flex items-start gap-3">
                   <div className="h-9 w-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                     <ShieldCheck className="h-5 w-5" />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-extrabold text-sm text-amber-950 flex items-center gap-2">
+                    <h4 className="font-extrabold text-sm text-amber-950 dark:text-amber-200 flex items-center gap-2">
                       Cam Kết Giấy Phép Lái Xe (GPLX) Chính Chủ
                       <Badge className="bg-amber-600 text-white text-[10px] uppercase font-bold tracking-wider">
                         Bắt buộc
                       </Badge>
                     </h4>
-                    <p className="text-xs text-amber-900/90 leading-relaxed">
+                    <p className="text-xs text-amber-900/90 dark:text-amber-300/90 leading-relaxed">
                       Theo quy định của pháp luật và chính sách thuê xe, người nhận xe bắt buộc phải có <strong>Giấy phép lái xe chính chủ hợp lệ</strong> và xuất trình <strong>bản gốc</strong> khi nhận xe tại cửa hàng.
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-xl bg-white/80 border border-amber-200/90 p-3 text-xs text-amber-950 flex items-start gap-2.5">
-                  <AlertCircle className="h-4 w-4 text-amber-700 shrink-0 mt-0.5" />
+                <div className="rounded-xl bg-white/80 dark:bg-slate-900/80 border border-amber-200/90 dark:border-amber-800/60 p-3 text-xs text-amber-950 dark:text-amber-200 flex items-start gap-2.5">
+                  <AlertCircle className="h-4 w-4 text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
                   <p className="leading-snug">
                     <strong>Cảnh báo quan trọng:</strong> Nếu tại thời điểm nhận xe, Quý khách <strong>không có bằng lái chính chủ</strong> hoặc bằng lái không hợp lệ, <strong>cửa hàng sẽ từ chối bàn giao xe</strong> và không chịu trách nhiệm hoàn lại tiền cọc.
                   </p>
@@ -552,25 +554,24 @@ export function BookingModal({
                 {/* Checkbox confirmation */}
                 <label
                   onClick={(e) => {
-                    // Prevent double triggering if clicked directly on input
                     if ((e.target as HTMLElement).tagName !== "INPUT") {
                       setHasAgreedLicense(!hasAgreedLicense);
                     }
                   }}
                   className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer select-none transition-all ${
                     hasAgreedLicense
-                      ? "bg-amber-100/90 border-amber-400 ring-2 ring-amber-400/30 text-amber-950 font-bold"
-                      : "bg-white border-slate-200 text-slate-700 hover:border-amber-300"
+                      ? "bg-amber-100/90 dark:bg-amber-900/40 border-amber-400 dark:border-amber-600 ring-2 ring-amber-400/30 text-amber-950 dark:text-amber-200 font-bold"
+                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-amber-300"
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={hasAgreedLicense}
                     onChange={(e) => setHasAgreedLicense(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-1"
+                    className="mt-0.5 h-4 w-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300 dark:border-slate-600 cursor-pointer"
                   />
                   <span className="text-xs leading-relaxed">
-                    Tôi xác nhận đã có <strong>Giấy phép lái xe chính chủ hợp lệ</strong> và cam kết mang theo bản gốc khi nhận xe. Tôi hiểu rằng cửa hàng sẽ không giao xe nếu tôi không xuất trình được bằng lái.
+                    Tôi xác nhận đã có <strong>Giấy phép lái xe chính chủ hợp lệ</strong> và cam kết mang theo bản gốc khi nhận xe.
                   </span>
                 </label>
 
@@ -583,34 +584,34 @@ export function BookingModal({
                   }}
                   className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer select-none transition-all ${
                     hasAgreedTerms
-                      ? "bg-blue-50/90 border-blue-400 ring-2 ring-blue-400/30 text-blue-950 font-medium"
-                      : "bg-white border-slate-200 text-slate-700 hover:border-blue-300"
+                      ? "bg-blue-50/90 dark:bg-blue-950/40 border-blue-400 dark:border-blue-600 ring-2 ring-blue-400/30 text-blue-950 dark:text-blue-200 font-medium"
+                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-300"
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={hasAgreedTerms}
                     onChange={(e) => setHasAgreedTerms(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1"
+                    className="mt-0.5 h-4 w-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 dark:border-slate-600 cursor-pointer shrink-0"
                   />
                   <span className="text-xs leading-relaxed">
                     Tôi đồng ý với{" "}
                     <Link
                       href="/terms"
                       target="_blank"
-                      className="font-bold text-blue-600 hover:underline"
+                      className="font-bold text-blue-600 dark:text-blue-400 hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      Điều khoản dịch vụ
+                      {t("footer_terms", "Điều khoản dịch vụ")}
                     </Link>{" "}
-                    (bao gồm trách nhiệm chịu phạt nguội) và{" "}
+                    và{" "}
                     <Link
                       href="/privacy"
                       target="_blank"
-                      className="font-bold text-blue-600 hover:underline"
+                      className="font-bold text-blue-600 dark:text-blue-400 hover:underline"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      Chính sách bảo mật
+                      {t("footer_privacy", "Chính sách bảo mật")}
                     </Link>{" "}
                     của VehicleRent.
                   </span>
@@ -720,9 +721,9 @@ export function BookingModal({
                                       </span>
                                     )}
                                   </div>
-                                  <div className="font-bold text-slate-800 text-[11px]">{p.title}</div>
-                                  <div className="text-[10px] text-slate-500">
-                                    {p.minRentDays > 1 ? `Áp dụng từ ${p.minRentDays} ngày thuê` : "Áp dụng cho mọi đơn"}
+                                  <div className="font-bold text-slate-800 dark:text-slate-200 text-[11px]">{p.title}</div>
+                                  <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                                    {p.minRentDays > 1 ? `${t("promo_min_days", "Áp dụng từ")} ${p.minRentDays} ${t("booking_days", "ngày thuê")}` : t("promo_all_orders", "Áp dụng cho mọi đơn")}
                                   </div>
                                 </div>
                                 <Button
@@ -730,9 +731,9 @@ export function BookingModal({
                                   size="sm"
                                   disabled={!isEligible}
                                   onClick={() => handleApplyPromo(p.code)}
-                                  className="h-7 px-3 text-[11px] font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shrink-0"
+                                  className="h-7 px-3 text-[11px] font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shrink-0 cursor-pointer"
                                 >
-                                  {isEligible ? "Chọn mã" : `Cần ≥${p.minRentDays} ngày`}
+                                  {isEligible ? t("promo_choose", "Chọn mã") : `${t("promo_min_need", "Cần")} ≥${p.minRentDays} ${t("booking_days", "ngày")}`}
                                 </Button>
                               </div>
                             );
@@ -744,41 +745,41 @@ export function BookingModal({
                 )}
 
                 {/* Price Breakdown Summary */}
-                <div className="rounded-xl bg-white p-3 border border-slate-200 text-xs space-y-1.5">
-                  <div className="flex justify-between items-center text-slate-600">
+                <div className="rounded-xl bg-white dark:bg-slate-900 p-3 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5 shadow-2xs">
+                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
                     <span>
-                      Giá thuê gốc ({dayRent} ngày{quantity > 1 ? ` × ${quantity} xe` : ""}):
+                      {t("booking_base_rent", "Giá thuê gốc")} ({dayRent} {t("booking_days", "ngày")}{quantity > 1 ? ` × ${quantity} xe` : ""}):
                     </span>
-                    <span className="font-semibold">{rentAmount.toLocaleString("vi-VN")} đ</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{rentAmount.toLocaleString("vi-VN")} đ</span>
                   </div>
                   {appliedPromo && discountAmount > 0 && (
-                    <div className="flex justify-between items-center text-emerald-600 font-bold">
-                      <span>Giảm giá ({appliedPromo.code}):</span>
+                    <div className="flex justify-between items-center text-emerald-600 dark:text-emerald-400 font-bold">
+                      <span>{t("booking_discount", "Giảm giá")} ({appliedPromo.code}):</span>
                       <span>-{discountAmount.toLocaleString("vi-VN")} đ</span>
                     </div>
                   )}
-                  <div className="flex justify-between items-center pt-1.5 border-t border-slate-100 font-extrabold text-slate-900">
-                    <span>Tổng tiền thuê sau giảm:</span>
-                    <span className="text-sm text-blue-700">{finalRentAmount.toLocaleString("vi-VN")} đ</span>
+                  <div className="flex justify-between items-center pt-1.5 border-t border-slate-100 dark:border-slate-800 font-extrabold text-slate-900 dark:text-slate-100">
+                    <span>{t("booking_final_rent", "Tổng tiền thuê sau giảm:")}</span>
+                    <span className="text-sm text-blue-700 dark:text-blue-400">{finalRentAmount.toLocaleString("vi-VN")} đ</span>
                   </div>
                 </div>
               </div>
 
               {/* Payment Method Option */}
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-800">Tùy chọn thanh toán</Label>
+                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">{t("booking_payment_opt", "Tùy chọn thanh toán")}</Label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setPaymentType(1)}
                     className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
                       paymentType === 1
-                        ? "border-blue-600 bg-blue-50/50 text-blue-900 ring-2 ring-blue-600/30"
-                        : "border-slate-200 hover:border-slate-300 text-slate-700 bg-white"
+                        ? "border-blue-600 bg-blue-50/50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 ring-2 ring-blue-600/30"
+                        : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900"
                     }`}
                   >
-                    <div className="font-bold text-xs">Cọc trước {depositPercent}% giữ xe</div>
-                    <div className="text-xs text-blue-600 font-extrabold mt-1">
+                    <div className="font-bold text-xs">{t("booking_deposit_opt", `Cọc trước ${depositPercent}% giữ xe`)}</div>
+                    <div className="text-xs text-blue-600 dark:text-blue-400 font-extrabold mt-1">
                       {depositAmount.toLocaleString("vi-VN")} đ
                     </div>
                   </button>
@@ -787,12 +788,12 @@ export function BookingModal({
                     onClick={() => setPaymentType(0)}
                     className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
                       paymentType === 0
-                        ? "border-blue-600 bg-blue-50/50 text-blue-900 ring-2 ring-blue-600/30"
-                        : "border-slate-200 hover:border-slate-300 text-slate-700 bg-white"
+                        ? "border-blue-600 bg-blue-50/50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 ring-2 ring-blue-600/30"
+                        : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900"
                     }`}
                   >
-                    <div className="font-bold text-xs">Thanh toán 100%</div>
-                    <div className="text-xs text-slate-700 font-extrabold mt-1">
+                    <div className="font-bold text-xs">{t("booking_full_opt", "Thanh toán 100%")}</div>
+                    <div className="text-xs text-slate-700 dark:text-slate-300 font-extrabold mt-1">
                       {finalRentAmount.toLocaleString("vi-VN")} đ
                     </div>
                   </button>
@@ -803,32 +804,32 @@ export function BookingModal({
             /* Step 2: Payment with VietQR & 10-Minute Countdown */
             <div className="space-y-6">
               {/* Live Countdown Banner - Solid, stable, high contrast */}
-              <div className="rounded-2xl bg-orange-50 border-2 border-orange-300 p-4 flex items-center justify-between shadow-xs">
+              <div className="rounded-2xl bg-orange-50 dark:bg-orange-950/40 border-2 border-orange-300 dark:border-orange-800 p-4 flex items-center justify-between shadow-xs">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold shadow-xs">
                     <Clock className="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-900 text-sm">Thời gian giữ chỗ còn lại</h4>
-                    <p className="text-xs text-slate-600">
-                      Xe đã được tạm khóa. Quá 10 phút đơn sẽ tự động hủy.
+                    <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{t("booking_time_remaining", "Thời gian giữ chỗ còn lại")}</h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">
+                      {t("booking_time_remaining_desc", "Xe đã được tạm khóa. Quá 10 phút đơn sẽ tự động hủy.")}
                     </p>
                   </div>
                 </div>
-                <div className="text-2xl font-black font-mono text-orange-600 tracking-wider">
+                <div className="text-2xl font-black font-mono text-orange-600 dark:text-orange-400 tracking-wider">
                   {formatTimer(timeLeft)}
                 </div>
               </div>
 
               {/* Driver License Handover Notice */}
-              <div className="rounded-2xl border-2 border-amber-300 bg-amber-50/90 p-4 flex items-start gap-3 text-amber-950 shadow-xs">
-                <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-800 bg-amber-50/90 dark:bg-amber-950/40 p-4 flex items-start gap-3 text-amber-950 dark:text-amber-200 shadow-xs">
+                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <div className="text-xs space-y-1">
-                  <h4 className="font-extrabold text-sm text-amber-900 flex items-center gap-1.5">
-                    LƯU Ý QUAN TRỌNG KHI ĐẾN NHẬN XE
+                  <h4 className="font-extrabold text-sm text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
+                    {t("booking_notice_header", "LƯU Ý QUAN TRỌNG KHI ĐẾN NHẬN XE")}
                   </h4>
-                  <p className="text-amber-800 leading-relaxed">
-                    Quý khách bắt buộc phải mang theo <strong>Giấy phép lái xe chính chủ (bản gốc)</strong> khi đến nhận xe tại cửa hàng. <strong>Cửa hàng sẽ đối chiếu và không bàn giao xe</strong> nếu Quý khách không xuất trình được bằng lái chính chủ hợp lệ!
+                  <p className="text-amber-800 dark:text-amber-300 leading-relaxed">
+                    {t("booking_notice_body", "Quý khách bắt buộc phải mang theo Giấy phép lái xe chính chủ (bản gốc) khi đến nhận xe tại cửa hàng. Cửa hàng sẽ đối chiếu và không bàn giao xe nếu Quý khách không xuất trình được bằng lái chính chủ hợp lệ!")}
                   </p>
                 </div>
               </div>
@@ -836,25 +837,25 @@ export function BookingModal({
               {/* QR Code and Payment Details */}
               <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
                 {/* Dynamic QR Display */}
-                <div className="flex flex-col items-center bg-white p-4 border border-slate-200 rounded-2xl shadow-sm w-full sm:w-auto shrink-0">
+                <div className="flex flex-col items-center bg-white dark:bg-slate-900 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm w-full sm:w-auto shrink-0">
                   {qrInfo?.qrCode ? (
                     <img
                       src={qrInfo.qrCode}
                       alt={`Mã VietQR thanh toán tiền cọc thuê xe ${model?.name || ""}`}
-                      className="w-56 h-56 object-contain"
+                      className="w-56 h-56 object-contain rounded-xl bg-white p-2"
                     />
                   ) : (
-                    <div className="w-56 h-56 flex flex-col items-center justify-center bg-slate-50 rounded-xl text-slate-400 gap-2">
+                    <div className="w-56 h-56 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-400 gap-2">
                       <QrCode className="h-12 w-12" />
-                      <span className="text-xs">Đang sinh mã VietQR...</span>
+                      <span className="text-xs">{t("booking_generating_qr", "Đang sinh mã VietQR...")}</span>
                     </div>
                   )}
-                  <span className="text-[11px] font-semibold text-slate-500 mt-2 text-center">
-                    Quét bằng mọi ứng dụng Mobile Banking
+                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-2 text-center">
+                    {t("vietqr_modal_scan_hint", "Quét bằng mọi ứng dụng Mobile Banking")}
                   </span>
 
                   {/* Actions for Mobile: Chuyển khoản ngay & Tải QR */}
-                  <div className="w-full space-y-2 mt-3 pt-3 border-t border-slate-100">
+                  <div className="w-full space-y-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                     {qrInfo?.checkoutUrl && (
                       <Button
                         type="button"
@@ -864,7 +865,7 @@ export function BookingModal({
                         className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-9.5 rounded-xl gap-2 shadow-xs cursor-pointer"
                       >
                         <Smartphone className="h-4 w-4" />
-                        <span>Mở ứng dụng ngân hàng thanh toán</span>
+                        <span>{t("booking_open_banking", "Mở ứng dụng ngân hàng thanh toán")}</span>
                       </Button>
                     )}
 
@@ -873,84 +874,84 @@ export function BookingModal({
                         type="button"
                         variant="outline"
                         onClick={handleDownloadQr}
-                        className="w-full border-blue-200 text-blue-700 hover:bg-blue-50 font-bold text-xs h-9.5 rounded-xl gap-2 shadow-xs cursor-pointer"
+                        className="w-full border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950 font-bold text-xs h-9.5 rounded-xl gap-2 shadow-xs cursor-pointer"
                       >
                         <Download className="h-4 w-4" />
-                        <span>Tải ảnh mã VietQR</span>
+                        <span>{t("booking_download_qr", "Tải ảnh mã VietQR")}</span>
                       </Button>
                     )}
                   </div>
 
-                  <div className="mt-2.5 text-[10px] text-slate-500 bg-slate-50 p-2 rounded-xl text-center leading-normal max-w-[220px] border border-slate-100">
-                    💡 <strong>Mẹo điện thoại:</strong> Tải QR về máy, sau đó mở App ngân hàng chọn <strong>Quét QR từ Thư viện ảnh</strong> để thanh toán siêu nhanh!
+                  <div className="mt-2.5 text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 p-2 rounded-xl text-center leading-normal max-w-[220px] border border-slate-100 dark:border-slate-700">
+                    💡 <strong>{t("booking_mobile_tip_title", "Mẹo điện thoại:")}</strong> {t("booking_mobile_tip_body", "Tải QR về máy, sau đó mở App ngân hàng chọn Quét QR từ Thư viện ảnh để thanh toán siêu nhanh!")}
                   </div>
                 </div>
 
                 {/* Transfer Breakdown */}
                 <div className="flex-1 space-y-3 text-xs w-full">
-                  <div className="bg-slate-50 p-4 rounded-2xl border space-y-2.5">
-                    <div className="flex justify-between items-center text-slate-600">
-                      <span>Mã đơn đặt xe:</span>
-                      <span className="font-mono font-bold text-slate-900">
+                  <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2.5">
+                    <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
+                      <span>{t("vietqr_modal_booking_code", "Mã đơn đặt xe:")}</span>
+                      <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
                         {bookingResult?.booking?.bookingCode || "BK-..."}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center text-slate-600">
-                      <span>Dòng xe & Số lượng:</span>
-                      <span className="font-bold text-slate-900">
+                    <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
+                      <span>{t("booking_vehicle_info", "Dòng xe & Số lượng:")}</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100">
                         {model.name} {quantity > 1 ? `(${quantity} xe)` : ""}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center text-slate-600">
-                      <span>Chủ tài khoản:</span>
-                      <span className="font-bold text-slate-900 uppercase">
+                    <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
+                      <span>{t("vietqr_modal_account_name", "Chủ tài khoản:")}</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100 uppercase">
                         {qrInfo?.accountName || "NGUYEN VAN HUU"}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center text-slate-600">
-                      <span>Ngân hàng thụ hưởng:</span>
-                      <span className="font-bold text-slate-900">
+                    <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
+                      <span>{t("vietqr_modal_bank", "Ngân hàng thụ hưởng:")}</span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100">
                         {qrInfo?.bankName || (qrInfo?.bin === "970422" ? "MB Bank (Quân Đội)" : "MB Bank / PayOS")}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center text-slate-600">
-                      <span>Số tài khoản:</span>
+                    <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
+                      <span>{t("vietqr_modal_account_num", "Số tài khoản:")}</span>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-bold text-slate-900">
+                        <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
                           {qrInfo?.accountNumber || "VQRQANJGX1330"}
                         </span>
                         <button
                           type="button"
                           onClick={() => {
                             navigator.clipboard.writeText(qrInfo?.accountNumber || "VQRQANJGX1330");
-                            toast.success("Đã sao chép số tài khoản!");
+                            toast.success(t("toast_copied_account", "Đã sao chép số tài khoản!"));
                           }}
-                          className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors"
+                          className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 transition-colors cursor-pointer"
                           title="Sao chép số tài khoản"
                         >
                           <Copy className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </div>
-                    <div className="flex justify-between items-center text-slate-600 border-t pt-2">
-                      <span>Số tiền cọc cần chuyển:</span>
-                      <span className="text-base font-black text-blue-700">
+                    <div className="flex justify-between items-center text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700 pt-2">
+                      <span>{t("booking_deposit_transfer", "Số tiền cọc cần chuyển:")}</span>
+                      <span className="text-base font-black text-blue-700 dark:text-blue-400">
                         {depositAmount.toLocaleString("vi-VN")} đ
                       </span>
                     </div>
-                    <div className="flex justify-between items-center text-slate-600 border-t pt-2">
-                      <span>Nội dung chuyển khoản:</span>
+                    <div className="flex justify-between items-center text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700 pt-2">
+                      <span>{t("vietqr_modal_memo", "Nội dung chuyển khoản:")}</span>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                        <span className="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800">
                           {bookingResult?.payment?.transactionRef || "VR-..."}
                         </span>
                         <button
                           type="button"
                           onClick={() => {
                             navigator.clipboard.writeText(bookingResult?.payment?.transactionRef || "");
-                            toast.success("Đã sao chép nội dung chuyển khoản!");
+                            toast.success(t("toast_copied_memo", "Đã sao chép nội dung chuyển khoản!"));
                           }}
-                          className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors"
+                          className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-500 transition-colors cursor-pointer"
                           title="Sao chép nội dung"
                         >
                           <Copy className="h-3.5 w-3.5" />
@@ -959,9 +960,9 @@ export function BookingModal({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs text-amber-800 bg-amber-50/80 p-2.5 rounded-xl border border-amber-200">
-                    <Loader2 className="h-4 w-4 animate-spin text-amber-600 shrink-0" />
-                    <span>Đang tự động lắng nghe thanh toán từ Mobile Banking...</span>
+                  <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-amber-300 bg-amber-50/80 dark:bg-amber-950/40 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800">
+                    <Loader2 className="h-4 w-4 animate-spin text-amber-600 dark:text-amber-400 shrink-0" />
+                    <span>{t("booking_listening_payment", "Đang tự động lắng nghe thanh toán từ Mobile Banking...")}</span>
                   </div>
 
                   {/* Dev Sandbox simulation button */}
@@ -971,7 +972,7 @@ export function BookingModal({
                     onClick={handleSimulatePaymentSuccess}
                     className="w-full text-[11px] text-slate-400 hover:text-slate-600 h-7"
                   >
-                    [Mô phỏng thanh toán test]
+                    [{t("booking_simulate_test", "Mô phỏng thanh toán test")}]
                   </Button>
                 </div>
               </div>
@@ -980,7 +981,7 @@ export function BookingModal({
         </div>
 
         {/* Footer - Always visible at bottom, never clipped */}
-        <DialogFooter className="shrink-0 p-4 sm:p-5 border-t bg-white flex flex-row items-center justify-end gap-2">
+        <DialogFooter className="shrink-0 p-4 sm:p-5 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-row items-center justify-end gap-2">
           {step === "form" ? (
             <>
               <Button
@@ -988,25 +989,25 @@ export function BookingModal({
                 variant="outline"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="h-10 text-xs font-semibold rounded-xl"
+                className="h-10 text-xs font-semibold rounded-xl border-slate-200 dark:border-slate-700"
               >
-                Hủy bỏ
+                {t("cancel_modal_close", "Hủy bỏ")}
               </Button>
               <Button
                 type="submit"
                 form="booking-form"
                 disabled={isSubmitting || !isTimeValid || !hasAgreedLicense || !hasAgreedTerms}
-                className="h-10 px-5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md gap-1.5 cursor-pointer disabled:bg-slate-300 disabled:text-slate-500"
+                className="h-10 px-5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md gap-1.5 cursor-pointer disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500"
               >
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Đang khóa xe 10 phút...</span>
+                    <span>{t("booking_locking_vehicle", "Đang khóa xe 10 phút...")}</span>
                   </>
                 ) : !isTimeValid ? (
-                  <span>Thời gian không hợp lệ</span>
+                  <span>{t("booking_time_invalid", "Thời gian không hợp lệ")}</span>
                 ) : (
-                  <span>Xác nhận đặt xe & Giữ chỗ</span>
+                  <span>{t("booking_confirm_button", "Xác nhận đặt xe & Giữ chỗ")}</span>
                 )}
               </Button>
             </>
@@ -1016,9 +1017,9 @@ export function BookingModal({
                 type="button"
                 variant="outline"
                 onClick={onClose}
-                className="h-10 text-xs font-semibold rounded-xl"
+                className="h-10 text-xs font-semibold rounded-xl border-slate-200 dark:border-slate-700"
               >
-                Đóng (Đơn lưu trong Lịch sử)
+                {t("booking_close_save", "Đóng (Đơn lưu trong Lịch sử)")}
               </Button>
               <Button
                 type="button"
@@ -1027,20 +1028,20 @@ export function BookingModal({
                   try {
                     const res = await api.customer.checkPaymentStatus(bookingResult.booking.id);
                     if (res.paid) {
-                      toast.success("🎉 Đã nhận thanh toán cọc thành công!");
+                      toast.success(t("booking_paid_success", "🎉 Đã nhận thanh toán cọc thành công!"));
                       onClose();
                       router.push("/customer/bookings");
                     } else {
-                      toast.info(res.message || "Chưa nhận được giao dịch. Vui lòng thử lại sau vài giây.");
+                      toast.info(res.message || t("booking_not_yet_paid", "Chưa nhận được giao dịch. Vui lòng thử lại sau vài giây."));
                     }
                   } catch {
-                    toast.error("Không thể kiểm tra giao dịch lúc này.");
+                    toast.error(t("booking_check_error", "Không thể kiểm tra giao dịch lúc này."));
                   }
                 }}
                 className="h-10 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs gap-1.5 cursor-pointer"
               >
                 <CheckCircle2 className="h-4 w-4" />
-                <span>Tôi đã chuyển khoản — Kiểm tra ngay</span>
+                <span>{t("booking_transferred_check_now", "Tôi đã chuyển khoản — Kiểm tra ngay")}</span>
               </Button>
             </div>
           )}
