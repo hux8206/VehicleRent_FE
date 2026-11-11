@@ -69,16 +69,22 @@ export function Navbar() {
     return parts[parts.length - 1].charAt(0).toUpperCase();
   };
 
-  // ─── Distinct Navigation Menus by Role ──────────────────────────────
-  const adminNavLinks = [
-    { title: t("nav_admin_reports", "Báo Cáo Sàn"), href: "/admin", icon: BarChart3, isActive: pathname === "/admin" },
-    { title: t("nav_admin_stores", "Duyệt Cửa Hàng"), href: "/admin/stores", icon: Store, isActive: pathname.startsWith("/admin/stores") },
-    { title: t("nav_admin_transactions", "Quản Lý Giao Dịch"), href: "/admin/transactions", icon: Receipt, isActive: pathname.startsWith("/admin/transactions") },
-    { title: t("nav_admin_users", "Quản Trị Người Dùng"), href: "/admin/users", icon: Users, isActive: pathname.startsWith("/admin/users") },
-    { title: t("nav_admin_promotions", "Khuyến Mãi & Voucher"), href: "/admin/promotions", icon: Ticket, isActive: pathname.startsWith("/admin/promotions") },
-    { title: t("nav_admin_feedbacks", "Hòm Thư Góp Ý"), href: "/admin/feedbacks", icon: MessageSquare, isActive: pathname.startsWith("/admin/feedbacks") },
-    { title: t("nav_admin_reviews", "Duyệt Đánh Giá"), href: "/admin/reviews", icon: Shield, isActive: pathname.startsWith("/admin/reviews") },
+  // ─── Distinct Navigation Menus by Role (Tối ưu gọn gàng cho Admin & Partner) ─
+  const adminPrimaryLinks = [
+    { title: t("nav_admin_reports", "Báo Cáo"), href: "/admin", icon: BarChart3, isActive: pathname === "/admin" },
+    { title: t("nav_admin_stores", "Cửa Hàng"), href: "/admin/stores", icon: Store, isActive: pathname.startsWith("/admin/stores") },
+    { title: t("nav_admin_transactions", "Giao Dịch"), href: "/admin/transactions", icon: Receipt, isActive: pathname.startsWith("/admin/transactions") },
+    { title: t("nav_admin_users", "Người Dùng"), href: "/admin/users", icon: Users, isActive: pathname.startsWith("/admin/users") },
   ];
+
+  const adminSecondaryLinks = [
+    { title: t("nav_admin_promotions", "Khuyến Mãi"), href: "/admin/promotions", icon: Ticket, isActive: pathname.startsWith("/admin/promotions") },
+    { title: t("nav_admin_feedbacks", "Góp Ý"), href: "/admin/feedbacks", icon: MessageSquare, isActive: pathname.startsWith("/admin/feedbacks") },
+    { title: t("nav_admin_reviews", "Đánh Giá"), href: "/admin/reviews", icon: Shield, isActive: pathname.startsWith("/admin/reviews") },
+  ];
+
+  const isMoreAdminActive = adminSecondaryLinks.some((l) => l.isActive);
+  const adminNavLinks = [...adminPrimaryLinks, ...adminSecondaryLinks]; // Dùng cho Mobile menu drawer
 
   // Determine partner portal state & active branch context
   const queryStoreId = searchParams?.get("storeId");
@@ -169,31 +175,31 @@ export function Navbar() {
       const branchQuery = effectiveBranchId ? `?storeId=${effectiveBranchId}` : "";
       return [
         {
-          title: t("partner_branch_ops", "Vận Hành Chi Nhánh"),
+          title: t("partner_branch_ops_short", "Vận Hành"),
           href: `/partner?mode=branch${effectiveBranchId ? `&storeId=${effectiveBranchId}` : ""}`,
           icon: BarChart3,
           isActive: pathname === "/partner" && partnerMode === "branch",
         },
         {
-          title: t("partner_vehicles", "Dòng Xe"),
+          title: t("partner_vehicles_short", "Dòng Xe"),
           href: `/partner/vehicles${branchQuery}`,
           icon: Bike,
           isActive: pathname.startsWith("/partner/vehicles"),
         },
         {
-          title: t("partner_bookings", "Đơn Thuê"),
+          title: t("partner_bookings_short", "Đơn Thuê"),
           href: `/partner/bookings${branchQuery}`,
           icon: ClipboardList,
           isActive: pathname.startsWith("/partner/bookings"),
         },
         {
-          title: t("partner_wallet", "Sổ Giao Dịch"),
+          title: t("partner_wallet_short", "Ví Tiền"),
           href: `/partner/wallet${branchQuery}`,
           icon: Wallet,
           isActive: pathname.startsWith("/partner/wallet"),
         },
         {
-          title: t("partner_switch_branch", "Đổi Chi Nhánh"),
+          title: t("partner_switch_branch_short", "Đổi Chi Nhánh"),
           href: "/partner?mode=branch",
           icon: ArrowLeft,
           isActive: false,
@@ -205,7 +211,7 @@ export function Navbar() {
     if (isOwnerRoute) {
       const links = [
         {
-          title: t("partner_revenue_branches", "Doanh Thu & Chi Nhánh"),
+          title: t("partner_revenue_branches_short", "Doanh Thu"),
           href: "/partner?mode=owner",
           icon: BarChart3,
           isActive: pathname === "/partner" && partnerMode === "owner",
@@ -214,7 +220,7 @@ export function Navbar() {
 
       if (pathname.startsWith("/partner/onboarding")) {
         links.push({
-          title: t("partner_branch_profile", "Hồ Sơ Chi Nhánh"),
+          title: t("partner_branch_profile_short", "Hồ Sơ"),
           href: `/partner/onboarding${effectiveBranchId ? `?storeId=${effectiveBranchId}` : ""}`,
           icon: Store,
           isActive: true,
@@ -223,13 +229,13 @@ export function Navbar() {
 
       links.push(
         {
-          title: t("partner_wallet_payout", "Ví Đối Tác & Rút Tiền"),
+          title: t("partner_wallet_payout_short", "Ví Đối Tác"),
           href: "/partner/wallet",
           icon: Wallet,
           isActive: pathname.startsWith("/partner/wallet"),
         },
         {
-          title: t("partner_switch_module", "Đổi Phân Hệ"),
+          title: t("partner_switch_module_short", "Đổi Phân Hệ"),
           href: "/partner",
           icon: ArrowLeft,
           isActive: false,
@@ -272,35 +278,101 @@ export function Navbar() {
           )}
         </div>
 
-        {/* Center Navigation Links - Strictly Filtered by Role (3-4 essential compact tabs, no scrollbar) */}
+        {/* Center Navigation Links - Strictly Filtered by Role (Gọn gàng, chỉ giữ tab hay dùng) */}
         <nav className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0 py-1">
-          {activeNavLinks.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={`${item.title}-${item.href}`}
-                href={item.href}
-                className={`flex items-center gap-1.5 xl:gap-2 px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${item.isActive
-                  ? isAdmin
-                    ? "bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-400 font-bold shadow-2xs"
-                    : isPartner
-                      ? "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-400 font-bold shadow-2xs"
-                      : "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 font-bold shadow-2xs"
-                  : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/70"
+          {isAdmin ? (
+            <>
+              {adminPrimaryLinks.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={`${item.title}-${item.href}`}
+                    href={item.href}
+                    className={`flex items-center gap-1.5 xl:gap-2 px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
+                      item.isActive
+                        ? "bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-400 font-bold shadow-2xs"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/70"
+                    }`}
+                  >
+                    <Icon
+                      className={`h-4 w-4 shrink-0 ${
+                        item.isActive ? "text-red-600 dark:text-red-400" : "text-slate-400 dark:text-slate-500"
+                      }`}
+                    />
+                    <span>{item.title}</span>
+                  </Link>
+                );
+              })}
+
+              {/* Dropdown 'Thêm' gom các mục ít dùng cho Admin (Khuyến Mãi, Góp Ý, Đánh Giá) */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                      isMoreAdminActive
+                        ? "bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-400 font-bold shadow-2xs"
+                        : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/70"
+                    }`}
+                  >
+                    <span>{t("nav_more", "Thêm")}</span>
+                    <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-44 p-1.5 rounded-2xl shadow-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                >
+                  {adminSecondaryLinks.map((sub) => {
+                    const SubIcon = sub.icon;
+                    return (
+                      <DropdownMenuItem key={sub.href} asChild>
+                        <Link
+                          href={sub.href}
+                          className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold cursor-pointer ${
+                            sub.isActive
+                              ? "bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-400 font-bold"
+                              : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          }`}
+                        >
+                          <SubIcon className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                          <span>{sub.title}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            activeNavLinks.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={`${item.title}-${item.href}`}
+                  href={item.href}
+                  className={`flex items-center gap-1.5 xl:gap-2 px-3 py-2 rounded-xl text-xs xl:text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
+                    item.isActive
+                      ? isPartner
+                        ? "bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-400 font-bold shadow-2xs"
+                        : "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 font-bold shadow-2xs"
+                      : "text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-slate-800/70"
                   }`}
-              >
-                <Icon className={`h-4 w-4 shrink-0 ${item.isActive
-                  ? isAdmin
-                    ? "text-red-600 dark:text-red-400"
-                    : isPartner
-                      ? "text-amber-600 dark:text-amber-400"
-                      : "text-blue-600 dark:text-blue-400"
-                  : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200"
-                  }`} />
-                <span>{item.title}</span>
-              </Link>
-            );
-          })}
+                >
+                  <Icon
+                    className={`h-4 w-4 shrink-0 ${
+                      item.isActive
+                        ? isPartner
+                          ? "text-amber-600 dark:text-amber-400"
+                          : "text-blue-600 dark:text-blue-400"
+                        : "text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200"
+                    }`}
+                  />
+                  <span>{item.title}</span>
+                </Link>
+              );
+            })
+          )}
         </nav>
 
         {/* Right Section: Role Actions + Controls + Auth State */}
