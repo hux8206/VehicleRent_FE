@@ -290,18 +290,18 @@ export default function VehicleDetailPage() {
             </Card>
 
             {/* 6-Point Safety Inspection & Digital Handover Seal */}
-            <Card className="rounded-2xl border border-slate-200/90 bg-white text-slate-900 shadow-xs overflow-hidden">
+            <Card className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs overflow-hidden">
               <CardContent className="p-6 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
+                    <div className="h-10 w-10 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400">
                       <FileCheck2 className="h-5 w-5" />
                     </div>
                     <div>
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold">
                         <CheckCircle2 className="h-3 w-3" /> Kiểm định 6 điểm kỹ thuật số
                       </div>
-                      <h3 className="text-base font-black text-slate-900 mt-0.5">
+                      <h3 className="text-base font-black text-slate-900 dark:text-slate-100 mt-0.5">
                         Biên Bản Bàn Giao & Kiểm Tra 6 Điểm Kỹ Thuật Số
                       </h3>
                     </div>
@@ -317,12 +317,12 @@ export default function VehicleDetailPage() {
                   </Button>
                 </div>
 
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Trước khi nhận xe, cửa hàng cùng bạn kiểm tra phanh, lốp, đèn, gương, vạch xăng và chụp ảnh 4 góc lưu trữ điện tử. Cam kết <strong className="text-slate-900 font-bold">Không phạt vạ trầy xước hao mòn</strong> và <strong className="text-slate-900 font-bold">Cứu hộ khẩn cấp 24/7</strong> mọi cung đường.
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Trước khi nhận xe, cửa hàng cùng bạn kiểm tra phanh, lốp, đèn, gương, vạch xăng và chụp ảnh 4 góc lưu trữ điện tử. Cam kết <strong className="text-slate-900 dark:text-slate-200 font-bold">Không phạt vạ trầy xước hao mòn</strong> và <strong className="text-slate-900 dark:text-slate-200 font-bold">Cứu hộ khẩn cấp 24/7</strong> mọi cung đường.
                 </p>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
+                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-center">
                     <div className="text-[11px] font-bold text-slate-700">Phanh & Tay Lái</div>
                     <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ Đã kiểm tra</div>
                   </div>
@@ -479,27 +479,27 @@ export default function VehicleDetailPage() {
 
           {/* Right Col: Reservation Booking Sidebar */}
           <div className="space-y-6">
-            <Card className="rounded-2xl border-slate-200/80 shadow-lg sticky top-20 bg-white">
-              <CardHeader className="p-6 pb-4 border-b border-slate-100 bg-slate-50/70">
-                <span className="text-xs font-bold text-blue-700">
+            <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800 shadow-lg sticky top-20 bg-white dark:bg-slate-900">
+              <CardHeader className="p-6 pb-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50">
+                <span className="text-xs font-bold text-blue-700 dark:text-blue-400">
                   Tính tiền & Đặt chỗ tức thì
                 </span>
                 <div className="flex items-baseline justify-between mt-1">
-                  <span className="text-2xl font-black text-blue-700">
+                  <span className="text-2xl font-black text-blue-700 dark:text-blue-400">
                     {pricePerDay.toLocaleString("vi-VN")} đ
                   </span>
-                  <span className="text-xs text-slate-500">/ 24 giờ thuê</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">/ 24 giờ thuê</span>
                 </div>
               </CardHeader>
 
               <CardContent className="p-6 space-y-5">
                 {/* Store Operating Hours Pill */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs">
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs">
                   <span className="flex items-center gap-1.5 font-semibold">
-                    <Clock className="h-4 w-4 text-cyan-600 shrink-0" />
+                    <Clock className="h-4 w-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
                     <span>Giờ mở cửa đón khách:</span>
                   </span>
-                  <span className="font-bold text-slate-900 bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-2xs">
+                  <span className="font-bold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 shadow-2xs">
                     {storeOpenTime} - {storeCloseTime}
                   </span>
                 </div>

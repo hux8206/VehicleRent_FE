@@ -118,29 +118,29 @@ function HeroVehicleTiltCard() {
 
       {/* Floating Badge 1: 4.95 / 5.0 (Stable & Crisp) */}
       <div
-        className="absolute -top-4 -left-4 sm:-left-6 bg-white rounded-2xl p-3 border border-slate-200 shadow-xl shadow-slate-200/60 flex items-center gap-3 z-20 pointer-events-auto"
+        className="absolute -top-4 -left-4 sm:-left-6 bg-white dark:bg-slate-900 rounded-2xl p-3 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/60 dark:shadow-none flex items-center gap-3 z-20 pointer-events-auto"
       >
-        <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+        <div className="h-10 w-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
           <Star className="h-5 w-5 fill-amber-400 text-amber-500" />
         </div>
         <div>
-          <div className="text-xs font-bold text-slate-900 flex items-center gap-1">
+          <div className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1">
             4.95 / 5.0
           </div>
-          <div className="text-[10px] text-slate-500">1.250+ đánh giá xác thực</div>
+          <div className="text-[10px] text-slate-500 dark:text-slate-400">1.250+ đánh giá xác thực</div>
         </div>
       </div>
 
       {/* Floating Badge 2: Bàn giao xe nhanh (Stable & Crisp) */}
       <div
-        className="absolute -bottom-4 -right-4 sm:-right-6 bg-white rounded-2xl p-3 border border-slate-200 shadow-xl shadow-slate-200/60 flex items-center gap-3 z-20 pointer-events-auto"
+        className="absolute -bottom-4 -right-4 sm:-right-6 bg-white dark:bg-slate-900 rounded-2xl p-3 border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/60 dark:shadow-none flex items-center gap-3 z-20 pointer-events-auto"
       >
-        <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-          <KeyRound className="h-5 w-5 text-emerald-600" />
+        <div className="h-10 w-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+          <KeyRound className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
         </div>
         <div>
-          <div className="text-xs font-bold text-slate-900">Bàn giao xe nhanh</div>
-          <div className="text-[10px] text-slate-500">Giao tận nơi sân bay & khách sạn</div>
+          <div className="text-xs font-bold text-slate-900 dark:text-slate-100">Bàn giao xe nhanh</div>
+          <div className="text-[10px] text-slate-500 dark:text-slate-400">Giao tận nơi sân bay & khách sạn</div>
         </div>
       </div>
     </div>
@@ -813,7 +813,7 @@ export default function HomePage() {
                 Nền tảng công nghệ kết nối trực tiếp với đối tác nhà xe uy tín, kiểm soát chất lượng từ khâu chọn biển số đến khi hoàn tất bàn giao thực tế.
               </p>
             </div>
-            <div className="text-xs text-slate-500 font-medium shrink-0 flex items-center gap-2 bg-white px-3.5 py-1.5 rounded-full border border-slate-200 shadow-xs">
+            <div className="text-xs text-slate-500 dark:text-slate-400 font-medium shrink-0 flex items-center gap-2 bg-white dark:bg-slate-900 px-3.5 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 shadow-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Quy trình kiểm tra 6 điểm kỹ thuật số</span>
             </div>
@@ -822,44 +822,44 @@ export default function HomePage() {
           {/* Asymmetric Bento Grid */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
             {/* Bento Card 1: 7 cols - Biển số thực tế & 6 điểm kiểm tra */}
-            <div className="md:col-span-7 bg-white rounded-2xl p-7 border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-6">
+            <div className="md:col-span-7 bg-white dark:bg-slate-900 rounded-2xl p-7 border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-6">
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
-                  <ShieldCheck className="h-4 w-4 text-blue-600" />
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-xs font-bold border border-blue-100 dark:border-blue-900">
+                  <ShieldCheck className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   <span>Cam kết biển số thực tế</span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-950 dark:text-slate-100 tracking-tight">
                   Nhận đúng dòng xe & biển số đã xác nhận
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-xl">
                   Loại bỏ tình trạng chỉ chọn dòng xe chung chung. Mỗi đơn thuê trên VehicleRent đều gắn liền với biển số thực tế và được đối soát 6 điểm kỹ thuật số lưu biên bản điện tử trực tiếp trên hệ thống.
                 </p>
               </div>
 
               {/* 6-point digital checklist */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-100 text-xs">
-                <div className="flex items-center gap-1.5 text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+                <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span className="font-medium text-[11px]">Đèn & Xi nhan</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span className="font-medium text-[11px]">Hệ thống phanh</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span className="font-medium text-[11px]">Lốp xe & Áp suất</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span className="font-medium text-[11px]">Gương chiếu hậu</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span className="font-medium text-[11px]">Vạch xăng hiện trạng</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/80 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span className="font-medium text-[11px]">Ảnh chụp trầy xước</span>
                 </div>
               </div>
@@ -890,52 +890,52 @@ export default function HomePage() {
             </div>
 
             {/* Bento Card 3: 5 cols - Nhận xe tận nơi */}
-            <div className="md:col-span-5 bg-white rounded-2xl p-7 border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-6">
+            <div className="md:col-span-5 bg-white dark:bg-slate-900 rounded-2xl p-7 border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-6">
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100">
-                  <Compass className="h-4 w-4 text-emerald-600" />
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold border border-emerald-100 dark:border-emerald-900">
+                  <Compass className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Tiện ích giao nhận</span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-950 dark:text-slate-100 tracking-tight">
                   Giao xe tận sảnh khách sạn & sân bay
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                   Linh hoạt lựa chọn: nhận trực tiếp tại showroom đối tác hoặc yêu cầu giao xe tận nơi theo giờ hẹn. Tặng kèm mũ bảo hiểm đạt chuẩn và áo mưa dự phòng cho mọi chuyến đi.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 pt-2 border-t border-slate-100">
-                <span className="bg-slate-100 px-2.5 py-1 rounded-lg font-semibold text-slate-700">Miễn phí giao &lt; 5km</span>
-                <span className="bg-slate-100 px-2.5 py-1 rounded-lg font-semibold text-slate-700">Giao đúng giờ hẹn</span>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <span className="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg font-semibold text-slate-700 dark:text-slate-300">Miễn phí giao &lt; 5km</span>
+                <span className="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg font-semibold text-slate-700 dark:text-slate-300">Giao đúng giờ hẹn</span>
               </div>
             </div>
 
             {/* Bento Card 4: 7 cols - Pháp lý & Hotline */}
-            <div className="md:col-span-7 bg-white rounded-2xl p-7 border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-6">
+            <div className="md:col-span-7 bg-white dark:bg-slate-900 rounded-2xl p-7 border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-6">
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200">
-                  <Scale className="h-4 w-4 text-amber-600" />
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 text-xs font-bold border border-amber-200 dark:border-amber-900">
+                  <Scale className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                   <span>Quy định pháp lý minh bạch</span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-black text-slate-950 dark:text-slate-100 tracking-tight">
                   Rõ ràng phạt nguội, an tâm di chuyển
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl">
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-xl">
                   Chính sách trách nhiệm vi phạm giao thông (phạt nguội) và điều kiện hoàn hủy cọc được niêm yết công khai. Đội ngũ quản lý vận hành hỗ trợ xử lý sự cố phát sinh 24/7 trong suốt hành trình.
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
                 <div className="flex items-center gap-3">
-                  <Link href="/terms" className="font-bold text-blue-600 hover:underline">
+                  <Link href="/terms" className="font-bold text-blue-600 dark:text-blue-400 hover:underline">
                     Quy định phạt nguội →
                   </Link>
-                  <Link href="/refund" className="font-bold text-blue-600 hover:underline">
+                  <Link href="/refund" className="font-bold text-blue-600 dark:text-blue-400 hover:underline">
                     Chính sách hoàn cọc →
                   </Link>
                 </div>
-                <div className="text-slate-500 text-[11px]">
-                  Hotline hỗ trợ: <a href="tel:0384340974" className="text-slate-900 font-bold hover:underline">0384 340 974</a>
+                <div className="text-slate-500 dark:text-slate-400 text-[11px]">
+                  Hotline hỗ trợ: <a href="tel:0384340974" className="text-slate-900 dark:text-slate-100 font-bold hover:underline">0384 340 974</a>
                 </div>
               </div>
             </div>
