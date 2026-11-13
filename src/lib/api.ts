@@ -589,6 +589,26 @@ export const api = {
         body: JSON.stringify(data),
       });
     },
+
+    forgotPassword: async (email: string) => {
+      return await request<{ success: boolean; message: string; devOtp?: string }>(
+        "/auth/forgot-password",
+        {
+          method: "POST",
+          body: JSON.stringify({ email }),
+        }
+      );
+    },
+
+    resetPassword: async (dto: { email: string; otp: string; newPassword: string }) => {
+      return await request<{ success: boolean; message: string }>(
+        "/auth/reset-password",
+        {
+          method: "POST",
+          body: JSON.stringify(dto),
+        }
+      );
+    },
   },
 
   customer: {
