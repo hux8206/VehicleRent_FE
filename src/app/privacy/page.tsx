@@ -130,7 +130,7 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-4 p-5 md:p-6 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700">
             <div className="flex items-center gap-2.5 text-slate-900 font-bold text-lg md:text-xl">
               <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-100 text-blue-700 text-xs font-bold">5</span>
-              <h2>Khai báo Đối tác Bên thứ ba & Công nghệ Theo dõi (Tracking)</h2>
+              <h2>Khai báo Đối tác Bên thứ ba & Công nghệ Theo dõi</h2>
             </div>
 
             <p className="text-sm">
@@ -151,7 +151,7 @@ export default function PrivacyPolicyPage() {
 
               <div className="p-3.5 rounded-xl bg-white border border-slate-200/90 space-y-1">
                 <div className="font-bold text-slate-900 flex items-center gap-2">
-                  <span>☁️ Hạ tầng lưu trữ hình ảnh — Cloudinary (Cloudinary Inc.) & Cloudflare R2</span>
+                  <span>☁️ Hạ tầng lưu trữ hình ảnh — Cloudinary (Cloudinary Inc.)</span>
                 </div>
                 <p className="text-slate-600 leading-relaxed">
                   <strong>Mục đích:</strong> Lưu trữ và tối ưu hóa tốc độ phân phối ảnh đại diện của cơ sở nhà xe và ảnh các dòng xe máy, ô tô trên nền tảng CDN toàn cầu.
@@ -216,9 +216,9 @@ export default function PrivacyPolicyPage() {
             </p>
             <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-100 text-xs md:text-sm text-slate-700 space-y-1">
               <p><strong>Bộ phận An toàn & Bảo mật Dữ liệu VehicleRent</strong></p>
-              <p>Email: <a href="mailto:privacy@vehiclerent.vn" className="text-blue-600 hover:underline">privacy@vehiclerent.vn</a></p>
-              <p>Hotline hỗ trợ: <strong>1900 6868 (8:00 - 21:00 hàng ngày)</strong></p>
-              <p>Địa chỉ văn phòng: Tòa nhà Công Nghệ VehicleRent, TP. Đà Nẵng, Việt Nam.</p>
+              <p>Email: <a href="huunguyen0802@gmail.com" className="text-blue-600 hover:underline">privacy@vehiclerent.vn</a></p>
+              <p>Hotline hỗ trợ: <strong>0384340974(8:00 - 21:00 hàng ngày)</strong></p>
+              <p>Địa chỉ văn phòng:phường Cẩm Lệ, TP. Đà Nẵng, Việt Nam.</p>
             </div>
           </section>
         </div>

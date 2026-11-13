@@ -1164,14 +1164,15 @@ export const api = {
       }
     },
 
-    handover: async (bookingId: number, vehicleItemId: number) => {
+    handover: async (bookingId: number, vehicleItemIdOrIds: number | number[]) => {
+      const ids = Array.isArray(vehicleItemIdOrIds) ? vehicleItemIdOrIds : [vehicleItemIdOrIds];
       try {
         return await request(`/partner/bookings/${bookingId}/handover`, {
           method: "POST",
-          body: JSON.stringify({ vehicleItemId }),
+          body: JSON.stringify({ vehicleItemIds: ids, vehicleItemId: ids[0] }),
         });
       } catch {
-        return { status: 3, vehicleItemId };
+        return { status: 3, vehicleItemId: ids[0], vehicleItemIds: ids };
       }
     },
 

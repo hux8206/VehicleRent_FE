@@ -26,6 +26,7 @@ import {
   Camera,
   CheckCircle2,
   AlertCircle,
+  ShieldAlert,
   Copy,
   ExternalLink,
   MapPin,
@@ -74,6 +75,7 @@ export function BookingModal({
   const [quantity, setQuantity] = useState<number>(1);
   const [hasAgreedLicense, setHasAgreedLicense] = useState<boolean>(false);
   const [hasAgreedTerms, setHasAgreedTerms] = useState<boolean>(false);
+  const [showRefundConfirm, setShowRefundConfirm] = useState<boolean>(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -325,6 +327,12 @@ export function BookingModal({
       return;
     }
 
+    // Mở popup thông báo chính sách hoàn cọc trước khi qua màn hình quét mã QR
+    setShowRefundConfirm(true);
+  };
+
+  const handleConfirmAndProceedToPayment = async () => {
+    setShowRefundConfirm(false);
     setIsSubmitting(true);
     try {
       const res = await api.customer.createBooking({
@@ -360,7 +368,8 @@ export function BookingModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl w-[95vw] sm:w-full max-h-[92vh] flex flex-col p-0 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-2xl">
         {/* Header - Fixed at top */}
         <DialogHeader className="shrink-0 p-5 sm:p-6 pb-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80">
@@ -778,7 +787,9 @@ export function BookingModal({
                         : "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900"
                     }`}
                   >
-                    <div className="font-bold text-xs">{t("booking_deposit_opt", `Cọc trước ${depositPercent}% giữ xe`)}</div>
+                    <div className="font-bold text-xs">
+                      {t("booking_deposit_opt", { percent: depositPercent }, `Cọc trước ${depositPercent}% giữ xe`)}
+                    </div>
                     <div className="text-xs text-blue-600 dark:text-blue-400 font-extrabold mt-1">
                       {depositAmount.toLocaleString("vi-VN")} đ
                     </div>
@@ -797,6 +808,28 @@ export function BookingModal({
                       {finalRentAmount.toLocaleString("vi-VN")} đ
                     </div>
                   </button>
+                </div>
+              </div>
+
+              {/* Refund Policy Summary Callout */}
+              <div className="p-3.5 bg-amber-50/80 dark:bg-amber-950/40 rounded-2xl border border-amber-200/90 dark:border-amber-800 text-xs space-y-1.5">
+                <div className="flex items-center justify-between font-bold text-amber-950 dark:text-amber-200">
+                  <span className="flex items-center gap-1.5 text-xs">
+                    <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
+                    Chính sách hoàn cọc quy định
+                  </span>
+                  <Link
+                    href="/refund"
+                    target="_blank"
+                    className="text-blue-600 dark:text-blue-400 underline text-[11px] font-medium hover:text-blue-800 inline-flex items-center gap-0.5"
+                  >
+                    Xem chi tiết <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </div>
+                <div className="text-[11px] text-amber-900/90 dark:text-amber-300 space-y-0.5 leading-relaxed">
+                  <p>• <strong>Hủy trước ≥ 24h:</strong> Hoàn 100% tiền cọc.</p>
+                  <p>• <strong>Hủy 6h - 24h:</strong> Hoàn 100% (nếu đặt ≤30p) hoặc Hoàn 50% (quá 30p).</p>
+                  <p>• <strong>Hủy &lt; 6h:</strong> Hoàn 50% (nếu đặt ≤30p) hoặc Mất cọc 100% (quá 30p).</p>
                 </div>
               </div>
             </form>
@@ -1048,5 +1081,116 @@ export function BookingModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    {/* Modal Thông Báo Chính Sách Hoàn Cọc (Hiện trước khi qua màn hình QR) */}
+    <Dialog open={showRefundConfirm} onOpenChange={setShowRefundConfirm}>
+      <DialogContent className="max-w-md rounded-2xl p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+        <DialogHeader className="space-y-2">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto border border-blue-200 dark:border-blue-800">
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+          <DialogTitle className="text-base font-extrabold text-center text-slate-900 dark:text-slate-100">
+            Xác Nhận Đặt Xe & Chính Sách Hoàn Cọc
+          </DialogTitle>
+          <DialogDescription className="text-xs text-center text-slate-500 dark:text-slate-400">
+            Vui lòng kiểm tra lại thông tin đơn và nắm rõ quy tắc hoàn cọc trước khi chuyển đến bước quét mã VietQR.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3.5 pt-1 text-xs">
+          {/* Tóm tắt đơn */}
+          <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1.5">
+            <div className="flex justify-between">
+              <span className="text-slate-500 dark:text-slate-400">Dòng xe & Số lượng:</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100">{model.name} (x{quantity} xe)</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500 dark:text-slate-400">Thời gian thuê:</span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200">{format24hDateTime(startTime)} → {format24hDateTime(endTime)} ({dayRent} ngày)</span>
+            </div>
+            <div className="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-1">
+              <span className="text-slate-500 dark:text-slate-400">Số tiền cọc cần chuyển:</span>
+              <span className="font-black text-blue-600 dark:text-blue-400 text-sm">{depositAmount.toLocaleString("vi-VN")} đ</span>
+            </div>
+          </div>
+
+          {/* Quy tắc hoàn cọc */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-slate-100">
+              <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>Quy định hoàn tiền cọc khi hủy đơn:</span>
+            </div>
+
+            <div className="space-y-2">
+              <div className="p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/30">
+                <div className="flex justify-between items-center font-bold text-emerald-800 dark:text-emerald-300">
+                  <span>1. Hủy trước ≥ 24h nhận xe</span>
+                  <Badge className="bg-emerald-600 text-white text-[10px]">Hoàn 100% cọc</Badge>
+                </div>
+                <p className="text-[11px] text-emerald-700 dark:text-emerald-400 mt-0.5">
+                  Khách hàng nhận lại đầy đủ 100% tiền cọc đã thanh toán.
+                </p>
+              </div>
+
+              <div className="p-2.5 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/60 dark:bg-amber-950/30">
+                <div className="flex justify-between items-center font-bold text-amber-900 dark:text-amber-300">
+                  <span>2. Hủy trước 6h - 24h nhận xe</span>
+                  <Badge className="bg-amber-600 text-white text-[10px]">Hoàn 100% / 50%</Badge>
+                </div>
+                <p className="text-[11px] text-amber-800 dark:text-amber-400 mt-0.5 leading-relaxed">
+                  • <strong>Hoàn 100% cọc:</strong> Nếu đơn mới đặt dưới 30 phút.<br />
+                  • <strong>Hoàn 50% cọc:</strong> Nếu đã quá 30 phút từ lúc đặt (nhà xe giữ 50%).
+                </p>
+              </div>
+
+              <div className="p-2.5 rounded-xl border border-rose-200 dark:border-rose-800 bg-rose-50/60 dark:bg-rose-950/30">
+                <div className="flex justify-between items-center font-bold text-rose-900 dark:text-rose-300">
+                  <span>3. Hủy cận giờ &lt; 6h nhận xe</span>
+                  <Badge className="bg-rose-600 text-white text-[10px]">Hoàn 50% / Mất cọc</Badge>
+                </div>
+                <p className="text-[11px] text-rose-800 dark:text-rose-400 mt-0.5 leading-relaxed">
+                  • <strong>Hoàn 50% cọc:</strong> Nếu đơn mới đặt dưới 30 phút.<br />
+                  • <strong>Mất 100% cọc (0% hoàn):</strong> Nếu đã quá 30 phút từ lúc đặt.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 italic text-center">
+            Bằng việc bấm tiếp tục, bạn xác nhận đã đọc, hiểu và đồng ý với các quy định hoàn cọc trên.
+          </p>
+        </div>
+
+        <DialogFooter className="flex-col sm:flex-row gap-2 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowRefundConfirm(false)}
+            className="w-full sm:w-auto text-xs"
+          >
+            Xem lại form
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleConfirmAndProceedToPayment}
+            disabled={isSubmitting}
+            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold gap-1.5"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Đang tạo đơn...
+              </>
+            ) : (
+              <>
+                <QrCode className="w-3.5 h-3.5" /> Tôi đã hiểu & Quét mã VietQR
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

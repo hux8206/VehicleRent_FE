@@ -91,7 +91,7 @@ export default function RefundPolicyPage() {
               <h2>Bảng Quy Định Tỷ Lệ Hoàn Tiền Cọc Khi Hủy Chuyến</h2>
             </div>
             <p className="text-sm">
-              Trường hợp Khách hàng chủ động yêu cầu hủy đơn đã cọc thành công, mức hoàn tiền cọc được tính căn cứ theo thời điểm gửi yêu cầu so với <strong>Giờ Nhận Xe (Start Time)</strong>:
+              Trường hợp Khách hàng chủ động yêu cầu hủy đơn đã cọc thành công, mức hoàn tiền cọc được tính căn cứ theo khoảng cách đến <strong>Giờ Nhận Xe</strong> và <strong>Thời gian từ lúc tạo đơn (ân hạn 30 phút)</strong>:
             </p>
 
             <div className="overflow-x-auto rounded-2xl border border-slate-200">
@@ -99,6 +99,7 @@ export default function RefundPolicyPage() {
                 <thead className="bg-slate-100/80 text-slate-900 font-bold border-b border-slate-200">
                   <tr>
                     <th className="p-3.5 md:p-4">Thời điểm hủy đơn</th>
+                    <th className="p-3.5 md:p-4">Thời gian từ lúc đặt</th>
                     <th className="p-3.5 md:p-4">Tỷ lệ hoàn tiền cọc</th>
                     <th className="p-3.5 md:p-4">Ghi chú & Chi phí</th>
                   </tr>
@@ -108,16 +109,33 @@ export default function RefundPolicyPage() {
                     <td className="p-3.5 md:p-4 font-semibold text-emerald-700">
                       Trước giờ nhận xe ≥ 24 giờ
                     </td>
+                    <td className="p-3.5 md:p-4 text-slate-600 text-xs">
+                      Không giới hạn
+                    </td>
                     <td className="p-3.5 md:p-4 font-bold text-emerald-600">
                       Hoàn 100% tiền cọc
                     </td>
                     <td className="p-3.5 md:p-4 text-slate-500 text-xs">
-                      Khách hàng nhận lại đầy đủ tiền cọc (trừ phí cổng thanh toán nếu có).
+                      Khách hàng nhận lại đầy đủ 100% tiền cọc đã đóng.
                     </td>
                   </tr>
                   <tr className="hover:bg-slate-50/80">
-                    <td className="p-3.5 md:p-4 font-semibold text-amber-700">
-                      Trước giờ nhận xe từ 12h đến dưới 24h
+                    <td className="p-3.5 md:p-4 font-semibold text-amber-700" rowSpan={2}>
+                      Trước giờ nhận xe từ 6h đến dưới 24h
+                    </td>
+                    <td className="p-3.5 md:p-4 font-medium text-emerald-700 text-xs bg-emerald-50/40">
+                      Vừa đặt dưới 30 phút (≤ 30p)
+                    </td>
+                    <td className="p-3.5 md:p-4 font-bold text-emerald-600 bg-emerald-50/40">
+                      Hoàn 100% tiền cọc
+                    </td>
+                    <td className="p-3.5 md:p-4 text-slate-500 text-xs bg-emerald-50/40">
+                      Chính sách ân hạn hỗ trợ khách đổi ý hoặc thao tác nhầm ngay sau khi đặt.
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-slate-50/80">
+                    <td className="p-3.5 md:p-4 font-medium text-amber-700 text-xs">
+                      Đã quá 30 phút (&gt; 30p)
                     </td>
                     <td className="p-3.5 md:p-4 font-bold text-amber-600">
                       Hoàn 50% tiền cọc
@@ -126,12 +144,26 @@ export default function RefundPolicyPage() {
                       50% tiền cọc còn lại được chuyển bù đắp chi phí giữ xe cho Chủ cửa hàng.
                     </td>
                   </tr>
+                  <tr className="hover:bg-slate-50/80 bg-rose-50/20">
+                    <td className="p-3.5 md:p-4 font-semibold text-rose-700" rowSpan={2}>
+                      Cận giờ dưới 6 giờ trước giờ nhận
+                    </td>
+                    <td className="p-3.5 md:p-4 font-medium text-amber-700 text-xs bg-amber-50/40">
+                      Vừa đặt dưới 30 phút (≤ 30p)
+                    </td>
+                    <td className="p-3.5 md:p-4 font-bold text-amber-600 bg-amber-50/40">
+                      Hoàn 50% tiền cọc
+                    </td>
+                    <td className="p-3.5 md:p-4 text-slate-500 text-xs bg-amber-50/40">
+                      Hỗ trợ hoàn 50% cọc nếu vừa đặt cận giờ và hủy ngay trong 30 phút.
+                    </td>
+                  </tr>
                   <tr className="hover:bg-slate-50/80 bg-rose-50/30">
-                    <td className="p-3.5 md:p-4 font-semibold text-rose-700">
-                      Dưới 12 giờ hoặc Không đến nhận xe (No-Show)
+                    <td className="p-3.5 md:p-4 font-medium text-rose-700 text-xs">
+                      Đã quá 30 phút hoặc Không đến nhận
                     </td>
                     <td className="p-3.5 md:p-4 font-bold text-rose-600">
-                      Không hoàn cọc (0%)
+                      Mất cọc 100% (Hoàn 0%)
                     </td>
                     <td className="p-3.5 md:p-4 text-slate-500 text-xs">
                       100% tiền cọc được bồi hoàn cho Chủ xe để bù đắp thiệt hại chi phí cơ hội.
@@ -167,11 +199,11 @@ export default function RefundPolicyPage() {
             <div className="space-y-2.5 text-xs md:text-sm text-slate-600">
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex gap-2.5 items-start">
                 <span className="font-bold text-blue-600 shrink-0">Bước 1:</span>
-                <div>Khách hàng thao tác bấm <strong>Hủy đơn</strong> trong trang <Link href="/customer/bookings" className="text-blue-600 hover:underline font-medium">Lịch sử đơn thuê</Link> hoặc liên hệ Hotline tổng đài <strong>1900 6868</strong>.</div>
+                <div>Khách hàng thao tác bấm <strong>Hủy đơn</strong> trong trang <Link href="/customer/bookings" className="text-blue-600 hover:underline font-medium">Lịch sử đơn thuê</Link>.</div>
               </div>
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex gap-2.5 items-start">
                 <span className="font-bold text-blue-600 shrink-0">Bước 2:</span>
-                <div>Hệ thống tự động đối chiếu mốc thời gian hủy so với giờ nhận xe để xác định tỷ lệ hoàn cọc (100% hoặc 50%).</div>
+                <div>Hệ thống tự động đối chiếu mốc thời gian hủy so với giờ nhận xe và thời gian tạo đơn (áp dụng cơ chế ân hạn 30 phút) để xác định chính xác tỷ lệ hoàn cọc (100%, 50% hoặc 0%).</div>
               </div>
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex gap-2.5 items-start">
                 <span className="font-bold text-blue-600 shrink-0">Bước 3:</span>

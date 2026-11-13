@@ -528,7 +528,7 @@ function PartnerOnboardingContent() {
 
                   <div className="grid grid-cols-2 gap-4 sm:col-span-2 pt-2 border-t border-slate-100">
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold">Giờ mở cửa đón khách (HH:mm)</Label>
+                      <Label className="text-xs font-semibold">Giờ mở cửa *</Label>
                       <Input
                         type="time"
                         value={openTime}
@@ -538,7 +538,7 @@ function PartnerOnboardingContent() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold">Giờ đóng cửa (HH:mm)</Label>
+                      <Label className="text-xs font-semibold">Giờ đóng cửa *</Label>
                       <Input
                         type="time"
                         value={closeTime}

@@ -2733,7 +2733,7 @@ function PartnerDashboardContent() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Giờ mở cửa đón khách (HH:mm)</Label>
+                <Label className="text-xs font-semibold">Giờ mở cửa *</Label>
                 <Input
                   type="time"
                   value={newBranchOpenTime}
@@ -2743,7 +2743,7 @@ function PartnerDashboardContent() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Giờ đóng cửa (HH:mm)</Label>
+                <Label className="text-xs font-semibold">Giờ đóng cửa *</Label>
                 <Input
                   type="time"
                   value={newBranchCloseTime}
@@ -2933,7 +2933,7 @@ function PartnerDashboardContent() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Giờ mở cửa mới (HH:mm)</Label>
+                <Label className="text-xs font-semibold">Giờ mở cửa mới</Label>
                 <Input
                   type="time"
                   value={updateOpenTime}
@@ -2943,7 +2943,7 @@ function PartnerDashboardContent() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Giờ đóng cửa mới (HH:mm)</Label>
+                <Label className="text-xs font-semibold">Giờ đóng cửa mới</Label>
                 <Input
                   type="time"
                   value={updateCloseTime}

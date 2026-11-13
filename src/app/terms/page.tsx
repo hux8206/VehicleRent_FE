@@ -166,6 +166,25 @@ export default function TermsOfServicePage() {
           <section className="space-y-3">
             <div className="flex items-center gap-2.5 text-slate-900 font-bold text-lg md:text-xl">
               <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-bold">6</span>
+              <h2>Chính sách hủy đơn & Quy định hoàn tiền cọc</h2>
+            </div>
+            <p className="text-sm">
+              Nhằm đảm bảo quyền lợi cân bằng và công bằng cho cả Khách thuê và Chủ xe, tỷ lệ hoàn cọc khi khách hàng hủy đơn được quy định chi tiết:
+            </p>
+            <ul className="list-disc pl-5 space-y-1.5 text-slate-600 text-sm">
+              <li><strong>Hủy trước ≥ 24h nhận xe:</strong> Hoàn 100% tiền cọc.</li>
+              <li><strong>Hủy từ 6h - 24h nhận xe:</strong> Hoàn 100% cọc nếu đơn vừa đặt dưới 30 phút; sau 30 phút chỉ hoàn 50% cọc (50% chuyển cho Chủ xe).</li>
+              <li><strong>Hủy cận giờ &lt; 6h nhận xe:</strong> Hoàn 50% cọc nếu đơn vừa đặt dưới 30 phút; sau 30 phút mất 100% cọc (không hoàn tiền).</li>
+            </ul>
+            <p className="text-xs text-slate-500">
+              Chi tiết quy trình chuyển khoản hoàn cọc và biểu phí quy định xem tại <Link href="/refund" className="text-blue-600 hover:underline font-semibold">Chính sách Hoàn cọc của VehicleRent</Link>.
+            </p>
+          </section>
+
+          {/* Section 7 */}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2.5 text-slate-900 font-bold text-lg md:text-xl">
+              <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-bold">7</span>
               <h2>Giải quyết tranh chấp & Tòa án tài phán</h2>
             </div>
             <p className="text-sm">
