@@ -34,6 +34,7 @@ import {
   Star,
   User,
 } from "lucide-react";
+import { ZaloChatButton } from "@/components/common/zalo-chat-button";
 
 export default function VehicleDetailPage() {
   const params = useParams();
@@ -365,8 +366,21 @@ export default function VehicleDetailPage() {
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <span className="text-slate-500 font-semibold">Số điện thoại liên hệ:</span>
-                    <div className="font-bold text-slate-900">{model.store?.phoneContact || "0902000002"}</div>
+                    <span className="text-slate-500 font-semibold">Hotline & Zalo liên hệ:</span>
+                    <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                      <a
+                        href={`tel:${(model.store?.phoneContact || "0902000002").replace(/\D/g, "")}`}
+                        className="font-bold text-slate-900 dark:text-slate-100 hover:text-blue-600 flex items-center gap-1 transition-colors"
+                      >
+                        <Phone className="h-3.5 w-3.5 text-blue-600" />
+                        <span>{model.store?.phoneContact || "0902000002"}</span>
+                      </a>
+                      <ZaloChatButton
+                        phone={model.store?.phoneContact || "0902000002"}
+                        label="Nhắn Zalo"
+                        variant="compact"
+                      />
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <span className="text-slate-500 font-semibold">Giờ mở cửa đón khách:</span>
@@ -599,11 +613,37 @@ export default function VehicleDetailPage() {
                         ? "Xác nhận đặt xe & Giữ chỗ"
                         : "Tạm hết xe trong khung giờ này"}
                 </Button>
+
+                {/* Direct Store Contact & Zalo Consultation */}
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+                  <div className="text-[11px] text-slate-500">
+                    Cần tư vấn xe qua Zalo?
+                  </div>
+                  <ZaloChatButton
+                    phone={model.store?.phoneContact}
+                    label="Chat Zalo nhà xe"
+                    variant="pill"
+                    size="sm"
+                  />
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
+
+      {/* Floating Zalo Fast Action */}
+      {model?.store?.phoneContact && (
+        <div className="fixed bottom-6 right-6 z-40">
+          <ZaloChatButton
+            phone={model.store.phoneContact}
+            label="Chat Zalo nhà xe"
+            variant="pill"
+            size="lg"
+            className="shadow-2xl hover:scale-105"
+          />
+        </div>
+      )}
 
       {/* Booking Modal */}
       {model && (

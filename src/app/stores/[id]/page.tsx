@@ -22,6 +22,7 @@ import {
   Calendar,
   Clock,
 } from "lucide-react";
+import { ZaloChatButton } from "@/components/common/zalo-chat-button";
 
 export default function StoreDetailPage() {
   const params = useParams();
@@ -142,14 +143,26 @@ export default function StoreDetailPage() {
                 </div>
               </div>
 
-              <div className="bg-slate-900/90 border border-slate-700 p-3 rounded-2xl flex items-center gap-3 shrink-0 shadow-lg">
-                <div className="h-10 w-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold">
-                  <Phone className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase font-bold text-slate-300">Hotline đặt xe</div>
-                  <div className="text-sm font-extrabold text-white">{store.phoneContact}</div>
-                </div>
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <a
+                  href={`tel:${store.phoneContact.replace(/\D/g, "")}`}
+                  className="bg-slate-900/90 hover:bg-slate-800/90 border border-slate-700 p-3 rounded-2xl flex items-center gap-3 shrink-0 shadow-lg transition-colors group"
+                >
+                  <div className="h-10 w-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold group-hover:bg-blue-500 transition-colors">
+                    <Phone className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] uppercase font-bold text-slate-300">Hotline đặt xe</div>
+                    <div className="text-sm font-extrabold text-white">{store.phoneContact}</div>
+                  </div>
+                </a>
+
+                <ZaloChatButton
+                  phone={store.phoneContact}
+                  label="Nhắn Zalo"
+                  subLabel="Tư vấn trực tiếp"
+                  variant="banner"
+                />
               </div>
             </div>
           </div>
@@ -353,6 +366,19 @@ export default function StoreDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Floating Zalo Fast Action */}
+      {store?.phoneContact && (
+        <div className="fixed bottom-6 right-6 z-40">
+          <ZaloChatButton
+            phone={store.phoneContact}
+            label="Chat Zalo nhà xe"
+            variant="pill"
+            size="lg"
+            className="shadow-2xl hover:scale-105"
+          />
+        </div>
+      )}
     </div>
   );
 }

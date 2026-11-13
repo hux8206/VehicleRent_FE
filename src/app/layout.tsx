@@ -24,10 +24,79 @@ const inter = Inter({
   display: "swap",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://vehiclerent.vn";
+
 export const metadata: Metadata = {
-  title: "VehicleRent - Nền Tảng Cho Thuê Xe Trực Tuyến Đa Đối Tác",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "VehicleRent - Nền Tảng Cho Thuê Xe Trực Tuyến Đa Đối Tác",
+    template: "%s | VehicleRent",
+  },
   description:
-    "Hệ sinh thái cho thuê xe máy, ô tô tự lái: Giữ chỗ 10 phút chống xung đột, thanh toán VietQR động và ví đối tác FIFO.",
+    "Hệ sinh thái cho thuê xe máy, ô tô tự lái uy tín toàn quốc. Giữ chỗ 10 phút chống xung đột, thanh toán VietQR tự động và đối soát 6 điểm kỹ thuật số.",
+  keywords: [
+    "thuê xe tự lái",
+    "thuê xe máy",
+    "thuê ô tô",
+    "VehicleRent",
+    "thuê xe hà nội",
+    "thuê xe đà nẵng",
+    "thuê xe hồ chí minh",
+    "VietQR thuê xe",
+  ],
+  authors: [{ name: "VehicleRent Team", url: siteUrl }],
+  creator: "VehicleRent",
+  publisher: "VehicleRent",
+  icons: {
+    icon: [
+      { url: "/images/logo-icon.png", sizes: "any" },
+      { url: "/images/logo-icon.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/images/logo-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  openGraph: {
+    title: "VehicleRent - Nền Tảng Cho Thuê Xe Trực Tuyến Đa Đối Tác",
+    description:
+      "Thuê xe máy, ô tô tự lái đời mới uy tín toàn quốc. Giữ xe 10 phút VietQR tự động, đối soát 6 điểm kỹ thuật số minh bạch.",
+    url: siteUrl,
+    siteName: "VehicleRent",
+    locale: "vi_VN",
+    type: "website",
+    images: [
+      {
+        url: "/images/og-banner.png",
+        width: 1200,
+        height: 630,
+        alt: "VehicleRent - Nền Tảng Cho Thuê Xe Trực Tuyến Đa Đối Tác",
+      },
+      {
+        url: "/images/logo.png",
+        width: 657,
+        height: 133,
+        alt: "VehicleRent Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "VehicleRent - Nền Tảng Cho Thuê Xe Trực Tuyến Đa Đối Tác",
+    description:
+      "Thuê xe máy, ô tô tự lái đời mới uy tín toàn quốc. Giữ xe 10 phút VietQR tự động, đối soát 6 điểm kỹ thuật số minh bạch.",
+    images: ["/images/og-banner.png"],
+    creator: "@vehiclerent",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({
