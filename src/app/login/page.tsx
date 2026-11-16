@@ -44,6 +44,7 @@ function LoginForm() {
   const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; general?: string }>({});
 
@@ -193,7 +194,10 @@ function LoginForm() {
         }
       }
     } catch (err: any) {
-      const msg = err.message || t("toast_login_failed", "Email hoặc mật khẩu không chính xác.");
+      let msg = err.message || t("toast_login_failed", "Email hoặc mật khẩu không chính xác.");
+      if (msg === "Failed to fetch" || msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
+        msg = "Không thể kết nối đến máy chủ API (Failed to fetch). Vui lòng kiểm tra lại cấu hình NEXT_PUBLIC_API_URL trên Vercel hoặc trạng thái của server Backend.";
+      }
       setFieldErrors({ general: msg });
       toast.error(msg);
     } finally {
@@ -273,19 +277,27 @@ function LoginForm() {
                 </span>
               </div>
               <div className="relative">
-                <Lock className="h-4 w-4 text-slate-400 absolute left-3.5 top-3" />
+                <Lock className="h-4 w-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <Input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder={t("auth_password_placeholder", "Nhập mật khẩu...")}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
                     if (fieldErrors.password) setFieldErrors((prev) => ({ ...prev, password: undefined }));
                   }}
-                  className={`pl-10 text-xs h-11 rounded-2xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 transition-all ${
+                  className={`pl-10 pr-10 text-xs h-11 rounded-2xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 transition-all ${
                     fieldErrors.password ? "border-red-500 focus-visible:ring-red-400" : ""
                   }`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus:outline-hidden"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
               {fieldErrors.password && (
                 <p className="text-[11px] font-semibold text-red-600 pl-1">{fieldErrors.password}</p>
