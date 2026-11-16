@@ -1357,7 +1357,7 @@ function PartnerDashboardContent() {
             {/* Visual Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-2 rounded-2xl border-slate-200 shadow-xs bg-white p-6 space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b gap-2">
                   <div>
                     <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
                       <BarChart3 className="h-5 w-5 text-amber-600" />
@@ -1367,6 +1367,13 @@ function PartnerDashboardContent() {
                       Số liệu thực tế tính theo các đơn hàng hoàn tất của nhà xe.
                     </CardDescription>
                   </div>
+                  <Link
+                    href="/partner/analytics?mode=owner"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl border border-amber-200 transition-colors self-start sm:self-auto"
+                  >
+                    <BarChart3 className="h-4 w-4" />
+                    <span>Xem Thống Kê Chi Tiết & Tải CSV →</span>
+                  </Link>
                 </div>
 
                 <div className="h-72 w-full pt-2">
@@ -2162,7 +2169,7 @@ function PartnerDashboardContent() {
                   {/* Charts Row: Revenue AreaChart & Fleet Status PieChart */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <Card className="lg:col-span-2 rounded-2xl border-slate-200 shadow-xs bg-white p-6 space-y-4">
-                      <div className="flex items-center justify-between pb-2 border-b">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b gap-2">
                         <div>
                           <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
                             <TrendingUp className="h-5 w-5 text-amber-600" />
@@ -2172,6 +2179,13 @@ function PartnerDashboardContent() {
                             So sánh Tổng tiền khách thanh toán (Gross) và Thực nhận chi nhánh (Net).
                           </CardDescription>
                         </div>
+                        <Link
+                          href={`/partner/analytics?mode=branch${selectedBranch ? `&storeId=${selectedBranch.id}` : ""}`}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition-colors self-start sm:self-auto"
+                        >
+                          <BarChart3 className="h-4 w-4" />
+                          <span>Xem Thống Kê Chi Tiết & Tải CSV →</span>
+                        </Link>
                       </div>
 
                       <div className="h-72 w-full pt-2">
