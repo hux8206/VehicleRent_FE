@@ -263,7 +263,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md transition-colors shadow-xs overflow-x-clip">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand Logo & Role Tag */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
           <BrandLogo
             href={isAdmin ? "/admin" : isPartner ? "/partner" : "/"}
             roleBadge={isAdmin ? "ADMIN PORTAL" : isPartner ? "PARTNER PORTAL" : null}
