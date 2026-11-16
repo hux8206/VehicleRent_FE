@@ -277,9 +277,9 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md transition-colors shadow-xs overflow-x-clip">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand Logo & Role Tag */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <BrandLogo
             href={isAdmin ? "/admin" : isPartner ? "/partner" : "/"}
             roleBadge={isAdmin ? "ADMIN PORTAL" : isPartner ? "PARTNER PORTAL" : null}
@@ -392,7 +392,7 @@ export function Navbar() {
         </nav>
 
         {/* Right Section: Role Actions + Controls + Auth State */}
-        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {/* Partner Onboarding CTA Button (Only shown to Guests or Customer) */}
           {!user && (
             <Link href="/register?type=partner" className="hidden xl:inline-block">
@@ -407,8 +407,8 @@ export function Navbar() {
             </Link>
           )}
 
-          {/* Language Selector & Theme Toggle (Always visible at top-right) */}
-          <div className="flex items-center gap-1.5">
+          {/* Language Selector & Theme Toggle (Visible on sm+ screens; on mobile it is inside mobile drawer) */}
+          <div className="hidden sm:flex items-center gap-1.5">
             <LanguageSelector />
             <ThemeToggle />
           </div>
@@ -420,9 +420,9 @@ export function Navbar() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-2.5 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 font-medium text-xs sm:text-sm pl-2 pr-3 h-10 rounded-xl bg-slate-50/70 dark:bg-slate-800/70 cursor-pointer"
+                  className="gap-1.5 sm:gap-2.5 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 font-medium text-xs sm:text-sm pl-1.5 sm:pl-2 pr-2 sm:pr-3 h-8.5 sm:h-10 rounded-xl bg-slate-50/70 dark:bg-slate-800/70 cursor-pointer"
                 >
-                  <div className={`w-7 h-7 rounded-full text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs ${isAdmin
+                  <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full text-white font-bold text-[11px] sm:text-xs flex items-center justify-center shrink-0 shadow-xs ${isAdmin
                     ? "bg-gradient-to-tr from-red-600 to-rose-600"
                     : isPartner
                       ? "bg-gradient-to-tr from-amber-600 to-orange-600"
@@ -430,10 +430,10 @@ export function Navbar() {
                     }`}>
                     {getInitials(user.fullName)}
                   </div>
-                  <span className="max-w-[100px] sm:max-w-[130px] truncate text-slate-800 dark:text-slate-100 font-bold">
+                  <span className="max-w-[70px] xs:max-w-[90px] sm:max-w-[130px] truncate text-slate-800 dark:text-slate-100 font-bold">
                     {user.fullName}
                   </span>
-                  <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                  <ChevronDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-slate-400" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-60 p-2 rounded-2xl shadow-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
@@ -604,12 +604,12 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             /* Unauthenticated state: Login + Register */
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Link href="/login">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl h-9 px-3 gap-1.5 cursor-pointer"
+                  className="text-[11px] sm:text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg sm:rounded-xl h-8.5 sm:h-9 px-2 sm:px-3 gap-1 sm:gap-1.5 cursor-pointer whitespace-nowrap"
                 >
                   <LogIn className="h-3.5 w-3.5" />
                   <span>{t("login", "Đăng Nhập")}</span>
@@ -620,7 +620,7 @@ export function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-9 px-3.5 rounded-xl shadow-xs gap-1.5 cursor-pointer"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] sm:text-xs h-8.5 sm:h-9 px-2 sm:px-3.5 rounded-lg sm:rounded-xl shadow-xs gap-1 sm:gap-1.5 cursor-pointer whitespace-nowrap"
                   >
                     <UserPlus className="h-3.5 w-3.5" />
                     <span>{t("register", "Đăng Ký")}</span>
@@ -656,7 +656,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
             aria-label="Toggle navigation"
           >
             {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}

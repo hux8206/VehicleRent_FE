@@ -24,9 +24,9 @@ export function BrandLogo({
   // Size variants
   // Original aspect ratio: 657 x 133 ≈ 4.94 : 1
   const dimensions = {
-    sm: { width: 138, height: 28, imgClass: "h-7", textClass: "text-[9px]" },
-    md: { width: 158, height: 32, imgClass: "h-8", textClass: "text-[10px]" },
-    lg: { width: 188, height: 38, imgClass: "h-9", textClass: "text-[11px]" },
+    sm: { width: 138, height: 28, imgClass: "h-6 sm:h-7", textClass: "text-[9px]" },
+    md: { width: 158, height: 32, imgClass: "h-7 sm:h-8", textClass: "text-[10px]" },
+    lg: { width: 188, height: 38, imgClass: "h-8 sm:h-9", textClass: "text-[11px]" },
   }[size];
 
   const logoContent = (

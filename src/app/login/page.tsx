@@ -216,7 +216,7 @@ function LoginForm() {
       </Link>
 
       <Card className="rounded-2xl border-slate-200/90 dark:border-slate-800 shadow-xl overflow-hidden bg-white dark:bg-slate-900">
-        <CardContent className="p-8 sm:p-10 space-y-6">
+        <CardContent className="p-5 sm:p-8 md:p-10 space-y-5 sm:space-y-6">
           {/* Header */}
           <div className="space-y-2">
             <div className="mb-2">
@@ -563,7 +563,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 sm:px-6 bg-slate-50/40 dark:bg-slate-950 transition-colors">
+    <div className="min-h-[85vh] flex items-center justify-center py-6 sm:py-12 px-3 sm:px-6 pb-24 sm:pb-12 bg-slate-50/40 dark:bg-slate-950 transition-colors">
       <Suspense fallback={<div className="text-center py-12 text-xs">Loading...</div>}>
         <LoginForm />
       </Suspense>
