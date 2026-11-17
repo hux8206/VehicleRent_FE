@@ -51,7 +51,7 @@ function RegisterForm() {
     else if (!/\S+@\S+\.\S+/.test(email.trim())) errors.email = "Định dạng email không hợp lệ.";
     if (!password) errors.password = t("auth_password", "Vui lòng nhập mật khẩu.");
     else if (password.length < 6) errors.password = "Mật khẩu phải từ 6 ký tự trở lên.";
-    if (!agreedToTerms) errors.agreedToTerms = t("toast_fill_required", "Bạn cần đồng ý với Điều khoản dịch vụ và Chính sách bảo mật để tiếp tục.");
+    if (!agreedToTerms) errors.agreedToTerms = t("toast_fill_required", "Bạn cần đồng ý với điều khoản dịch vụ và chính sách bảo mật để tiếp tục.");
     return errors;
   };
 
@@ -74,7 +74,7 @@ function RegisterForm() {
           email: email.trim(),
           password,
         });
-        toast.success(t("toast_register_success", "Đăng ký tài khoản Đối tác thành công! Chào mừng bạn đến với hệ thống."));
+        toast.success(t("toast_register_success", "Đăng ký tài khoản đối tác thành công! Chào mừng bạn đến với hệ thống."));
         window.location.href = "/partner";
       } else {
         await registerCustomer({
@@ -83,7 +83,7 @@ function RegisterForm() {
           email: email.trim(),
           password,
         });
-        toast.success(t("toast_register_success", "Đăng ký tài khoản Khách thuê thành công! Chào mừng bạn."));
+        toast.success(t("toast_register_success", "Đăng ký tài khoản khách thuê thành công! Chào mừng bạn."));
         window.location.href = "/";
       }
     } catch (err: any) {
@@ -116,7 +116,7 @@ function RegisterForm() {
               <BrandLogo href="/" size="md" />
             </div>
             <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-              {t("auth_register_title", "Tạo Tài Khoản Mới")}
+              {t("auth_register_title", "Tạo tài khoản mới")}
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {t("auth_register_subtitle", "Chọn vai trò phù hợp để trải nghiệm dịch vụ tốt nhất")}
@@ -166,7 +166,7 @@ function RegisterForm() {
                 <User className="h-4 w-4 text-slate-400 absolute left-3.5 top-3" />
                 <Input
                   type="text"
-                  placeholder={t("auth_full_name_placeholder", "Nguyễn Văn A")}
+                  placeholder={t("auth_full_name_placeholder", "Nguyễn văn A")}
                   value={fullName}
                   onChange={(e) => {
                     setFullName(e.target.value);
@@ -208,7 +208,7 @@ function RegisterForm() {
 
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                {t("auth_email", "Địa chỉ Email")}
+                {t("auth_email", "Địa chỉ email")}
               </Label>
               <div className="relative">
                 <Mail className="h-4 w-4 text-slate-400 absolute left-3.5 top-3" />
@@ -299,8 +299,8 @@ function RegisterForm() {
               {isLoading
                 ? t("auth_registering", "Đang xử lý...")
                 : activeTab === "partner"
-                ? t("register_partner", "Đăng ký Đối tác nhà xe")
-                : t("register_customer", "Đăng ký Khách thuê")}
+                ? t("register_partner", "Đăng ký đối tác nhà xe")
+                : t("register_customer", "Đăng ký khách thuê")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </form>

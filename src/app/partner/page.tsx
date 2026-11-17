@@ -1025,13 +1025,13 @@ function PartnerDashboardContent() {
           <div className="max-w-4xl mx-auto space-y-8 py-6">
             <div className="text-center space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider">
-                <StoreIcon className="h-3.5 w-3.5" /> {t("partner_portal_badge", "Hệ Thống Đối Tác VehicleRent")}
+                <StoreIcon className="h-3.5 w-3.5" /> {t("partner_portal_badge", "Hệ thống đối tác VehicleRent")}
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-                {t("partner_welcome", "Chào mừng")}, {user?.fullName || t("partner_default_host", "Chủ Nhà Xe Đối Tác")}!
+                {t("partner_welcome", "Chào mừng")}, {user?.fullName || t("partner_default_host", "Chủ nhà xe đối tác")}!
               </h1>
               <p className="text-sm text-slate-500 max-w-xl mx-auto">
-                {t("partner_portal_desc", "Hệ thống chia làm 2 phân hệ độc lập nhằm tối ưu phân quyền giữa Chủ sở hữu doanh nghiệp và Nhân viên phụ trách vận hành chi nhánh.")}
+                {t("partner_portal_desc", "Hệ thống chia làm 2 phân hệ độc lập nhằm tối ưu phân quyền giữa chủ sở hữu doanh nghiệp và nhân viên phụ trách vận hành chi nhánh.")}
               </p>
             </div>
 
@@ -1043,7 +1043,7 @@ function PartnerDashboardContent() {
               >
                 <div className="absolute top-5 right-5">
                   <span className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
-                    <Lock className="h-3 w-3 text-amber-600" /> {t("partner_owner_pin_required", "Cần Mật Khẩu Cấp 2")}
+                    <Lock className="h-3 w-3 text-amber-600" /> {t("partner_owner_pin_required", "Cần mật khẩu cấp 2")}
                   </span>
                 </div>
 
@@ -1054,10 +1054,10 @@ function PartnerDashboardContent() {
 
                   <div>
                     <h3 className="text-xl font-black text-slate-900 group-hover:text-amber-700 transition-colors">
-                      {t("partner_owner_portal_title", "1. Quản Lý Riêng Của Chủ Cửa Hàng")}
+                      {t("partner_owner_portal_title", "1. Quản lý riêng của chủ cửa hàng")}
                     </h3>
                     <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                      {t("partner_owner_portal_desc", "Dành riêng cho Chủ sở hữu: Kiểm soát toàn diện doanh thu các cơ sở, quản trị ví, nạp/rút tiền và đăng ký chi nhánh mới.")}
+                      {t("partner_owner_portal_desc", "Dành riêng cho chủ sở hữu: kiểm soát toàn diện doanh thu các cơ sở, quản trị ví, nạp/rút tiền và đăng ký chi nhánh mới.")}
                     </p>
                   </div>
 
@@ -1068,7 +1068,7 @@ function PartnerDashboardContent() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Wallet className="h-4 w-4 text-emerald-600 shrink-0" />
-                      <span>{t("partner_owner_bullet_2", "Quản lý Ví đối tác, nạp VietQR, yêu cầu rút tiền về ngân hàng")}</span>
+                      <span>{t("partner_owner_bullet_2", "Quản lý ví đối tác, nạp VietQR, yêu cầu rút tiền về ngân hàng")}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-blue-600 shrink-0" />
@@ -1076,14 +1076,14 @@ function PartnerDashboardContent() {
                     </div>
                     <div className="flex items-center gap-2">
                       <KeyRound className="h-4 w-4 text-indigo-600 shrink-0" />
-                      <span>{t("partner_owner_bullet_4", "Bảo mật bằng Mật khẩu cấp 2 (đặt & đổi mật khẩu tùy chỉnh)")}</span>
+                      <span>{t("partner_owner_bullet_4", "Bảo mật bằng mật khẩu cấp 2 (đặt & đổi mật khẩu tùy chỉnh)")}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-6">
                   <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl h-11 text-xs gap-2 shadow-xs group-hover:shadow-md">
-                    <span>{t("partner_owner_unlock_btn", "Mở Khóa Khu Vực Chủ Cửa Hàng")}</span>
+                    <span>{t("partner_owner_unlock_btn", "Mở khóa khu vực chủ cửa hàng")}</span>
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -1093,7 +1093,7 @@ function PartnerDashboardContent() {
               <div
                 onClick={() => {
                   if (approvedBranches.length === 0) {
-                    toast.warning(t("partner_no_approved_branches", "Bạn chưa có chi nhánh nào được duyệt (ACTIVE). Hãy vào Khu vực Chủ để xem xét hoặc tạo chi nhánh mới!"));
+                    toast.warning(t("partner_no_approved_branches", "Bạn chưa có chi nhánh nào được duyệt (ACTIVE). Hãy vào khu vực chủ để xem xét hoặc tạo chi nhánh mới!"));
                   }
                   handleEnterBranchPortal();
                 }}
@@ -1101,7 +1101,7 @@ function PartnerDashboardContent() {
               >
                 <div className="absolute top-5 right-5">
                   <span className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                    <StoreIcon className="h-3 w-3 text-blue-600" /> {t("partner_branch_badge", "Vận Hành Cơ Sở")}
+                    <StoreIcon className="h-3 w-3 text-blue-600" /> {t("partner_branch_badge", "Vận hành cơ sở")}
                   </span>
                 </div>
 
@@ -1112,10 +1112,10 @@ function PartnerDashboardContent() {
 
                   <div>
                     <h3 className="text-xl font-black text-slate-900 group-hover:text-blue-600 transition-colors">
-                      {t("partner_branch_portal_title", "2. Quản Lý Vận Hành Chi Nhánh")}
+                      {t("partner_branch_portal_title", "2. Quản lý vận hành chi nhánh")}
                     </h3>
                     <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                      {t("partner_branch_portal_desc", "Dành cho Quản lý chi nhánh hoặc Nhân viên trực quầy: Chọn cơ sở làm việc, bàn giao xe cho khách, quản lý biển số xe thực tế.")}
+                      {t("partner_branch_portal_desc", "Dành cho quản lý chi nhánh hoặc nhân viên trực quầy: chọn cơ sở làm việc, bàn giao xe cho khách, quản lý biển số xe thực tế.")}
                     </p>
                   </div>
 
@@ -1134,11 +1134,11 @@ function PartnerDashboardContent() {
                     </div>
                     <div className="flex items-center gap-2">
                       <FileEdit className="h-4 w-4 text-purple-600 shrink-0" />
-                      <span>{t("partner_branch_bullet_4", "Gửi yêu cầu thay đổi thông tin chi nhánh lên Ban Quản Trị")}</span>
+                      <span>{t("partner_branch_bullet_4", "Gửi yêu cầu thay đổi thông tin chi nhánh lên ban quản trị")}</span>
                     </div>
                     <div className="flex items-center gap-2 text-slate-400 font-semibold">
                       <span className="h-2 w-2 rounded-full bg-slate-300" />
-                      <span>{t("partner_branch_bullet_5", "Loại bỏ hoàn toàn thông tin Ví & Tài chính để bảo mật")}</span>
+                      <span>{t("partner_branch_bullet_5", "Loại bỏ hoàn toàn thông tin ví & tài chính để bảo mật")}</span>
                     </div>
                   </div>
                 </div>
@@ -1148,7 +1148,7 @@ function PartnerDashboardContent() {
                     variant="outline"
                     className="w-full border-blue-200 text-blue-700 bg-blue-50/50 hover:bg-blue-100 font-bold rounded-2xl h-11 text-xs gap-2"
                   >
-                    <span>{t("partner_branch_enter_btn", "Vào Quản Lý Chi Nhánh")}</span>
+                    <span>{t("partner_branch_enter_btn", "Vào quản lý chi nhánh")}</span>
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -1167,12 +1167,12 @@ function PartnerDashboardContent() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Badge className="bg-amber-400 text-amber-950 font-black text-[10px] uppercase tracking-wider">
-                    {t("partner_owner_badge", "👑 Phân Hệ Chủ Sở Hữu (Master HQ)")}
+                    {t("partner_owner_badge", "👑 Phân hệ chủ sở hữu (Master HQ)")}
                   </Badge>
                   <span className="text-xs text-amber-200">{t("partner_owner_unlocked_hint", "• Đang mở khóa bảo mật")}</span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
-                  {t("partner_owner_title", "Khu Vực Quản Lý Của Chủ Cửa Hàng")}
+                  {t("partner_owner_title", "Khu vực quản lý của chủ cửa hàng")}
                 </h2>
                 <p className="text-xs sm:text-sm text-amber-100/80">
                   {t("partner_owner_subtitle", "Thống kê doanh thu hợp nhất, kiểm soát số dư ví hoa hồng và phê duyệt chi nhánh.")}
@@ -1186,7 +1186,7 @@ function PartnerDashboardContent() {
                   className="bg-white text-amber-900 hover:bg-amber-50 font-bold text-xs h-9 rounded-xl gap-1.5 shadow-sm"
                 >
                   <Plus className="h-4 w-4 text-amber-600" />
-                  <span>{t("partner_btn_add_branch", "Thêm Chi Nhánh Mới")}</span>
+                  <span>{t("partner_btn_add_branch", "Thêm chi nhánh mới")}</span>
                 </Button>
 
                 <Button
@@ -1202,7 +1202,7 @@ function PartnerDashboardContent() {
                   className="bg-amber-800/60 border-amber-500/60 text-white hover:bg-amber-800 font-bold text-xs h-9 rounded-xl gap-1.5"
                 >
                   <KeyRound className="h-3.5 w-3.5" />
-                  <span>{t("partner_btn_change_pass", "Đổi Mật Khẩu")}</span>
+                  <span>{t("partner_btn_change_pass", "Đổi mật khẩu")}</span>
                 </Button>
 
                 <Button
@@ -1212,7 +1212,7 @@ function PartnerDashboardContent() {
                   className="bg-amber-950/40 border-amber-500/40 text-amber-200 hover:bg-amber-950 hover:text-white font-bold text-xs h-9 rounded-xl gap-1.5"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
-                  <span>{t("partner_btn_back_menu", "Về Menu Chọn")}</span>
+                  <span>{t("partner_btn_back_menu", "Về menu chọn")}</span>
                 </Button>
               </div>
             </div>
@@ -1223,7 +1223,7 @@ function PartnerDashboardContent() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Wallet className="h-5 w-5 text-amber-600" />
-                    <h3 className="text-lg font-black text-slate-900">{t("partner_wallet_title", "Ví Đối Tác & Khấu Trừ Hoa Hồng")}</h3>
+                    <h3 className="text-lg font-black text-slate-900">{t("partner_wallet_title", "Ví đối tác & khấu trừ hoa hồng")}</h3>
                   </div>
                   <p className="text-xs text-slate-500">
                     {t("partner_wallet_desc", "Doanh thu khách thanh toán cọc và phí thuê. Hoa hồng sàn chỉ bị khấu trừ sau khi khách nhận xe thành công.")}
@@ -1241,7 +1241,7 @@ function PartnerDashboardContent() {
                     className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs h-9 px-4 rounded-xl gap-1.5 shadow-xs"
                   >
                     <QrCode className="h-4 w-4" />
-                    <span>{t("partner_btn_deposit_qr", "Nạp Ví VietQR")}</span>
+                    <span>{t("partner_btn_deposit_qr", "Nạp ví VietQR")}</span>
                   </Button>
 
                   <Button
@@ -1255,7 +1255,7 @@ function PartnerDashboardContent() {
                     className="border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs h-9 px-4 rounded-xl gap-1.5"
                   >
                     <DollarSign className="h-4 w-4 text-emerald-600" />
-                    <span>{t("partner_btn_payout", "Yêu Cầu Rút Tiền")}</span>
+                    <span>{t("partner_btn_payout", "Yêu cầu rút tiền")}</span>
                   </Button>
 
                   <Link href="/partner/wallet">
@@ -1362,7 +1362,7 @@ function PartnerDashboardContent() {
                   <div>
                     <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
                       <BarChart3 className="h-5 w-5 text-amber-600" />
-                      {t("partner_revenue_chart_title", "Doanh Thu 7 Ngày Gần Nhất (Gross vs Net)")}
+                      {t("partner_revenue_chart_title", "Doanh thu 7 ngày gần nhất (Gross vs net)")}
                     </CardTitle>
                     <CardDescription className="text-xs text-slate-500 mt-0.5">
                       {t("partner_revenue_chart_desc", "Số liệu thực tế tính theo các đơn hàng hoàn tất của nhà xe.")}
@@ -1373,7 +1373,7 @@ function PartnerDashboardContent() {
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl border border-amber-200 transition-colors self-start sm:self-auto"
                   >
                     <BarChart3 className="h-4 w-4" />
-                    <span>{t("partner_view_analytics_csv", "Xem Thống Kê Chi Tiết & Tải CSV →")}</span>
+                    <span>{t("partner_view_analytics_csv", "Xem thống kê chi tiết & tải CSV →")}</span>
                   </Link>
                 </div>
 
@@ -1472,7 +1472,7 @@ function PartnerDashboardContent() {
                 <div>
                   <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
                     <Building2 className="h-5 w-5 text-indigo-600" />
-                    {t("partner_my_branches_title", "Danh Sách Chi Nhánh Của Bạn")}
+                    {t("partner_my_branches_title", "Danh sách chi nhánh của bạn")}
                   </CardTitle>
                   <CardDescription className="text-xs text-slate-500 mt-0.5">
                     {t("partner_my_branches_desc", "Quản lý tất cả cơ sở kinh doanh đã phê duyệt và các chi nhánh mới đang chờ Admin duyệt.")}
@@ -1485,13 +1485,13 @@ function PartnerDashboardContent() {
                   className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs h-9 rounded-xl gap-1.5 shadow-xs"
                 >
                   <Plus className="h-4 w-4" />
-                  <span>{t("partner_btn_add_branch", "Thêm Chi Nhánh Mới")}</span>
+                  <span>{t("partner_btn_add_branch", "Thêm chi nhánh mới")}</span>
                 </Button>
               </div>
 
               {stores.length === 0 ? (
                 <div className="text-center py-10 text-xs text-slate-500">
-                  {t("partner_no_branches_desc", "Bạn chưa đăng ký chi nhánh nào. Hãy vào Khu vực Chủ Cửa Hàng để thêm chi nhánh mới gửi Admin duyệt!")}
+                  {t("partner_no_branches_desc", "Bạn chưa đăng ký chi nhánh nào. Hãy vào khu vực chủ cửa hàng để thêm chi nhánh mới gửi Admin duyệt!")}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -1518,22 +1518,22 @@ function PartnerDashboardContent() {
                             <span className="font-bold text-sm text-slate-900">{s.storeName}</span>
                             {s.status === 1 && (
                               <Badge className="bg-emerald-600 text-white text-[10px] gap-1">
-                                <CheckCircle2 className="h-3 w-3" /> {t("partner_status_active", "Đang Hoạt Động")}
+                                <CheckCircle2 className="h-3 w-3" /> {t("partner_status_active", "Đang hoạt động")}
                               </Badge>
                             )}
                             {s.status === 3 && (
                               <Badge className="bg-amber-600 text-white text-[10px] gap-1">
-                                <PauseCircle className="h-3 w-3" /> {t("partner_status_paused", "Tạm Ngừng")}
+                                <PauseCircle className="h-3 w-3" /> {t("partner_status_paused", "Tạm ngừng")}
                               </Badge>
                             )}
                             {s.status === 4 && (
                               <Badge className="bg-indigo-600 text-white text-[10px] gap-1">
-                                <Wrench className="h-3 w-3" /> {t("partner_status_maintenance", "Đang Sửa Chữa")}
+                                <Wrench className="h-3 w-3" /> {t("partner_status_maintenance", "Đang sửa chữa")}
                               </Badge>
                             )}
                             {s.status === 0 && (
                               <Badge className="bg-amber-500 text-white text-[10px] gap-1 animate-pulse">
-                                <Clock className="h-3 w-3" /> {t("partner_status_pending", "Chờ Admin Duyệt")}
+                                <Clock className="h-3 w-3" /> {t("partner_status_pending", "Chờ Admin duyệt")}
                               </Badge>
                             )}
                             {s.status === 2 && (
@@ -1564,7 +1564,7 @@ function PartnerDashboardContent() {
                               title="Xem và chỉnh sửa hồ sơ chi nhánh này"
                             >
                               <StoreIcon className="h-3.5 w-3.5 text-indigo-600" />
-                              <span>{t("partner_branch_profile", "Hồ Sơ Chi Nhánh")}</span>
+                              <span>{t("partner_branch_profile", "Hồ sơ chi nhánh")}</span>
                             </Button>
 
                             <Button
@@ -1575,7 +1575,7 @@ function PartnerDashboardContent() {
                               title="Thay đổi trạng thái hoạt động của chi nhánh"
                             >
                               <Activity className="h-3.5 w-3.5 text-blue-600" />
-                              <span className="hidden sm:inline">{t("partner_status_modal_title", "Đổi Trạng Thái")}</span>
+                              <span className="hidden sm:inline">{t("partner_status_modal_title", "Đổi trạng thái")}</span>
                             </Button>
 
                             <Button
@@ -1586,7 +1586,7 @@ function PartnerDashboardContent() {
                               }}
                               className="text-xs font-bold text-blue-700 border-blue-200 hover:bg-blue-50 h-8 rounded-xl"
                             >
-                              {t("partner_enter_branch_ops_btn", "Vào Vận Hành Cơ Sở →")}
+                              {t("partner_enter_branch_ops_btn", "Vào vận hành cơ sở →")}
                             </Button>
                           </>
                         )}
@@ -1600,7 +1600,7 @@ function PartnerDashboardContent() {
                             title="Xem và cập nhật hồ sơ chi nhánh này"
                           >
                             <StoreIcon className="h-3.5 w-3.5 text-indigo-600" />
-                            <span>{t("partner_branch_profile", "Hồ Sơ Chi Nhánh")}</span>
+                            <span>{t("partner_branch_profile", "Hồ sơ chi nhánh")}</span>
                           </Button>
                         )}
 
@@ -1613,7 +1613,7 @@ function PartnerDashboardContent() {
                           title="Xóa chi nhánh này"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
-                          <span className="hidden sm:inline">{t("partner_delete_branch_btn", "Xóa Chi Nhánh")}</span>
+                          <span className="hidden sm:inline">{t("partner_delete_branch_btn", "Xóa chi nhánh")}</span>
                         </Button>
                       </div>
                     </div>
@@ -1641,15 +1641,15 @@ function PartnerDashboardContent() {
                         size="sm"
                         className="text-xs font-bold text-slate-600 h-8 px-2 rounded-xl gap-1 hover:bg-slate-200/70 -ml-2"
                       >
-                        <ArrowLeft className="h-4 w-4" /> {t("partner_back_to_module_menu", "Về Menu Chọn Phân Hệ")}
+                        <ArrowLeft className="h-4 w-4" /> {t("partner_back_to_module_menu", "Về menu chọn phân hệ")}
                       </Button>
                       <span className="text-slate-300">|</span>
                       <Badge className="bg-blue-600 text-white text-[10px] uppercase font-bold">
-                        {t("partner_branch_ops_badge", "🏪 Phân Hệ Vận Hành Chi Nhánh")}
+                        {t("partner_branch_ops_badge", "🏪 Phân hệ vận hành chi nhánh")}
                       </Badge>
                     </div>
                     <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                      {t("partner_select_branch_title", "Chọn Chi Nhánh Để Vận Hành")}
+                      {t("partner_select_branch_title", "Chọn chi nhánh để vận hành")}
                     </h1>
                     <p className="text-xs text-slate-500 mt-1">
                       {t("partner_select_branch_desc", "Mỗi cơ sở hoạt động độc lập về kho xe và đơn đặt. Nhấn vào chi nhánh bạn muốn quản lý làm việc.")}
@@ -1662,13 +1662,13 @@ function PartnerDashboardContent() {
                     <StoreIcon className="h-12 w-12 text-amber-500 mx-auto" />
                     <h3 className="text-lg font-bold text-amber-950">{t("partner_no_branches_yet", "Chưa có chi nhánh nào")}</h3>
                     <p className="text-xs text-amber-800 max-w-md mx-auto">
-                      {t("partner_no_branches_desc", "Bạn chưa đăng ký chi nhánh nào. Hãy vào Khu vực Chủ Cửa Hàng để thêm chi nhánh mới gửi Admin duyệt!")}
+                      {t("partner_no_branches_desc", "Bạn chưa đăng ký chi nhánh nào. Hãy vào khu vực chủ cửa hàng để thêm chi nhánh mới gửi Admin duyệt!")}
                     </p>
                     <Button
                       onClick={handleEnterOwnerPortal}
                       className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl"
                     >
-                      {t("partner_enter_owner_to_add", "Vào Khu Vực Chủ Để Thêm Chi Nhánh")}
+                      {t("partner_enter_owner_to_add", "Vào khu vực chủ để thêm chi nhánh")}
                     </Button>
                   </Card>
                 ) : (
@@ -1710,22 +1710,22 @@ function PartnerDashboardContent() {
                               <div className="absolute top-3 right-3">
                                 {s.status === 1 && (
                                   <Badge className="bg-emerald-600 text-white text-[10px] gap-1 shadow-xs">
-                                    <CheckCircle2 className="h-3 w-3" /> {t("partner_status_active", "Đang Hoạt Động")}
+                                    <CheckCircle2 className="h-3 w-3" /> {t("partner_status_active", "Đang hoạt động")}
                                   </Badge>
                                 )}
                                 {s.status === 3 && (
                                   <Badge className="bg-amber-600 text-white text-[10px] gap-1 shadow-xs">
-                                    <PauseCircle className="h-3 w-3" /> {t("partner_status_paused", "Tạm Ngừng")}
+                                    <PauseCircle className="h-3 w-3" /> {t("partner_status_paused", "Tạm ngừng")}
                                   </Badge>
                                 )}
                                 {s.status === 4 && (
                                   <Badge className="bg-indigo-600 text-white text-[10px] gap-1 shadow-xs">
-                                    <Wrench className="h-3 w-3" /> {t("partner_status_maintenance", "Đang Sửa Chữa")}
+                                    <Wrench className="h-3 w-3" /> {t("partner_status_maintenance", "Đang sửa chữa")}
                                   </Badge>
                                 )}
                                 {s.status === 0 && (
                                   <Badge className="bg-amber-500 text-white text-[10px] gap-1 shadow-xs animate-pulse">
-                                    <Clock className="h-3 w-3" /> {t("partner_status_pending", "Chờ Admin Duyệt")}
+                                    <Clock className="h-3 w-3" /> {t("partner_status_pending", "Chờ Admin duyệt")}
                                   </Badge>
                                 )}
                                 {s.status === 2 && (
@@ -1771,7 +1771,7 @@ function PartnerDashboardContent() {
                                   handleSelectBranch(s);
                                 }}
                               >
-                                <span>Vào Quản Lý Cơ Sở Này</span>
+                                <span>Vào quản lý cơ sở này</span>
                                 <ArrowRight className="h-4 w-4" />
                               </Button>
                             ) : (
@@ -1780,7 +1780,7 @@ function PartnerDashboardContent() {
                                 disabled
                                 className="w-full text-xs font-semibold h-10 rounded-xl text-slate-400 cursor-not-allowed"
                               >
-                                {s.status === 0 ? "Chờ Admin Phê Duyệt" : "Bị Từ Chối - Cần Cập Nhật"}
+                                {s.status === 0 ? "Chờ Admin phê duyệt" : "Bị từ chối - cần cập nhật"}
                               </Button>
                             )}
                           </div>
@@ -1998,7 +1998,7 @@ function PartnerDashboardContent() {
                     <div className="pt-2">
                       <Link href={`/partner/vehicles?storeId=${selectedBranch?.id}`}>
                         <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs h-10 rounded-xl gap-2">
-                          <span>Quản Lý Xe & Biển Số</span>
+                          <span>Quản lý xe & biển số</span>
                           <ArrowRight className="h-4 w-4" />
                         </Button>
                       </Link>
@@ -2011,7 +2011,7 @@ function PartnerDashboardContent() {
                         <ClipboardList className="h-6 w-6" />
                       </div>
                       <div>
-                        <h3 className="text-base font-black text-slate-900">Đơn Thuê & Bàn Giao</h3>
+                        <h3 className="text-base font-black text-slate-900">Đơn thuê & bàn giao</h3>
                         <p className="text-xs text-slate-500">Xử lý đón khách và gán biển số</p>
                       </div>
                     </div>
@@ -2021,7 +2021,7 @@ function PartnerDashboardContent() {
                     <div className="pt-2">
                       <Link href={`/partner/bookings?storeId=${selectedBranch?.id}`}>
                         <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs h-10 rounded-xl gap-2">
-                          <span>Xem Đơn Thuê & Bàn Giao</span>
+                          <span>Xem đơn thuê & bàn giao</span>
                           <ArrowRight className="h-4 w-4" />
                         </Button>
                       </Link>
@@ -2034,7 +2034,7 @@ function PartnerDashboardContent() {
                         <Wallet className="h-6 w-6" />
                       </div>
                       <div>
-                        <h3 className="text-base font-black text-slate-900">Sổ Quỹ & Lịch Sử Giao Dịch</h3>
+                        <h3 className="text-base font-black text-slate-900">Sổ quỹ & lịch sử giao dịch</h3>
                         <p className="text-xs text-slate-500">Quan sát số dư & đối soát sổ cái</p>
                       </div>
                     </div>
@@ -2044,7 +2044,7 @@ function PartnerDashboardContent() {
                     <div className="pt-2">
                       <Link href={`/partner/wallet?storeId=${selectedBranch?.id}`}>
                         <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-10 rounded-xl gap-2">
-                          <span>Xem Sổ Cái Giao Dịch</span>
+                          <span>Xem sổ cái giao dịch</span>
                           <ArrowRight className="h-4 w-4" />
                         </Button>
                       </Link>
@@ -2548,7 +2548,7 @@ function PartnerDashboardContent() {
               <Lock className="h-6 w-6" />
             </div>
             <DialogTitle className="text-lg font-black text-slate-900">
-              {t("partner_unlock_title", "Xác Thực Mật Khẩu Chủ Cửa Hàng")}
+              {t("partner_unlock_title", "Xác thực mật khẩu chủ cửa hàng")}
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
               {t("partner_unlock_desc", "Vui lòng nhập mật khẩu bảo vệ cấp 2 để mở khóa phân hệ quản trị doanh thu, ví và chi nhánh.")}
@@ -2557,7 +2557,7 @@ function PartnerDashboardContent() {
 
           <form onSubmit={handleVerifyPasswordSubmit} className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">{t("partner_unlock_label", "Mật khẩu Chủ Cửa Hàng *")}</Label>
+              <Label className="text-xs font-semibold">{t("partner_unlock_label", "Mật khẩu chủ cửa hàng *")}</Label>
               <Input
                 type="password"
                 placeholder={t("partner_unlock_placeholder", "Nhập mật khẩu...")}
@@ -2585,7 +2585,7 @@ function PartnerDashboardContent() {
                 disabled={isVerifyingPassword}
                 className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl"
               >
-                {isVerifyingPassword ? t("common_verifying", "Đang xác thực...") : t("partner_unlock_confirm", "Mở Khóa Phân Hệ")}
+                {isVerifyingPassword ? t("common_verifying", "Đang xác thực...") : t("partner_unlock_confirm", "Mở khóa phân hệ")}
               </Button>
             </DialogFooter>
           </form>
@@ -2603,13 +2603,13 @@ function PartnerDashboardContent() {
             </div>
             <DialogTitle className="text-lg font-black text-slate-900">
               {isSettingInitialPassword
-                ? t("partner_password_setup_title", "Thiết Lập Mật Khẩu Chủ Cửa Hàng Lần Đầu")
-                : t("partner_password_change_title", "Đổi Mật Khẩu Chủ Cửa Hàng")}
+                ? t("partner_password_setup_title", "Thiết lập mật khẩu chủ cửa hàng lần đầu")
+                : t("partner_password_change_title", "Đổi mật khẩu chủ cửa hàng")}
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
               {isSettingInitialPassword
                 ? t("partner_password_setup_desc", "Mật khẩu này bảo vệ số dư ví, tài chính doanh thu và quyền đăng ký chi nhánh mới của bạn.")
-                : t("partner_password_change_desc", "Thay đổi mật khẩu cấp 2 bảo vệ khu vực Chủ Cửa Hàng.")}
+                : t("partner_password_change_desc", "Thay đổi mật khẩu cấp 2 bảo vệ khu vực chủ cửa hàng.")}
             </DialogDescription>
           </DialogHeader>
 
@@ -2668,7 +2668,7 @@ function PartnerDashboardContent() {
                 disabled={isSubmittingPassword}
                 className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl"
               >
-                {isSubmittingPassword ? t("common_saving", "Đang lưu...") : t("partner_password_save_btn", "Lưu Mật Khẩu")}
+                {isSubmittingPassword ? t("common_saving", "Đang lưu...") : t("partner_password_save_btn", "Lưu mật khẩu")}
               </Button>
             </DialogFooter>
           </form>
@@ -2684,11 +2684,11 @@ function PartnerDashboardContent() {
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-amber-600" />
               <DialogTitle className="text-lg font-black text-slate-900">
-                {t("partner_add_branch_title", "Đăng Ký Chi Nhánh Mới")}
+                {t("partner_add_branch_title", "Đăng ký chi nhánh mới")}
               </DialogTitle>
             </div>
             <DialogDescription className="text-xs text-slate-500">
-              {t("partner_add_branch_desc", "Chi nhánh mới sẽ được tạo với trạng thái Chờ Duyệt (PENDING) và chuyển tới Ban Quản Trị Sàn kiểm duyệt trước khi hoạt động.")}
+              {t("partner_add_branch_desc", "Chi nhánh mới sẽ được tạo với trạng thái chờ duyệt (PENDING) và chuyển tới ban quản trị sàn kiểm duyệt trước khi hoạt động.")}
             </DialogDescription>
           </DialogHeader>
 
@@ -2705,7 +2705,7 @@ function PartnerDashboardContent() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">{t("partner_add_branch_province_label", "Tỉnh / Thành phố *")}</Label>
+              <Label className="text-xs font-semibold">{t("partner_add_branch_province_label", "Tỉnh / thành phố *")}</Label>
               <div className="border border-slate-200 rounded-xl px-3 py-1 bg-white">
                 <ProvinceCombobox
                   value={newBranchProvince}
@@ -2842,7 +2842,7 @@ function PartnerDashboardContent() {
                 disabled={isSubmittingBranch}
                 className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl"
               >
-                {isSubmittingBranch ? t("partner_add_branch_submitting", "Đang gửi hồ sơ...") : t("partner_add_branch_submit", "Gửi Hồ Sơ Phê Duyệt")}
+                {isSubmittingBranch ? t("partner_add_branch_submitting", "Đang gửi hồ sơ...") : t("partner_add_branch_submit", "Gửi hồ sơ phê duyệt")}
               </Button>
             </DialogFooter>
           </form>
@@ -3064,7 +3064,7 @@ function PartnerDashboardContent() {
               <QrCode className="h-6 w-6" />
             </div>
             <DialogTitle className="text-lg font-black text-slate-900">
-              {t("partner_deposit_title", "Nạp Tiền Vào Ví Đối Tác")}
+              {t("partner_deposit_title", "Nạp tiền vào ví đối tác")}
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
               {t("partner_deposit_desc", "Tạo mã VietQR chuyển khoản tự động để kích hoạt tài khoản và nhận đơn liên tục.")}
@@ -3116,7 +3116,7 @@ function PartnerDashboardContent() {
                   disabled={isGeneratingQr}
                   className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl"
                 >
-                  {isGeneratingQr ? t("partner_deposit_generating", "Đang tạo mã...") : t("partner_deposit_generate_btn", "Tạo Mã VietQR")}
+                  {isGeneratingQr ? t("partner_deposit_generating", "Đang tạo mã...") : t("partner_deposit_generate_btn", "Tạo mã VietQR")}
                 </Button>
               </DialogFooter>
             </div>
@@ -3145,7 +3145,7 @@ function PartnerDashboardContent() {
                   }}
                   className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl"
                 >
-                  {t("partner_deposit_completed_btn", "Đã Chuyển Khoản Xong")}
+                  {t("partner_deposit_completed_btn", "Đã chuyển khoản xong")}
                 </Button>
               </DialogFooter>
             </div>
@@ -3163,10 +3163,10 @@ function PartnerDashboardContent() {
               <DollarSign className="h-6 w-6" />
             </div>
             <DialogTitle className="text-lg font-black text-slate-900">
-              {t("partner_withdraw_title", "Yêu Cầu Rút Tiền Về Ngân Hàng")}
+              {t("partner_withdraw_title", "Yêu cầu rút tiền về ngân hàng")}
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
-              {t("partner_withdraw_desc", "Chuyển số dư doanh thu từ Ví đối tác về tài khoản ngân hàng chính chủ của bạn.")}
+              {t("partner_withdraw_desc", "Chuyển số dư doanh thu từ ví đối tác về tài khoản ngân hàng chính chủ của bạn.")}
             </DialogDescription>
           </DialogHeader>
 
@@ -3224,7 +3224,7 @@ function PartnerDashboardContent() {
                 disabled={isSubmittingWithdraw}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl"
               >
-                {isSubmittingWithdraw ? t("partner_withdraw_submitting", "Đang gửi yêu cầu...") : t("partner_withdraw_submit", "Gửi Yêu Cầu Rút Tiền")}
+                {isSubmittingWithdraw ? t("partner_withdraw_submitting", "Đang gửi yêu cầu...") : t("partner_withdraw_submit", "Gửi yêu cầu rút tiền")}
               </Button>
             </DialogFooter>
           </form>
@@ -3239,7 +3239,7 @@ function PartnerDashboardContent() {
           <DialogHeader>
             <DialogTitle className="text-lg font-black text-slate-900 flex items-center gap-2">
               <Activity className="h-5 w-5 text-blue-600" />
-              {t("partner_status_modal_title", "Cập Nhật Trạng Thái Chi Nhánh")}
+              {t("partner_status_modal_title", "Cập nhật trạng thái chi nhánh")}
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
               {t("partner_status_modal_desc", "Quản lý trạng thái mở cửa kinh doanh của chi nhánh")}{" "}
@@ -3266,7 +3266,7 @@ function PartnerDashboardContent() {
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_active_title", "🟢 Đang Hoạt Động (Active)")}</span>
+                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_active_title", "🟢 Đang hoạt động (Active)")}</span>
                   <Badge className="bg-emerald-600 text-white text-[10px]">{t("partner_status_active_badge", "Hiển thị")}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">
@@ -3293,7 +3293,7 @@ function PartnerDashboardContent() {
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_paused_title", "⏸️ Tạm Ngừng Hoạt Động (Paused)")}</span>
+                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_paused_title", "⏸️ tạm ngừng hoạt động (Paused)")}</span>
                   <Badge className="bg-amber-500 text-white text-[10px]">{t("partner_status_paused_badge", "Tạm ẩn")}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">
@@ -3320,7 +3320,7 @@ function PartnerDashboardContent() {
               </div>
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_maint_title", "🔧 Đang Sửa Chữa / Bảo Trì (Maintenance)")}</span>
+                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_maint_title", "🔧 Đang sửa chữa / bảo trì (Maintenance)")}</span>
                   <Badge className="bg-indigo-600 text-white text-[10px]">{t("partner_status_maint_badge", "Bảo trì")}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">
@@ -3353,7 +3353,7 @@ function PartnerDashboardContent() {
               ) : (
                 <>
                   <Check className="h-3.5 w-3.5" />
-                  <span>{t("partner_status_confirm_btn", "Xác Nhận Đổi Trạng Thái")}</span>
+                  <span>{t("partner_status_confirm_btn", "Xác nhận đổi trạng thái")}</span>
                 </>
               )}
             </Button>
@@ -3369,7 +3369,7 @@ function PartnerDashboardContent() {
           <DialogHeader>
             <DialogTitle className="text-lg font-black text-slate-900 flex items-center gap-2">
               <Clock className="h-5 w-5 text-purple-600" />
-              {t("partner_hours_modal_title", "Cài Đặt Giờ Hoạt Động Chi Nhánh")}
+              {t("partner_hours_modal_title", "Cài đặt giờ hoạt động chi nhánh")}
             </DialogTitle>
             <DialogDescription className="text-xs text-slate-500">
               {t("partner_hours_modal_desc", "Khung giờ nhân viên trực tại cơ sở để bàn giao xe và nhận xe hoàn trả từ khách hàng.")}
@@ -3451,7 +3451,7 @@ function PartnerDashboardContent() {
                 ) : (
                   <>
                     <Check className="h-3.5 w-3.5" />
-                    <span>{t("partner_hours_save_btn", "Lưu Giờ Hoạt Động")}</span>
+                    <span>{t("partner_hours_save_btn", "Lưu giờ hoạt động")}</span>
                   </>
                 )}
               </Button>

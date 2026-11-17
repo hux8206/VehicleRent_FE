@@ -1277,6 +1277,28 @@ export const api = {
       }
     },
 
+    createWalkInBooking: async (dto: {
+      storeId: number;
+      modelId: number;
+      vehicleItemId: number;
+      customerName: string;
+      customerPhone: string;
+      customerEmail?: string;
+      driverLicense?: string;
+      startTime: string;
+      endTime: string;
+      rentPrice?: number;
+      depositAmount?: number;
+      totalAmount?: number;
+      note?: string;
+      handoverNow?: boolean;
+    }) => {
+      return await request<Booking>("/partner/bookings/walk-in", {
+        method: "POST",
+        body: JSON.stringify(dto),
+      });
+    },
+
     handover: async (bookingId: number, vehicleItemIdOrIds: number | number[]) => {
       const ids = Array.isArray(vehicleItemIdOrIds) ? vehicleItemIdOrIds : [vehicleItemIdOrIds];
       try {

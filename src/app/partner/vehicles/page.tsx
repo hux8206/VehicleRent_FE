@@ -44,6 +44,7 @@ import {
   ArrowLeft,
   MapPin,
   ChevronDown,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import * as XLSX from "xlsx";
@@ -439,7 +440,7 @@ function PartnerVehiclesContent() {
         licensePlate: editLicensePlate.toUpperCase().trim(),
         color: editItemColor.trim(),
         chassisNumber: editChassisNumber.trim(),
-        status: editItemStatus,
+        status: (editingItem.status === 1 || editingItem.status === 2) ? editingItem.status : editItemStatus,
       });
 
       setItems((prev) =>
@@ -453,18 +454,38 @@ function PartnerVehiclesContent() {
   };
 
   const handleUpdateItemStatus = async (itemId: number, newStatus: number) => {
+    const currentItem = items.find((i) => i.id === itemId);
+    if (currentItem && (currentItem.status === 1 || currentItem.status === 2)) {
+      toast.error(
+        currentItem.status === 2
+          ? "Xe này đang cho thuê, không thể tự ý đổi trạng thái!"
+          : "Xe này đang được đặt giữ chỗ cho khách, không thể tự ý đổi trạng thái!"
+      );
+      return;
+    }
+    if (newStatus === 1 || newStatus === 2) {
+      toast.error(
+        'Không thể chuyển sang trạng thái "Đang giữ" hoặc "Đang cho thuê" thủ công. Trạng thái này được cập nhật tự động khi có đơn thuê!'
+      );
+      return;
+    }
     try {
       await api.partner.updateItemStatus(itemId, newStatus);
       setItems((prev) =>
         prev.map((i) => (i.id === itemId ? { ...i, status: newStatus } : i))
       );
       toast.success("Đã cập nhật trạng thái xe.");
-    } catch {
-      toast.error("Không thể cập nhật trạng thái.");
+    } catch (err: any) {
+      toast.error(err.message || "Không thể cập nhật trạng thái.");
     }
   };
 
   const handleDeleteItem = async (itemId: number, plate: string) => {
+    const currentItem = items.find((i) => i.id === itemId);
+    if (currentItem && (currentItem.status === 1 || currentItem.status === 2)) {
+      toast.error("Xe đang có đơn đặt hoặc đang cho thuê, không thể xóa khỏi kho!");
+      return;
+    }
     if (!confirm(`Bạn có chắc muốn xóa xe biển số "${plate}" khỏi kho?`)) return;
     try {
       await api.partner.deleteItem(itemId);
@@ -649,17 +670,17 @@ function PartnerVehiclesContent() {
             <div className="flex items-center gap-2">
               <Link href="/partner?mode=branch">
                 <Button variant="ghost" size="sm" className="text-xs font-bold text-slate-600 h-8 px-2 rounded-xl gap-1 hover:bg-slate-200/70 -ml-2">
-                  <ArrowLeft className="h-4 w-4" /> Về Quản Lý Chi Nhánh
+                  <ArrowLeft className="h-4 w-4" /> Về quản lý chi nhánh
                 </Button>
               </Link>
               <span className="text-slate-300">|</span>
               <Badge className="bg-blue-600 text-white text-[10px] uppercase font-bold">
-                🛵 Quản Trị Kho Xe & Biển Số
+                🛵 Quản trị kho xe & biển số
               </Badge>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Dòng Xe & Biển Số Vật Lý
+              Dòng xe & biển số vật lý
             </h1>
             <p className="text-xs text-slate-500">
               Chủ cửa hàng có thể thêm, chỉnh sửa thông tin hoặc xóa dòng xe và từng biển số xe cụ thể.
@@ -695,7 +716,7 @@ function PartnerVehiclesContent() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-lg font-black text-slate-900">
-              Danh sách dòng xe tại {selectedStore?.storeName || "Chi Nhánh"}
+              Danh sách dòng xe tại {selectedStore?.storeName || "chi nhánh"}
             </h2>
             <p className="text-xs text-slate-500">
               Hiện có {models.length} dòng xe đang hoạt động tại cơ sở này.
@@ -707,7 +728,7 @@ function PartnerVehiclesContent() {
             size="sm"
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl gap-1.5 shadow-xs"
           >
-            <Plus className="h-4 w-4" /> Thêm Dòng Xe Mới
+            <Plus className="h-4 w-4" /> Thêm dòng xe mới
           </Button>
         </div>
 
@@ -853,7 +874,7 @@ function PartnerVehiclesContent() {
                       size="sm"
                       className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl gap-1.5"
                     >
-                      <Plus className="h-3.5 w-3.5" /> Thêm 1 Biển Số
+                      <Plus className="h-3.5 w-3.5" /> Thêm 1 biển số
                     </Button>
                   </div>
                 </CardHeader>
@@ -864,7 +885,7 @@ function PartnerVehiclesContent() {
                       <Bike className="h-10 w-10 text-slate-300 mx-auto mb-2" />
                       <p className="text-xs font-bold">Chưa có biển số nào thuộc dòng xe này</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
-                        Bấm &quot;Thêm 1 Biển Số&quot; hoặc &quot;Nhập từ Excel/CSV&quot; để khai báo từng chiếc xe thực tế.
+                        Bấm &quot;Thêm 1 biển số&quot; hoặc &quot;Nhập từ Excel/CSV&quot; để khai báo từng chiếc xe thực tế.
                       </p>
                     </div>
                   ) : (
@@ -894,18 +915,27 @@ function PartnerVehiclesContent() {
 
                             <div className="flex items-center gap-2">
                               {/* Status Selector Dropdown */}
-                              <select
-                                value={item.status}
-                                onChange={(e) =>
-                                  handleUpdateItemStatus(item.id, Number(e.target.value))
-                                }
-                                className={`text-xs font-semibold px-2.5 py-1.5 rounded-xl border ${st.color} outline-none cursor-pointer`}
-                              >
-                                <option value={0}>0: Sẵn sàng (Available)</option>
-                                <option value={1}>1: Đang giữ (Reserved)</option>
-                                <option value={2}>2: Đang cho thuê (Rented)</option>
-                                <option value={3}>3: Bảo dưỡng (Maintenance)</option>
-                              </select>
+                              {item.status === 1 || item.status === 2 ? (
+                                <div
+                                  className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl border ${st.color} cursor-not-allowed opacity-90 shadow-2xs`}
+                                  title="Xe đang trong hợp đồng hoặc giữ chỗ cho khách. Không thể tự ý đổi trạng thái thủ công!"
+                                >
+                                  <Lock className="h-3 w-3 shrink-0" />
+                                  <span>{st.label}</span>
+                                </div>
+                              ) : (
+                                <select
+                                  value={item.status}
+                                  onChange={(e) =>
+                                    handleUpdateItemStatus(item.id, Number(e.target.value))
+                                  }
+                                  className={`text-xs font-semibold px-2.5 py-1.5 rounded-xl border ${st.color} outline-none cursor-pointer`}
+                                  title="Chuyển đổi trạng thái xe"
+                                >
+                                  <option value={0}>0: Sẵn sàng (Available)</option>
+                                  <option value={3}>3: Bảo dưỡng (Maintenance)</option>
+                                </select>
+                              )}
 
                               {/* Edit Item Button */}
                               <button
@@ -920,9 +950,18 @@ function PartnerVehiclesContent() {
                               {/* Delete Item Button */}
                               <button
                                 type="button"
+                                disabled={item.status === 1 || item.status === 2}
                                 onClick={() => handleDeleteItem(item.id, item.licensePlate)}
-                                className="p-1.5 text-slate-400 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
-                                title="Xóa biển số này"
+                                className={`p-1.5 transition-colors rounded-lg ${
+                                  item.status === 1 || item.status === 2
+                                    ? "text-slate-300 cursor-not-allowed"
+                                    : "text-slate-400 hover:text-red-600 hover:bg-red-50"
+                                }`}
+                                title={
+                                  item.status === 1 || item.status === 2
+                                    ? "Xe đang có đơn đặt hoặc đang cho thuê, không thể xóa"
+                                    : "Xóa biển số này"
+                                }
                               >
                                 <Trash2 className="h-4 w-4" />
                               </button>
@@ -947,7 +986,7 @@ function PartnerVehiclesContent() {
       <Dialog open={isModelModalOpen} onOpenChange={setIsModelModalOpen}>
         <DialogContent className="max-w-md rounded-2xl p-6">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold">Thêm Dòng Xe Mới (VehicleModel)</DialogTitle>
+            <DialogTitle className="text-base font-bold">Thêm dòng xe mới (VehicleModel)</DialogTitle>
             <DialogDescription className="text-xs">
               Khai báo thông tin chung để khách hàng tìm kiếm và đặt chỗ tại {selectedStore?.storeName}.
             </DialogDescription>
@@ -1065,7 +1104,7 @@ function PartnerVehiclesContent() {
                 Hủy
               </Button>
               <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700">
-                Lưu Dòng Xe
+                Lưu dòng xe
               </Button>
             </DialogFooter>
           </form>
@@ -1076,7 +1115,7 @@ function PartnerVehiclesContent() {
       <Dialog open={isEditModelModalOpen} onOpenChange={setIsEditModelModalOpen}>
         <DialogContent className="max-w-md rounded-2xl p-6">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold">Chỉnh Sửa Dòng Xe (VehicleModel)</DialogTitle>
+            <DialogTitle className="text-base font-bold">Chỉnh sửa dòng xe (VehicleModel)</DialogTitle>
             <DialogDescription className="text-xs">
               Cập nhật thông tin dòng xe, giá thuê hoặc hình ảnh đại diện.
             </DialogDescription>
@@ -1193,7 +1232,7 @@ function PartnerVehiclesContent() {
                 Hủy
               </Button>
               <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 font-bold text-xs rounded-xl">
-                Cập Nhật Dòng Xe
+                Cập nhật dòng xe
               </Button>
             </DialogFooter>
           </form>
@@ -1204,7 +1243,7 @@ function PartnerVehiclesContent() {
       <Dialog open={isItemModalOpen} onOpenChange={setIsItemModalOpen}>
         <DialogContent className="max-w-md rounded-2xl p-6">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold">Thêm Biển Số Xe Thực Tế</DialogTitle>
+            <DialogTitle className="text-base font-bold">Thêm biển số xe thực tế</DialogTitle>
             <DialogDescription className="text-xs">
               Thêm 1 chiếc xe ngoài đời thực vào dòng <strong>{selectedModel?.name}</strong>.
             </DialogDescription>
@@ -1245,7 +1284,7 @@ function PartnerVehiclesContent() {
                 Hủy
               </Button>
               <Button type="submit" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl">
-                Thêm Vào Kho
+                Thêm vào kho
               </Button>
             </DialogFooter>
           </form>
@@ -1256,7 +1295,7 @@ function PartnerVehiclesContent() {
       <Dialog open={isEditItemModalOpen} onOpenChange={setIsEditItemModalOpen}>
         <DialogContent className="max-w-md rounded-2xl p-6">
           <DialogHeader>
-            <DialogTitle className="text-base font-bold">Chỉnh Sửa Xe (Biển Số Vật Lý)</DialogTitle>
+            <DialogTitle className="text-base font-bold">Chỉnh sửa xe (biển số vật lý)</DialogTitle>
             <DialogDescription className="text-xs">
               Cập nhật biển số, màu sơn, số khung và trạng thái vận hành của xe.
             </DialogDescription>
@@ -1286,16 +1325,26 @@ function PartnerVehiclesContent() {
 
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">Trạng thái xe *</Label>
-                <select
-                  value={editItemStatus}
-                  onChange={(e) => setEditItemStatus(Number(e.target.value))}
-                  className="w-full h-10 px-3 text-xs rounded-lg border bg-background font-semibold"
-                >
-                  <option value={0}>0: Sẵn sàng (Available)</option>
-                  <option value={1}>1: Đã giữ chỗ (Reserved)</option>
-                  <option value={2}>2: Đang cho thuê (Rented)</option>
-                  <option value={3}>3: Bảo dưỡng (Maintenance)</option>
-                </select>
+                {editItemStatus === 1 || editItemStatus === 2 ? (
+                  <div className="space-y-1">
+                    <div className="w-full h-10 px-3 text-xs rounded-lg border bg-slate-100 text-slate-700 font-semibold flex items-center gap-2 cursor-not-allowed">
+                      <Lock className="h-3.5 w-3.5 text-slate-500" />
+                      <span>{statusMap[editItemStatus]?.label || "Đang bận"}</span>
+                    </div>
+                    <p className="text-[11px] text-amber-700 leading-tight">
+                      Xe đang có đơn đặt hoặc đang cho thuê. Không thể đổi trạng thái thủ công!
+                    </p>
+                  </div>
+                ) : (
+                  <select
+                    value={editItemStatus}
+                    onChange={(e) => setEditItemStatus(Number(e.target.value))}
+                    className="w-full h-10 px-3 text-xs rounded-lg border bg-background font-semibold"
+                  >
+                    <option value={0}>0: Sẵn sàng (Available)</option>
+                    <option value={3}>3: Bảo dưỡng (Maintenance)</option>
+                  </select>
+                )}
               </div>
             </div>
 
@@ -1313,7 +1362,7 @@ function PartnerVehiclesContent() {
                 Hủy
               </Button>
               <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl">
-                Lưu Thay Đổi
+                Lưu thay đổi
               </Button>
             </DialogFooter>
           </form>
@@ -1331,7 +1380,7 @@ function PartnerVehiclesContent() {
                 </div>
                 <div>
                   <DialogTitle className="text-lg font-black text-slate-900">
-                    Nhập Hàng Loạt Xe Từ File (CSV / Excel)
+                    Nhập hàng loạt xe từ file (CSV / Excel)
                   </DialogTitle>
                   <DialogDescription className="text-xs text-slate-500 mt-0.5">
                     Thêm nhiều xe vào dòng <strong>{selectedModel?.name}</strong> từ file bảng tính.
@@ -1346,7 +1395,7 @@ function PartnerVehiclesContent() {
                 onClick={handleDownloadSampleFile}
                 className="text-xs text-blue-700 border-blue-200 hover:bg-blue-50 gap-1.5 h-8 rounded-xl font-bold shrink-0"
               >
-                <Download className="h-3.5 w-3.5" /> Tải File Mẫu Excel
+                <Download className="h-3.5 w-3.5" /> Tải file mẫu Excel
               </Button>
             </div>
           </DialogHeader>
@@ -1443,8 +1492,8 @@ function PartnerVehiclesContent() {
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="h-4 w-4" /> Xác Nhận Thêm{" "}
-                  {parsedVehicles.filter((v) => v.isValid).length} Xe Vào Kho
+                  <CheckCircle2 className="h-4 w-4" /> Xác nhận thêm{" "}
+                  {parsedVehicles.filter((v) => v.isValid).length} xe vào kho
                 </>
               )}
             </Button>

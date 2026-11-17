@@ -3,10 +3,11 @@
 import React, { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { api, Booking, VehicleItem, Store } from "@/lib/api";
+import { api, Booking, VehicleItem, VehicleModel, Store } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Dialog,
@@ -33,6 +34,8 @@ import {
   Store as StoreIcon,
   Search,
   RotateCcw,
+  PlusCircle,
+  Car,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format24hDateTime } from "@/components/common/datetime-24h-picker";
@@ -58,6 +61,28 @@ function PartnerBookingsContent() {
   const [availablePlates, setAvailablePlates] = useState<VehicleItem[]>([]);
   const [selectedPlateIds, setSelectedPlateIds] = useState<number[]>([]);
   const [isHandoverLoading, setIsHandoverLoading] = useState(false);
+
+  // Walk-in booking modal state
+  const [isWalkInModalOpen, setIsWalkInModalOpen] = useState(false);
+  const [walkInModels, setWalkInModels] = useState<VehicleModel[]>([]);
+  const [isLoadingWalkInModels, setIsLoadingWalkInModels] = useState(false);
+  const [walkInSelectedModelId, setWalkInSelectedModelId] = useState<number | null>(null);
+  const [walkInVehicleItems, setWalkInVehicleItems] = useState<VehicleItem[]>([]);
+  const [walkInSelectedItemId, setWalkInSelectedItemId] = useState<number | null>(null);
+  const [isLoadingItems, setIsLoadingItems] = useState(false);
+
+  const [walkInCustomerName, setWalkInCustomerName] = useState("");
+  const [walkInCustomerPhone, setWalkInCustomerPhone] = useState("");
+  const [walkInCustomerEmail, setWalkInCustomerEmail] = useState("");
+  const [walkInDriverLicense, setWalkInDriverLicense] = useState("");
+  const [walkInStartTime, setWalkInStartTime] = useState("");
+  const [walkInEndTime, setWalkInEndTime] = useState("");
+  const [walkInRentPrice, setWalkInRentPrice] = useState<number>(0);
+  const [walkInDepositAmount, setWalkInDepositAmount] = useState<number>(0);
+  const [walkInTotalAmount, setWalkInTotalAmount] = useState<number>(0);
+  const [walkInNote, setWalkInNote] = useState("");
+  const [walkInHandoverNow, setWalkInHandoverNow] = useState(true);
+  const [isSubmittingWalkIn, setIsSubmittingWalkIn] = useState(false);
 
   const fetchBookings = async (status?: number, silent = false) => {
     if (!silent) setIsLoading(true);
@@ -249,6 +274,178 @@ function PartnerBookingsContent() {
     }
   };
 
+  const toDateTimeLocalString = (date: Date) => {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  const recalcWalkInPrices = (startStr: string, endStr: string, price: number, depositPct: number) => {
+    if (!startStr || !endStr) return;
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
+      setWalkInTotalAmount(price);
+      setWalkInDepositAmount(Math.round((price * depositPct) / 100));
+      return;
+    }
+    const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    const days = Math.max(1, Math.ceil(diffHours / 24));
+    const total = Math.round(days * price);
+    const deposit = Math.round((total * depositPct) / 100);
+    setWalkInTotalAmount(total);
+    setWalkInDepositAmount(deposit);
+  };
+
+  const loadItemsForModel = async (modelId: number) => {
+    setIsLoadingItems(true);
+    try {
+      const items = await api.partner.getItems(modelId);
+      const availableItems = (items || []).filter((it) => it.status === 0);
+      setWalkInVehicleItems(availableItems);
+      if (availableItems.length > 0) {
+        setWalkInSelectedItemId(availableItems[0].id);
+      } else {
+        setWalkInSelectedItemId(null);
+      }
+    } catch {
+      setWalkInVehicleItems([]);
+      setWalkInSelectedItemId(null);
+    } finally {
+      setIsLoadingItems(false);
+    }
+  };
+
+  const handleOpenWalkInModal = async () => {
+    if (!selectedStore) {
+      toast.warning("Vui lòng chọn cơ sở chi nhánh trước khi tạo đơn.");
+      return;
+    }
+
+    const now = new Date();
+    now.setMinutes(0, 0, 0);
+    now.setHours(now.getHours() + 1);
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    const startStr = toDateTimeLocalString(now);
+    const endStr = toDateTimeLocalString(tomorrow);
+    setWalkInStartTime(startStr);
+    setWalkInEndTime(endStr);
+    setWalkInCustomerName("");
+    setWalkInCustomerPhone("");
+    setWalkInCustomerEmail("");
+    setWalkInDriverLicense("");
+    setWalkInNote("Khách thuê trực tiếp tại quầy");
+    setWalkInHandoverNow(true);
+    setIsWalkInModalOpen(true);
+
+    setIsLoadingWalkInModels(true);
+    try {
+      const models = await api.partner.getModels(selectedStore.id);
+      setWalkInModels(models || []);
+      if (models && models.length > 0) {
+        const firstModel = models[0];
+        setWalkInSelectedModelId(firstModel.id);
+        const price = Number(firstModel.rentPrice) || 0;
+        setWalkInRentPrice(price);
+        const depositPct = Number(selectedStore.rentalPolicy?.depositPercent || 15);
+        recalcWalkInPrices(startStr, endStr, price, depositPct);
+        await loadItemsForModel(firstModel.id);
+      } else {
+        setWalkInSelectedModelId(null);
+        setWalkInVehicleItems([]);
+        setWalkInSelectedItemId(null);
+      }
+    } catch {
+      toast.error("Không thể tải danh sách dòng xe.");
+    } finally {
+      setIsLoadingWalkInModels(false);
+    }
+  };
+
+  const handleWalkInModelChange = async (modelId: number) => {
+    setWalkInSelectedModelId(modelId);
+    const model = walkInModels.find((m) => m.id === modelId);
+    const price = model ? Number(model.rentPrice) || 0 : 0;
+    setWalkInRentPrice(price);
+    const depositPct = Number(selectedStore?.rentalPolicy?.depositPercent || 15);
+    recalcWalkInPrices(walkInStartTime, walkInEndTime, price, depositPct);
+    await loadItemsForModel(modelId);
+  };
+
+  const handleWalkInTimeChange = (startStr: string, endStr: string) => {
+    setWalkInStartTime(startStr);
+    setWalkInEndTime(endStr);
+    const depositPct = Number(selectedStore?.rentalPolicy?.depositPercent || 15);
+    recalcWalkInPrices(startStr, endStr, walkInRentPrice, depositPct);
+  };
+
+  const handleCreateWalkInBookingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStore) {
+      toast.error("Vui lòng chọn cơ sở chi nhánh!");
+      return;
+    }
+    if (!walkInCustomerName.trim()) {
+      toast.error("Vui lòng nhập họ và tên khách hàng!");
+      return;
+    }
+    if (!walkInCustomerPhone.trim()) {
+      toast.error("Vui lòng nhập số điện thoại khách hàng!");
+      return;
+    }
+    if (!walkInSelectedModelId) {
+      toast.error("Vui lòng chọn dòng xe thuê!");
+      return;
+    }
+    if (!walkInSelectedItemId) {
+      toast.error("Dòng xe này hiện không có xe nào sẵn sàng (status = 0). Vui lòng chọn dòng xe khác!");
+      return;
+    }
+    const start = new Date(walkInStartTime);
+    const end = new Date(walkInEndTime);
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
+      toast.error("Thời gian trả xe phải sau thời gian nhận xe!");
+      return;
+    }
+
+    setIsSubmittingWalkIn(true);
+    try {
+      await api.partner.createWalkInBooking({
+        storeId: selectedStore.id,
+        modelId: walkInSelectedModelId,
+        vehicleItemId: walkInSelectedItemId,
+        customerName: walkInCustomerName.trim(),
+        customerPhone: walkInCustomerPhone.trim(),
+        customerEmail: walkInCustomerEmail.trim() || undefined,
+        driverLicense: walkInDriverLicense.trim() || undefined,
+        startTime: start.toISOString(),
+        endTime: end.toISOString(),
+        rentPrice: Number(walkInRentPrice),
+        depositAmount: Number(walkInDepositAmount),
+        totalAmount: Number(walkInTotalAmount),
+        note: walkInNote.trim() || undefined,
+        handoverNow: walkInHandoverNow,
+      });
+
+      toast.success(
+        walkInHandoverNow
+          ? "Tạo đơn tại quầy thành công! Xe đã được bàn giao ngay cho khách."
+          : "Tạo đơn tại quầy thành công! Đơn ở trạng thái Chờ nhận xe."
+      );
+      setIsWalkInModalOpen(false);
+      fetchBookings(activeTab);
+    } catch (error: any) {
+      toast.error(error?.message || "Không thể tạo đơn tại quầy. Vui lòng kiểm tra lại thông tin!");
+    } finally {
+      setIsSubmittingWalkIn(false);
+    }
+  };
+
   const waitingCount = bookings.filter((b) => b.status === 2).length;
 
   return (
@@ -258,7 +455,7 @@ function PartnerBookingsContent() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Quản Lý Đơn Thuê & Bàn Giao Xe
+              Quản lý đơn thuê & bàn giao xe
             </h1>
             <p className="text-xs text-slate-500 mt-1">
               {selectedStore
@@ -267,27 +464,37 @@ function PartnerBookingsContent() {
             </p>
           </div>
 
-          {stores.filter((s) => s.status === 1).length > 1 && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">Chi nhánh:</span>
-              <select
-                value={selectedStore?.id || ""}
-                onChange={(e) => {
-                  const s = stores.find((item) => item.id === Number(e.target.value));
-                  if (s) handleSelectStore(s);
-                }}
-                className="h-10 px-3 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-800 shadow-xs focus:ring-2 focus:ring-amber-500/20"
-              >
-                {stores
-                  .filter((s) => s.status === 1)
-                  .map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.storeName}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          )}
+          <div className="flex flex-wrap items-center gap-3">
+            {stores.filter((s) => s.status === 1).length > 1 && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">Chi nhánh:</span>
+                <select
+                  value={selectedStore?.id || ""}
+                  onChange={(e) => {
+                    const s = stores.find((item) => item.id === Number(e.target.value));
+                    if (s) handleSelectStore(s);
+                  }}
+                  className="h-10 px-3 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-800 shadow-xs focus:ring-2 focus:ring-amber-500/20"
+                >
+                  {stores
+                    .filter((s) => s.status === 1)
+                    .map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.storeName}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            )}
+
+            <Button
+              onClick={handleOpenWalkInModal}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-xs text-xs sm:text-sm h-10 px-4 flex items-center gap-2"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>Tạo đơn tại quầy</span>
+            </Button>
+          </div>
         </div>
 
         {/* Warning Banner if there are WaitingQueue bookings */}
@@ -678,7 +885,7 @@ function PartnerBookingsContent() {
           <Dialog open={!!handoverBooking} onOpenChange={() => setHandoverBooking(null)}>
             <DialogContent className="max-w-md rounded-2xl p-6">
               <DialogHeader>
-                <DialogTitle className="text-base font-bold">Bàn Giao Xe Vật Lý (Biển Số)</DialogTitle>
+                <DialogTitle className="text-base font-bold">Bàn giao xe vật lý (biển số)</DialogTitle>
                 <DialogDescription className="text-xs">
                   {totalQty > 1
                     ? `Đơn này khách đặt ${totalQty} xe. Hãy chọn đủ ${totalQty} biển số xe để bàn giao cho khách hàng: `
@@ -796,6 +1003,289 @@ function PartnerBookingsContent() {
           </Dialog>
         );
       })()}
+
+      {/* Walk-in Booking Modal */}
+      <Dialog open={isWalkInModalOpen} onOpenChange={setIsWalkInModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-7">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-slate-900 flex items-center gap-2">
+              <PlusCircle className="w-5 h-5 text-amber-600" />
+              Tạo đơn thuê tại quầy
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-500">
+              Tạo đơn trực tiếp cho khách vãng lai tại cơ sở <strong>{selectedStore?.storeName}</strong>. Biển số xe sẽ được gán và đồng bộ ngay vào hệ thống.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleCreateWalkInBookingSubmit} className="space-y-5 pt-2">
+            {/* Thông tin khách hàng */}
+            <div className="space-y-3 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                <User className="w-3.5 h-3.5 text-amber-600" />
+                Thông tin khách hàng
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-slate-700">
+                    Họ và tên khách hàng <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    required
+                    placeholder="VD: Nguyễn Văn A"
+                    value={walkInCustomerName}
+                    onChange={(e) => setWalkInCustomerName(e.target.value)}
+                    className="h-9.5 text-xs rounded-xl bg-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-slate-700">
+                    Số điện thoại <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    required
+                    type="tel"
+                    placeholder="VD: 0912345678"
+                    value={walkInCustomerPhone}
+                    onChange={(e) => setWalkInCustomerPhone(e.target.value)}
+                    className="h-9.5 text-xs rounded-xl bg-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-slate-700">
+                    Số GPLX / CCCD (đối chiếu trực tiếp)
+                  </Label>
+                  <Input
+                    placeholder="VD: 012345678901"
+                    value={walkInDriverLicense}
+                    onChange={(e) => setWalkInDriverLicense(e.target.value)}
+                    className="h-9.5 text-xs rounded-xl bg-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-slate-700">
+                    Email (không bắt buộc)
+                  </Label>
+                  <Input
+                    type="email"
+                    placeholder="name@example.com"
+                    value={walkInCustomerEmail}
+                    onChange={(e) => setWalkInCustomerEmail(e.target.value)}
+                    className="h-9.5 text-xs rounded-xl bg-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Chọn dòng xe & biển số */}
+            <div className="space-y-3 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                <Car className="w-3.5 h-3.5 text-amber-600" />
+                Chọn phương tiện & biển số xe
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-slate-700">
+                    Dòng xe thuê <span className="text-red-500">*</span>
+                  </Label>
+                  {isLoadingWalkInModels ? (
+                    <div className="h-9.5 flex items-center gap-2 px-3 text-xs text-slate-500 bg-white border rounded-xl">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" /> Đang tải dòng xe...
+                    </div>
+                  ) : walkInModels.length === 0 ? (
+                    <div className="h-9.5 flex items-center px-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-xl">
+                      Cơ sở chưa có dòng xe nào
+                    </div>
+                  ) : (
+                    <select
+                      value={walkInSelectedModelId || ""}
+                      onChange={(e) => handleWalkInModelChange(Number(e.target.value))}
+                      className="w-full h-9.5 px-3 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 font-semibold focus:ring-2 focus:ring-amber-500/20"
+                    >
+                      {walkInModels.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name} ({m.brand}) - {Number(m.rentPrice).toLocaleString("vi-VN")} đ/ngày
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-slate-700">
+                    Biển số xe bàn giao <span className="text-red-500">*</span>
+                  </Label>
+                  {isLoadingItems ? (
+                    <div className="h-9.5 flex items-center gap-2 px-3 text-xs text-slate-500 bg-white border rounded-xl">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" /> Đang kiểm tra kho...
+                    </div>
+                  ) : walkInVehicleItems.length === 0 ? (
+                    <div className="h-9.5 flex items-center px-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl font-medium">
+                      Hết xe sẵn sàng (status = 0)
+                    </div>
+                  ) : (
+                    <select
+                      value={walkInSelectedItemId || ""}
+                      onChange={(e) => setWalkInSelectedItemId(Number(e.target.value))}
+                      className="w-full h-9.5 px-3 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 font-mono font-bold focus:ring-2 focus:ring-amber-500/20"
+                    >
+                      {walkInVehicleItems.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.licensePlate} {item.color ? `(Màu: ${item.color})` : ""} - Sẵn sàng
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Thời gian & Chi phí */}
+            <div className="space-y-3 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+                <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                Thời gian thuê & Chi phí
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-slate-700">
+                    Thời gian nhận xe <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    type="datetime-local"
+                    required
+                    value={walkInStartTime}
+                    onChange={(e) => handleWalkInTimeChange(e.target.value, walkInEndTime)}
+                    className="h-9.5 text-xs rounded-xl bg-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-slate-700">
+                    Thời gian trả xe dự kiến <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    type="datetime-local"
+                    required
+                    value={walkInEndTime}
+                    onChange={(e) => handleWalkInTimeChange(walkInStartTime, e.target.value)}
+                    className="h-9.5 text-xs rounded-xl bg-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-slate-700">
+                    Đơn giá thuê / ngày (VNĐ)
+                  </Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={walkInRentPrice}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      setWalkInRentPrice(val);
+                      const depositPct = Number(selectedStore?.rentalPolicy?.depositPercent || 15);
+                      recalcWalkInPrices(walkInStartTime, walkInEndTime, val, depositPct);
+                    }}
+                    className="h-9.5 text-xs rounded-xl bg-white font-mono font-semibold"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-slate-700">
+                    Tiền cọc nhận tại quầy (VNĐ)
+                  </Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={walkInDepositAmount}
+                    onChange={(e) => setWalkInDepositAmount(Number(e.target.value))}
+                    className="h-9.5 text-xs rounded-xl bg-white font-mono font-semibold text-amber-700"
+                  />
+                </div>
+              </div>
+
+              {/* Tổng tiền tổng hợp */}
+              <div className="p-3 bg-amber-50/80 rounded-xl border border-amber-200/80 flex items-center justify-between">
+                <span className="text-xs font-bold text-amber-950">Tổng tiền thuê dự kiến:</span>
+                <div className="text-right">
+                  <span className="text-base font-black text-amber-700 font-mono">
+                    {walkInTotalAmount.toLocaleString("vi-VN")} đ
+                  </span>
+                  <span className="block text-[11px] text-amber-900">
+                    (Cọc: {walkInDepositAmount.toLocaleString("vi-VN")} đ • Còn lại: {(walkInTotalAmount - walkInDepositAmount > 0 ? walkInTotalAmount - walkInDepositAmount : 0).toLocaleString("vi-VN")} đ)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Tùy chọn bàn giao ngay */}
+            <div className="space-y-3">
+              <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  checked={walkInHandoverNow}
+                  onChange={(e) => setWalkInHandoverNow(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500"
+                />
+                <div>
+                  <span className="text-xs font-bold text-slate-900 block">
+                    Bàn giao xe ngay cho khách (Đang thuê)
+                  </span>
+                  <span className="text-[11px] text-slate-500 block mt-0.5">
+                    Khách đã có mặt tại cửa hàng và nhận xe ngay. Xe sẽ chuyển sang trạng thái &ldquo;Đang cho thuê&rdquo; và đơn chuyển sang &ldquo;Đang thuê&rdquo;.
+                  </span>
+                </div>
+              </label>
+
+              <div className="space-y-1">
+                <Label className="text-xs font-semibold text-slate-700">Ghi chú đơn (tùy chọn)</Label>
+                <Input
+                  placeholder="Ghi chú về tình trạng giấy tờ, mũ bảo hiểm, đồ đi kèm..."
+                  value={walkInNote}
+                  onChange={(e) => setWalkInNote(e.target.value)}
+                  className="h-9.5 text-xs rounded-xl bg-white"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsWalkInModalOpen(false)}
+                disabled={isSubmittingWalkIn}
+                className="rounded-xl"
+              >
+                Hủy
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isSubmittingWalkIn || !walkInSelectedItemId}
+                className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-xs"
+              >
+                {isSubmittingWalkIn ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                    Đang tạo đơn...
+                  </>
+                ) : walkInHandoverNow ? (
+                  "Tạo đơn & Bàn giao ngay"
+                ) : (
+                  "Tạo đơn đặt trước"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
