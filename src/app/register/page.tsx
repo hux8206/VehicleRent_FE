@@ -74,8 +74,8 @@ function RegisterForm() {
           email: email.trim(),
           password,
         });
-        toast.success(t("toast_register_success", "Đăng ký tài khoản Đối tác thành công! Hãy thiết lập hồ sơ cửa hàng."));
-        window.location.href = "/partner/onboarding";
+        toast.success(t("toast_register_success", "Đăng ký tài khoản Đối tác thành công! Chào mừng bạn đến với hệ thống."));
+        window.location.href = "/partner";
       } else {
         await registerCustomer({
           fullName: fullName.trim(),

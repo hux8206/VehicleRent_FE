@@ -54,7 +54,10 @@ function LoginForm() {
       if (user.role === 0) {
         window.location.href = callbackUrl && callbackUrl.startsWith("/admin") ? callbackUrl : "/admin";
       } else if (user.role === 1) {
-        window.location.href = callbackUrl && callbackUrl.startsWith("/partner") ? callbackUrl : "/partner";
+        window.location.href =
+          callbackUrl && callbackUrl.startsWith("/partner") && !callbackUrl.startsWith("/partner/onboarding")
+            ? callbackUrl
+            : "/partner";
       } else {
         window.location.href = callbackUrl && !callbackUrl.startsWith("/admin") && !callbackUrl.startsWith("/partner") ? callbackUrl : "/";
       }
@@ -190,16 +193,10 @@ function LoginForm() {
       if (loggedUser.role === 0) {
         destination = callbackUrl && callbackUrl.startsWith("/admin") ? callbackUrl : "/admin";
       } else if (loggedUser.role === 1) {
-        if (callbackUrl && callbackUrl.startsWith("/partner")) {
+        if (callbackUrl && callbackUrl.startsWith("/partner") && !callbackUrl.startsWith("/partner/onboarding")) {
           destination = callbackUrl;
         } else {
-          try {
-            const stores = await api.partner.getStores();
-            const hasActiveStore = Array.isArray(stores) && stores.some((s) => s.status === 1);
-            destination = hasActiveStore ? "/partner" : "/partner/onboarding";
-          } catch {
-            destination = "/partner/onboarding";
-          }
+          destination = "/partner";
         }
       } else {
         destination =
