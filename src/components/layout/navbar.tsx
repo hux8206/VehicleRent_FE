@@ -485,37 +485,37 @@ export function Navbar() {
                         <DropdownMenuItem asChild>
                           <Link href={`/partner/vehicles${effectiveBranchId ? `?storeId=${effectiveBranchId}` : ""}`} className="cursor-pointer py-2 text-xs">
                             <Bike className="mr-2 h-4 w-4 text-amber-600" />
-                            <span>Quản lý xe</span>
+                            <span>{t("nav_partner_vehicles", "Quản lý xe")}</span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href={`/partner/bookings${effectiveBranchId ? `?storeId=${effectiveBranchId}` : ""}`} className="cursor-pointer py-2 text-xs">
                             <ClipboardList className="mr-2 h-4 w-4 text-amber-600" />
-                            <span>Đơn thuê</span>
+                            <span>{t("partner_bookings", "Đơn thuê")}</span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href={`/partner/wallet${effectiveBranchId ? `?storeId=${effectiveBranchId}` : ""}`} className="cursor-pointer py-2 text-xs">
                             <Wallet className="mr-2 h-4 w-4 text-amber-600" />
-                            <span>Sổ  giao dịch chi nhánh</span>
+                            <span>{t("partner_wallet", "Sổ giao dịch chi nhánh")}</span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href={`/partner/onboarding${effectiveBranchId ? `?storeId=${effectiveBranchId}` : ""}`} className="cursor-pointer py-2 text-xs">
                             <Store className="mr-2 h-4 w-4 text-amber-600" />
-                            <span>Hồ sơ chi nhánh</span>
+                            <span>{t("partner_branch_profile", "Hồ sơ chi nhánh")}</span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href="/partner?mode=branch" className="cursor-pointer py-2 text-xs font-semibold text-blue-700">
                             <Store className="mr-2 h-4 w-4 text-blue-600" />
-                            <span>Đổi chi nhánh vận hành</span>
+                            <span>{t("partner_switch_branch", "Đổi chi nhánh vận hành")}</span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href="/partner" className="cursor-pointer py-2 text-xs font-semibold text-slate-700">
                             <ArrowLeft className="mr-2 h-4 w-4 text-slate-500" />
-                            <span>Đổi phân hệ làm việc</span>
+                            <span>{t("partner_switch_module", "Đổi phân hệ làm việc")}</span>
                           </Link>
                         </DropdownMenuItem>
                       </>
@@ -526,19 +526,19 @@ export function Navbar() {
                         <DropdownMenuItem asChild>
                           <Link href="/partner?mode=owner" className="cursor-pointer py-2 text-xs font-semibold text-amber-700">
                             <BarChart3 className="mr-2 h-4 w-4 text-amber-600" />
-                            <span>Báo cáo doanh thu & Chi nhánh</span>
+                            <span>{t("partner_revenue_branches", "Báo cáo doanh thu & Chi nhánh")}</span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href="/partner/wallet" className="cursor-pointer py-2 text-xs">
                             <Wallet className="mr-2 h-4 w-4 text-amber-600" />
-                            <span>Ví đối tác & Rút tiền</span>
+                            <span>{t("partner_wallet_payout", "Ví đối tác & Rút tiền")}</span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href="/partner" className="cursor-pointer py-2 text-xs font-semibold text-slate-700">
                             <ArrowLeft className="mr-2 h-4 w-4 text-slate-500" />
-                            <span>Đổi phân hệ làm việc</span>
+                            <span>{t("partner_switch_module", "Đổi phân hệ làm việc")}</span>
                           </Link>
                         </DropdownMenuItem>
                       </>
@@ -548,7 +548,7 @@ export function Navbar() {
                       <DropdownMenuItem asChild>
                         <Link href="/partner" className="cursor-pointer py-2 text-xs font-semibold text-amber-700">
                           <Store className="mr-2 h-4 w-4 text-amber-600" />
-                          <span>Chọn phân hệ làm việc</span>
+                          <span>{t("partner_switch_module", "Chọn phân hệ làm việc")}</span>
                         </Link>
                       </DropdownMenuItem>
                     )}
