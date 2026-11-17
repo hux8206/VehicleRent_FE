@@ -144,8 +144,6 @@ function PartnerDashboardContent() {
   const [newBranchPhone, setNewBranchPhone] = useState(user?.phone || "");
   const [newBranchDeposit, setNewBranchDeposit] = useState<number>(15);
   const [newBranchDesc, setNewBranchDesc] = useState("");
-  const [newBranchBankAcc, setNewBranchBankAcc] = useState(user?.bankAccountNum || "");
-  const [newBranchBankName, setNewBranchBankName] = useState(user?.bankName || "Vietcombank");
   const [newBranchImage, setNewBranchImage] = useState("");
   const [isUploadingBranchImage, setIsUploadingBranchImage] = useState(false);
   const [isSubmittingBranch, setIsSubmittingBranch] = useState(false);
@@ -534,8 +532,8 @@ function PartnerDashboardContent() {
         description: newBranchDesc.trim() || undefined,
         storeImage: newBranchImage || undefined,
         depositPercent: newBranchDeposit,
-        bankAccountNum: newBranchBankAcc.trim(),
-        bankName: newBranchBankName,
+        bankAccountNum: user?.bankAccountNum || undefined,
+        bankName: user?.bankName || undefined,
         openTime: newBranchOpenTime,
         closeTime: newBranchCloseTime,
         cancelRule: "Hủy trước 24h được hoàn 100% cọc.",
@@ -2776,35 +2774,6 @@ function PartnerDashboardContent() {
                   className="text-xs h-10 rounded-xl font-bold"
                   required
                 />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">{t("partner_add_branch_bank_acc", "Số tài khoản ngân hàng *")}</Label>
-                <Input
-                  placeholder="Số tài khoản..."
-                  value={newBranchBankAcc}
-                  onChange={(e) => setNewBranchBankAcc(e.target.value)}
-                  className="text-xs h-10 rounded-xl"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">{t("partner_add_branch_bank_name", "Ngân hàng thụ hưởng *")}</Label>
-                <select
-                  value={newBranchBankName}
-                  onChange={(e) => setNewBranchBankName(e.target.value)}
-                  className="w-full h-10 px-3 text-xs rounded-xl border border-slate-200 bg-white font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                  required
-                >
-                  {VIETNAMESE_BANKS.map((b) => (
-                    <option key={b.code} value={b.shortName}>
-                      {b.shortName} - {b.name}
-                    </option>
-                  ))}
-                </select>
               </div>
             </div>
 

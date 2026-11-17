@@ -977,8 +977,8 @@ export const api = {
       depositPercent: number;
       cancelRule?: string;
       refundCondition?: string;
-      bankAccountNum: string;
-      bankName: string;
+      bankAccountNum?: string;
+      bankName?: string;
       openTime?: string;
       closeTime?: string;
     }) => {
