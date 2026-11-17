@@ -58,9 +58,10 @@ function detectImageTypeFromMagicBytes(buffer: Buffer): string | null {
 
 function isCloudinaryConfigured() {
   return Boolean(
-    process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
+    process.env.CLOUDINARY_URL ||
+    (process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET)
   );
 }
 
@@ -70,12 +71,16 @@ function uploadToCloudinary(
   filename: string,
   folder: string = "vehiclerent/img_store"
 ): Promise<string> {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure: true,
-  });
+  if (process.env.CLOUDINARY_URL) {
+    cloudinary.config({ secure: true });
+  } else {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+      secure: true,
+    });
+  }
 
   const publicId = filename.replace(/\.[^/.]+$/, "");
 
@@ -203,7 +208,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ url, success: true, storage: "r2", folder: targetFolder });
     }
 
-    // --- Phương án dự phòng: Lưu cục bộ vào public/uploads nếu chưa cấu hình Cloud ---
+    // --- Phương án dự phòng: Lưu cục bộ vào public/uploads nếu ở môi trường phát triển cục bộ (localhost) ---
+    // Trên Vercel / AWS Lambda (serverless) hoặc Production, filesystem là read-only, bắt buộc phải có Cloudinary/R2
+    const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NODE_ENV === "production");
+    if (isServerless) {
+      console.error(
+        "[API /api/upload] Serverless/Production environment detected but Cloud storage is not configured. Missing CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, or CLOUDINARY_API_SECRET."
+      );
+      return NextResponse.json(
+        {
+          error:
+            "Hệ thống lưu trữ ảnh đám mây (Cloudinary) chưa được cấu hình trên máy chủ Vercel. Vui lòng thêm các biến môi trường CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET trong cài đặt dự án Vercel để tiếp tục.",
+        },
+        { status: 500 }
+      );
+    }
+
     const subfolder = targetFolder.replace(/^vehiclerent\/?/, "") || "img_store";
     const uploadsDir = path.join(process.cwd(), "public", "uploads", subfolder);
     await mkdir(uploadsDir, { recursive: true });
@@ -214,8 +234,18 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url, success: true, storage: "local", folder: targetFolder });
   } catch (err: any) {
+    console.error("[API /api/upload Error]:", err);
+
+    // Bảo mật: Không để lộ đường dẫn file hệ thống /var/task/... ra client (theo AGENTS.md)
+    let errorMessage = "Không thể tải ảnh lên. Vui lòng thử lại sau.";
+    if (err.message && !err.message.includes("/var/task") && !err.message.includes("ENOENT") && !err.message.includes("EROFS")) {
+      errorMessage = err.message;
+    } else if (err.code === "ENOENT" || err.code === "EROFS" || err.message?.includes("/var/task")) {
+      errorMessage = "Hệ thống lưu trữ ảnh đám mây (Cloudinary) chưa được cấu hình trên máy chủ sản xuất. Vui lòng thiết lập biến môi trường CLOUDINARY trên Vercel.";
+    }
+
     return NextResponse.json(
-      { error: err.message || "Không thể tải ảnh lên" },
+      { error: errorMessage },
       { status: 500 }
     );
   }
