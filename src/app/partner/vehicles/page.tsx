@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api, VehicleModel, VehicleItem, Store, INITIAL_VEHICLE_MODELS } from "@/lib/api";
+import { getOptimizedImageUrl, getVehicleThumbnailUrl } from "@/lib/image-optimizer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -116,7 +117,27 @@ function PartnerVehiclesContent() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const storesData = await api.partner.getStores();
+      // Parallelize: check if we already have targetStoreId from query or storage
+      const initialTargetId = queryStoreId
+        ? Number(queryStoreId)
+        : typeof window !== "undefined" && localStorage.getItem("active_partner_store_id")
+        ? Number(localStorage.getItem("active_partner_store_id"))
+        : null;
+
+      let storesData: Store[] = [];
+      let preloadedModels: VehicleModel[] | null = null;
+
+      if (initialTargetId) {
+        const [storesRes, modelsRes] = await Promise.all([
+          api.partner.getStores(),
+          api.partner.getModels(initialTargetId).catch(() => []),
+        ]);
+        storesData = storesRes || [];
+        preloadedModels = modelsRes || [];
+      } else {
+        storesData = (await api.partner.getStores()) || [];
+      }
+
       setStores(storesData || []);
 
       const approved = (storesData || []).filter((s) => s.status === 1);
@@ -126,14 +147,8 @@ function PartnerVehiclesContent() {
 
       // Pick selected store from query param or localStorage or first approved
       let currentStore: Store | null = null;
-      const targetStoreId = queryStoreId
-        ? Number(queryStoreId)
-        : typeof window !== "undefined" && localStorage.getItem("active_partner_store_id")
-        ? Number(localStorage.getItem("active_partner_store_id"))
-        : null;
-
-      if (targetStoreId) {
-        currentStore = (storesData || []).find((s) => s.id === targetStoreId) || null;
+      if (initialTargetId) {
+        currentStore = (storesData || []).find((s) => s.id === initialTargetId) || null;
       }
       if (!currentStore && approved.length > 0) {
         currentStore = approved[0];
@@ -146,8 +161,16 @@ function PartnerVehiclesContent() {
         localStorage.setItem("active_partner_store_name", currentStore.storeName);
       }
 
-      // Load models strictly of currentStore
-      if (currentStore) {
+      // If models were already prefetched in parallel for currentStore, use them immediately
+      if (currentStore && preloadedModels && currentStore.id === initialTargetId) {
+        setModels(preloadedModels);
+        if (preloadedModels.length > 0) {
+          handleSelectModel(preloadedModels[0]);
+        } else {
+          setSelectedModel(null);
+          setItems([]);
+        }
+      } else if (currentStore) {
         await fetchModelsForStore(currentStore.id);
       } else {
         setModels([]);
@@ -720,9 +743,13 @@ function PartnerVehiclesContent() {
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="h-12 w-12 rounded-xl bg-slate-100 overflow-hidden shrink-0 border">
                             <img
-                              src={m.images?.[0] || "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=300&q=80"}
+                              src={getVehicleThumbnailUrl(m.images?.[0])}
                               alt={m.name ? `Ảnh đại diện dòng xe ${m.brand ? m.brand + " " : ""}${m.name}` : "Ảnh đại diện dòng xe"}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = getVehicleThumbnailUrl(null);
+                              }}
                               className="h-full w-full object-cover"
+                              loading="lazy"
                             />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -992,7 +1019,7 @@ function PartnerVehiclesContent() {
                 </div>
               ) : modelImage ? (
                 <div className="relative h-32 w-full rounded-xl overflow-hidden border bg-slate-100 group shadow-xs">
-                  <img src={modelImage} alt={modelName ? `Ảnh chụp mẫu xe ${modelName}` : "Ảnh chụp mẫu xe đối tác"} className="w-full h-full object-cover" />
+                  <img src={getOptimizedImageUrl(modelImage, { width: 500, height: 320, crop: "fill" })} alt={modelName ? `Ảnh chụp mẫu xe ${modelName}` : "Ảnh chụp mẫu xe đối tác"} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <button
                       type="button"
@@ -1121,7 +1148,7 @@ function PartnerVehiclesContent() {
                 </div>
               ) : editModelImage ? (
                 <div className="relative h-32 w-full rounded-xl overflow-hidden border bg-slate-100 group shadow-xs">
-                  <img src={editModelImage} alt={editModelName ? `Ảnh chụp cập nhật mẫu xe ${editModelName}` : "Ảnh chụp mẫu xe đối tác"} className="w-full h-full object-cover" />
+                  <img src={getOptimizedImageUrl(editModelImage, { width: 500, height: 320, crop: "fill" })} alt={editModelName ? `Ảnh chụp cập nhật mẫu xe ${editModelName}` : "Ảnh chụp mẫu xe đối tác"} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <button
                       type="button"

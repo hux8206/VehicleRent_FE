@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { api, Store, VehicleModel, PartnerWallet, Booking, StoreUpdateRequest, WalletHistory } from "@/lib/api";
+import { getOptimizedImageUrl, getStoreCardImageUrl } from "@/lib/image-optimizer";
 import { VIETNAMESE_BANKS } from "@/lib/constants";
 import { ProvinceCombobox } from "@/components/common/province-combobox";
 import { Button } from "@/components/ui/button";
@@ -1502,9 +1503,13 @@ function PartnerDashboardContent() {
                       <div className="flex items-start sm:items-center gap-3.5">
                         <div className="h-12 w-12 rounded-xl overflow-hidden border bg-slate-100 shrink-0">
                           <img
-                            src={s.storeImage || "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&q=80"}
+                            src={getStoreCardImageUrl(s.storeImage)}
                             alt={`Cửa hàng ${s.storeName} - ${s.address || ""}`}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = getStoreCardImageUrl(null);
+                            }}
                             className="w-full h-full object-cover"
+                            loading="lazy"
                           />
                         </div>
 
@@ -1694,9 +1699,13 @@ function PartnerDashboardContent() {
                           <div className="space-y-3.5">
                             <div className="relative h-44 w-full rounded-2xl overflow-hidden bg-slate-100 border">
                               <img
-                                src={s.storeImage || "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=80"}
+                                src={getStoreCardImageUrl(s.storeImage)}
                                 alt={`Mặt tiền cửa hàng ${s.storeName} - ${s.address || ""}`}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = getStoreCardImageUrl(null);
+                                }}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
                               />
                               <div className="absolute top-3 right-3">
                                 {s.status === 1 && (
@@ -2831,7 +2840,7 @@ function PartnerDashboardContent() {
               </div>
               {newBranchImage && (
                 <div className="h-24 w-40 rounded-xl overflow-hidden border mt-2">
-                  <img src={newBranchImage} alt="Xem trước ảnh mặt tiền chi nhánh mới" className="w-full h-full object-cover" />
+                  <img src={getOptimizedImageUrl(newBranchImage, { width: 320, height: 200, crop: "fill" })} alt="Xem trước ảnh mặt tiền chi nhánh mới" className="w-full h-full object-cover" />
                 </div>
               )}
             </div>
@@ -3027,7 +3036,7 @@ function PartnerDashboardContent() {
               </div>
               {updateImage && (
                 <div className="h-24 w-40 rounded-xl overflow-hidden border mt-2">
-                  <img src={updateImage} alt="Xem trước ảnh cập nhật mặt tiền chi nhánh" className="w-full h-full object-cover" />
+                  <img src={getOptimizedImageUrl(updateImage, { width: 320, height: 200, crop: "fill" })} alt="Xem trước ảnh cập nhật mặt tiền chi nhánh" className="w-full h-full object-cover" />
                 </div>
               )}
             </div>

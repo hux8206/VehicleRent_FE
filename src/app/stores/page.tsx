@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { api, Store } from "@/lib/api";
+import { getStoreCardImageUrl } from "@/lib/image-optimizer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProvinceCombobox } from "@/components/common/province-combobox";
@@ -166,12 +167,13 @@ export default function StoresPage() {
                     {/* Store Facade Image */}
                     <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                       <img
-                        src={
-                          store.storeImage ||
-                          "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80"
-                        }
+                        src={getStoreCardImageUrl(store.storeImage)}
                         alt={`Cửa hàng cho thuê xe ${store.storeName} tại ${store.province || store.address || "Đà Nẵng"}`}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = getStoreCardImageUrl(null);
+                        }}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
                       />
                       <div className="absolute top-3 left-3">
                         <span className="bg-emerald-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">

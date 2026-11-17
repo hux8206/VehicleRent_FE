@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, Store } from "@/lib/api";
+import { getOptimizedImageUrl } from "@/lib/image-optimizer";
 import { VIETNAMESE_BANKS } from "@/lib/constants";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
@@ -247,22 +248,24 @@ function PartnerOnboardingContent() {
           "Đã gửi yêu cầu thay đổi thông tin chi nhánh lên Ban quản trị sàn phê duyệt! Admin duyệt sẽ cập nhật vào chi nhánh hiện tại mà không tạo chi nhánh mới."
         );
       } else if (store && (store.status === 0 || store.status === 2)) {
-        // Cửa hàng đang chờ duyệt hoặc bị từ chối: Cập nhật thông tin chi nhánh hiện tại
-        const updated = await api.partner.updateStore(store.id, {
-          storeName,
-          province: province.trim() || undefined,
-          address,
-          phoneContact,
-          description,
-          storeImage,
-          openTime,
-          closeTime,
-        });
-        await api.partner.upsertRentalPolicy(store.id, {
-          depositPercent,
-          cancelRule,
-          refundCondition,
-        });
+        // Cửa hàng đang chờ duyệt hoặc bị từ chối: Cập nhật thông tin chi nhánh hiện tại (chạy song song)
+        const [updated] = await Promise.all([
+          api.partner.updateStore(store.id, {
+            storeName,
+            province: province.trim() || undefined,
+            address,
+            phoneContact,
+            description,
+            storeImage,
+            openTime,
+            closeTime,
+          }),
+          api.partner.upsertRentalPolicy(store.id, {
+            depositPercent,
+            cancelRule,
+            refundCondition,
+          }),
+        ]);
         setStore(updated);
         toast.success(
           store.status === 2
@@ -482,7 +485,7 @@ function PartnerOnboardingContent() {
                       </div>
                     ) : storeImage ? (
                       <div className="relative h-44 w-full sm:w-96 rounded-2xl overflow-hidden border bg-slate-100 group shadow-xs">
-                        <img src={storeImage} alt={storeName ? `Ảnh chụp mặt tiền cửa hàng ${storeName}` : "Ảnh chụp mặt tiền cửa hàng đối tác"} className="w-full h-full object-cover" />
+                        <img src={getOptimizedImageUrl(storeImage, { width: 500, height: 320, crop: "fill" })} alt={storeName ? `Ảnh chụp mặt tiền cửa hàng ${storeName}` : "Ảnh chụp mặt tiền cửa hàng đối tác"} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                           <button
                             type="button"

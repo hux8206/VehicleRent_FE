@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, useMotionValue, useTransform, useSpring, type Variants } from "framer-motion";
 import { api, VehicleModel, Promotion } from "@/lib/api";
+import { getOptimizedImageUrl, getVehicleCardImageUrl } from "@/lib/image-optimizer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -81,7 +82,7 @@ function HeroVehicleTiltCard() {
       >
         {/* Vehicle Image */}
         <img
-          src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=1200&q=80"
+          src={getOptimizedImageUrl("https://images.unsplash.com/photo-1558981403-c5f9899a28bc", { width: 1000, height: 600, crop: "fill" })}
           alt="Xe tay ga Honda Air Blade 125cc đời mới cho thuê tự lái"
           className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
         />
@@ -539,16 +540,13 @@ export default function HomePage() {
                           {/* Vehicle Image Container */}
                           <div className="relative h-52 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                             <img
-                              src={
-                                v.images && v.images.length > 0 && v.images[0]
-                                  ? v.images[0]
-                                  : DEFAULT_VEHICLE_IMG
-                              }
+                              src={getVehicleCardImageUrl(v.images?.[0])}
                               alt={`Dòng xe ${v.brand ? v.brand + " " : ""}${v.name || "cho thuê tự lái"} tại ${v.store?.storeName || "nhà xe đối tác"}`}
                               onError={(e) => {
-                                (e.target as HTMLImageElement).src = DEFAULT_VEHICLE_IMG;
+                                (e.target as HTMLImageElement).src = getVehicleCardImageUrl(null);
                               }}
                               className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                              loading="lazy"
                             />
 
                             {/* Category badge */}

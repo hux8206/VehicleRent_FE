@@ -62,7 +62,33 @@ function PartnerBookingsContent() {
   const fetchBookings = async (status?: number, silent = false) => {
     if (!silent) setIsLoading(true);
     try {
-      const storesData = await api.partner.getStores();
+      if (silent && selectedStore) {
+        // Fast polling: only refresh bookings for currently active store without refetching stores
+        const data = await api.partner.getBookings(status, selectedStore.id);
+        setBookings(data || []);
+        return;
+      }
+
+      const targetStoreId = queryStoreId
+        ? Number(queryStoreId)
+        : typeof window !== "undefined" && localStorage.getItem("active_partner_store_id")
+        ? Number(localStorage.getItem("active_partner_store_id"))
+        : null;
+
+      let storesData: Store[] = [];
+      let bookingsData: Booking[] = [];
+
+      if (targetStoreId) {
+        const [sRes, bRes] = await Promise.all([
+          api.partner.getStores(),
+          api.partner.getBookings(status, targetStoreId).catch(() => []),
+        ]);
+        storesData = sRes || [];
+        bookingsData = bRes || [];
+      } else {
+        storesData = (await api.partner.getStores()) || [];
+      }
+
       setStores(storesData || []);
 
       const approved = (storesData || []).filter((s) => s.status === 1);
@@ -73,12 +99,6 @@ function PartnerBookingsContent() {
         }
         return;
       }
-
-      const targetStoreId = queryStoreId
-        ? Number(queryStoreId)
-        : typeof window !== "undefined" && localStorage.getItem("active_partner_store_id")
-        ? Number(localStorage.getItem("active_partner_store_id"))
-        : null;
 
       let currentStore = targetStoreId
         ? (storesData || []).find((s) => s.id === targetStoreId) || null
@@ -94,8 +114,12 @@ function PartnerBookingsContent() {
         localStorage.setItem("active_partner_store_name", currentStore.storeName);
       }
 
-      const data = await api.partner.getBookings(status, currentStore ? currentStore.id : undefined);
-      setBookings(data || []);
+      if (currentStore && targetStoreId === currentStore.id && bookingsData.length >= 0) {
+        setBookings(bookingsData);
+      } else {
+        const data = await api.partner.getBookings(status, currentStore ? currentStore.id : undefined);
+        setBookings(data || []);
+      }
     } catch {
       // fallback
     } finally {

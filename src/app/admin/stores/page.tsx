@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { api, Store, StoreUpdateRequest } from "@/lib/api";
+import { getStoreCardImageUrl, getOptimizedImageUrl } from "@/lib/image-optimizer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -303,12 +304,13 @@ export default function AdminStoresPage() {
                           {/* Facade image */}
                           <div className="md:col-span-1 h-36 rounded-xl overflow-hidden border bg-slate-100">
                             <img
-                              src={
-                                s.storeImage ||
-                                "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80"
-                              }
+                              src={getStoreCardImageUrl(s.storeImage)}
                               alt={s.storeName ? `Mặt tiền cửa hàng ${s.storeName}` : "Mặt tiền cửa hàng đối tác"}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = getStoreCardImageUrl(null);
+                              }}
                               className="w-full h-full object-cover"
+                              loading="lazy"
                             />
                           </div>
 
@@ -698,7 +700,7 @@ export default function AdminStoresPage() {
                                             <span className="text-[11px] font-semibold text-slate-500 block">Ảnh hiện tại:</span>
                                             <div className="relative h-44 w-full rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
                                               <img
-                                                src={item.oldVal}
+                                                src={getOptimizedImageUrl(item.oldVal, { width: 500, height: 320, crop: "fill" })}
                                                 alt="Ảnh mặt tiền cửa hàng hiện tại"
                                                 className="w-full h-full object-cover"
                                               />
@@ -712,7 +714,7 @@ export default function AdminStoresPage() {
                                           </span>
                                           <div className="relative h-44 w-full rounded-xl overflow-hidden border-2 border-emerald-500 shadow-md bg-slate-100 group">
                                             <img
-                                              src={item.newVal}
+                                              src={getOptimizedImageUrl(item.newVal, { width: 500, height: 320, crop: "fill" })}
                                               alt="Ảnh mặt tiền cửa hàng mới gửi duyệt"
                                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                             />

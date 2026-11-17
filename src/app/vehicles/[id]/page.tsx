@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, VehicleModel } from "@/lib/api";
+import { getVehicleDetailImageUrl, getVehicleThumbnailUrl } from "@/lib/image-optimizer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -191,14 +192,10 @@ export default function VehicleDetailPage() {
             <div className="space-y-3">
               <div className="h-80 sm:h-96 w-full rounded-2xl overflow-hidden border bg-white shadow-xs">
                 <img
-                  src={
-                    selectedImg ||
-                    "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80"
-                  }
+                  src={getVehicleDetailImageUrl(selectedImg)}
                   alt={`Hình ảnh xe ${model.brand ? model.brand + " " : ""}${model.name || "cho thuê tự lái"} tại nhà xe ${model.store?.storeName || ""}`}
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80";
+                    (e.target as HTMLImageElement).src = getVehicleDetailImageUrl(null);
                   }}
                   className="w-full h-full object-cover"
                 />
@@ -215,7 +212,7 @@ export default function VehicleDetailPage() {
                       className={`h-20 w-24 rounded-xl overflow-hidden border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${selectedImg === img ? "border-blue-600 ring-2 ring-blue-600/30" : "border-slate-200 opacity-70 hover:opacity-100"
                         }`}
                     >
-                      <img src={img} alt={`${model.name || "Dòng xe"} - Ảnh chi tiết ${idx + 1}`} className="w-full h-full object-cover" />
+                      <img src={getVehicleThumbnailUrl(img)} alt={`${model.name || "Dòng xe"} - Ảnh chi tiết ${idx + 1}`} className="w-full h-full object-cover" loading="lazy" />
                     </button>
                   ))}
                 </div>

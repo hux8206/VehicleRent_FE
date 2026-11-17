@@ -380,40 +380,127 @@ export function setAuthToken(token: string | null, role?: number | null) {
   }
 }
 
+// ── Query Cache & Deduplication Layer (React-Query style staleTime) ──────────
+
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+  staleTime: number;
+}
+
+const apiCache = new Map<string, CacheEntry>();
+const inFlightRequests = new Map<string, Promise<any>>();
+
+export function clearApiCache(filterPrefix?: string) {
+  if (!filterPrefix) {
+    apiCache.clear();
+  } else {
+    Array.from(apiCache.keys()).forEach((key) => {
+      if (key.includes(filterPrefix)) {
+        apiCache.delete(key);
+      }
+    });
+  }
+}
+
+export interface RequestOptions extends RequestInit {
+  staleTime?: number; // ms to keep data fresh, default 0
+  bypassCache?: boolean; // if true, ignore cached data
+}
+
 async function request<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestOptions = {}
 ): Promise<T> {
+  const method = (options.method || "GET").toUpperCase();
   const token = getAuthToken();
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options.headers as Record<string, string>),
-  };
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+
+  // On state-changing mutations (POST, PUT, PATCH, DELETE), purge cached queries
+  if (method !== "GET") {
+    clearApiCache();
   }
 
-  const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
-
-  if (!res.ok) {
-    const errorBody = await res.json().catch(() => ({}));
-    let msg = `Yêu cầu thất bại (${res.status} ${res.statusText})`;
-    if (errorBody) {
-      if (Array.isArray(errorBody.message)) {
-        msg = errorBody.message.join(", ");
-      } else if (typeof errorBody.message === "string") {
-        msg = errorBody.message;
-      } else if (typeof errorBody.error === "string") {
-        msg = errorBody.error;
-      }
+  // Determine caching rules for GET requests
+  const isGet = method === "GET";
+  let effectiveStaleTime = options.staleTime ?? 0;
+  if (isGet && options.staleTime === undefined) {
+    if (endpoint.includes("/system-config") || endpoint.includes("/config")) {
+      effectiveStaleTime = 60_000; // 1 minute
+    } else if (endpoint.includes("/promotions")) {
+      effectiveStaleTime = 30_000; // 30 seconds
+    } else if (endpoint.includes("/stores") && !endpoint.includes("/partner/") && !endpoint.includes("/admin/")) {
+      effectiveStaleTime = 15_000; // 15 seconds for public store list
     }
-    throw new Error(msg);
   }
 
-  return res.json();
+  const cacheKey = `${token || "anon"}:${endpoint}`;
+
+  // Check cache for fresh data
+  if (isGet && !options.bypassCache && effectiveStaleTime > 0) {
+    const cached = apiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < cached.staleTime) {
+      return cached.data as T;
+    }
+  }
+
+  // Deduplicate in-flight GET requests
+  if (isGet && !options.bypassCache && inFlightRequests.has(cacheKey)) {
+    return inFlightRequests.get(cacheKey) as Promise<T>;
+  }
+
+  const execute = async (): Promise<T> => {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...(options.headers as Record<string, string>),
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const { staleTime: _st, bypassCache: _bc, ...fetchOptions } = options;
+
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...fetchOptions,
+      headers,
+    });
+
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => ({}));
+      let msg = `Yêu cầu thất bại (${res.status} ${res.statusText})`;
+      if (errorBody) {
+        if (Array.isArray(errorBody.message)) {
+          msg = errorBody.message.join(", ");
+        } else if (typeof errorBody.message === "string") {
+          msg = errorBody.message;
+        } else if (typeof errorBody.error === "string") {
+          msg = errorBody.error;
+        }
+      }
+      throw new Error(msg);
+    }
+
+    const data = await res.json();
+
+    if (isGet && effectiveStaleTime > 0) {
+      apiCache.set(cacheKey, {
+        data,
+        timestamp: Date.now(),
+        staleTime: effectiveStaleTime,
+      });
+    }
+
+    return data;
+  };
+
+  if (isGet && !options.bypassCache) {
+    const promise = execute().finally(() => {
+      inFlightRequests.delete(cacheKey);
+    });
+    inFlightRequests.set(cacheKey, promise);
+    return promise;
+  }
+
+  return execute();
 }
 
 // ── Local Mock Fallback Data (Seed) ──────────────────────────────────────────
@@ -533,6 +620,9 @@ export const INITIAL_VEHICLE_MODELS: VehicleModel[] = [
 // ── Exported API Methods ──────────────────────────────────────────────────────
 
 export const api = {
+  cache: {
+    clear: clearApiCache,
+  },
   auth: {
     login: async (dto: { email: string; password: string }) => {
       const data = await request<{ accessToken: string; user: User }>(

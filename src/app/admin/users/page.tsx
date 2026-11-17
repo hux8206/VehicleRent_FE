@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { api, User, UserDetail } from "@/lib/api";
+import { getVehicleThumbnailUrl } from "@/lib/image-optimizer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -805,10 +806,7 @@ export default function AdminUsersPage() {
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {displayedModels.map((m) => {
-                            const coverImg =
-                              m.images && m.images.length > 0
-                                ? m.images[0]
-                                : "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=400&q=80";
+                            const coverImg = getVehicleThumbnailUrl(m.images?.[0]);
 
                             return (
                               <div
@@ -821,7 +819,7 @@ export default function AdminUsersPage() {
                                     className="h-20 w-24 rounded-xl overflow-hidden bg-slate-100 border shrink-0 cursor-pointer relative group"
                                     title="Nhấn để phóng to ảnh"
                                   >
-                                    <img src={coverImg} alt={`Dòng xe ${m.brand ? m.brand + " " : ""}${m.name || ""}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                    <img src={coverImg} alt={`Dòng xe ${m.brand ? m.brand + " " : ""}${m.name || ""}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
                                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                       <ZoomIn className="h-4 w-4 text-white" />
                                     </div>

@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { VehicleModel } from "@/lib/api";
+import { getOptimizedImageUrl } from "@/lib/image-optimizer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/context/language-context";
@@ -139,10 +140,7 @@ export function VehicleCompareModal({
             <div className={`grid grid-cols-1 md:grid-cols-${vehicles.length} gap-4`}>
               {vehicles.map((v, idx) => {
                 const spec = typeSpecs[v.type] || typeSpecs[1];
-                const coverImg =
-                  v.images && v.images.length > 0
-                    ? v.images[0]
-                    : "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=600&q=80";
+                const coverImg = getOptimizedImageUrl(v.images?.[0], { width: 400, height: 260, crop: "fill" });
 
                 return (
                   <div
@@ -307,11 +305,7 @@ export function FloatingCompareBar({
                 className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full pl-1.5 pr-2 py-1 text-xs text-slate-800 dark:text-slate-200"
               >
                 <img
-                  src={
-                    v.images && v.images.length > 0
-                      ? v.images[0]
-                      : "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=100&q=80"
-                  }
+                  src={getOptimizedImageUrl(v.images?.[0], { width: 80, height: 80, crop: "fill" })}
                   alt={`Thu nhỏ dòng xe ${v.name || ""}`}
                   className="h-5 w-5 rounded-full object-cover"
                 />

@@ -233,19 +233,6 @@ export default function CustomerBookingsPage() {
           fetchBookings();
           return;
         }
-
-        const data = await api.customer.getMyBookings();
-        const found = data.find((b: Booking) => b.id === targetBookingId);
-        if (found && (found.status === 1 || (found as any).bookingStatus === 1 || (found as any).bookingStatus === 4)) {
-          clearInterval(pollInterval);
-          setBookings(data);
-          setQrModalBooking(null);
-          setQrData(null);
-          toast.success(
-            t("booking_paid_success", "🎉 Đã nhận thanh toán cọc thành công! Đơn xe đã được xác nhận (Confirmed)."),
-            { duration: 5000 }
-          );
-        }
       } catch {
         // bỏ qua lỗi trong lúc poll
       }

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, Store, VehicleModel, Review } from "@/lib/api";
+import { getStoreBannerImageUrl, getVehicleCardImageUrl } from "@/lib/image-optimizer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -104,8 +105,11 @@ export default function StoreDetailPage() {
         <div className="rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
           <div className="relative h-64 sm:h-72 w-full bg-slate-900">
             <img
-              src={store.storeImage || "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=1200&q=80"}
+              src={getStoreBannerImageUrl(store.storeImage)}
               alt={`Hình ảnh mặt tiền nhà xe ${store.storeName} - ${store.province || store.address || ""}`}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = getStoreBannerImageUrl(null);
+              }}
               className="w-full h-full object-cover opacity-80"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
@@ -224,13 +228,13 @@ export default function StoreDetailPage() {
                       <div>
                         <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
                           <img
-                            src={
-                              v.images && v.images[0]
-                                ? v.images[0]
-                                : "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80"
-                            }
+                            src={getVehicleCardImageUrl(v.images?.[0])}
                             alt={`Dòng xe ${v.brand ? v.brand + " " : ""}${v.name || ""} tại ${store.storeName}`}
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = getVehicleCardImageUrl(null);
+                            }}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
                           />
                           <div className="absolute top-3 left-3 flex gap-1.5">
                             <span className="bg-white/95 text-slate-900 font-bold text-[10px] px-2.5 py-1 rounded-full shadow-xs">

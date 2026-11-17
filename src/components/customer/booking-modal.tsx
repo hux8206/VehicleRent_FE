@@ -276,18 +276,6 @@ export function BookingModal({
           router.push("/customer/bookings");
           return;
         }
-
-        const bookings = await api.customer.getMyBookings();
-        const found: any = bookings.find((b: any) => b.id === targetBookingId);
-        if (found && (found.status === 1 || found.bookingStatus === 1 || found.bookingStatus === 4)) {
-          clearInterval(pollInterval);
-          toast.success(
-            "🎉 Thanh toán thành công! Đơn xe của bạn đã được xác nhận (Confirmed).",
-            { duration: 5000 }
-          );
-          onClose();
-          router.push("/customer/bookings");
-        }
       } catch {
         // bỏ qua lỗi mạng tạm thời trong lúc poll
       }
