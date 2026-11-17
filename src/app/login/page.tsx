@@ -40,13 +40,26 @@ function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl");
   const errorParam = searchParams.get("error");
 
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string; general?: string }>({});
+
+  // Nếu người dùng đã đăng nhập từ trước, tự động chuyển hướng đến phân hệ tương ứng
+  useEffect(() => {
+    if (user) {
+      if (user.role === 0) {
+        window.location.href = callbackUrl && callbackUrl.startsWith("/admin") ? callbackUrl : "/admin";
+      } else if (user.role === 1) {
+        window.location.href = callbackUrl && callbackUrl.startsWith("/partner") ? callbackUrl : "/partner";
+      } else {
+        window.location.href = callbackUrl && !callbackUrl.startsWith("/admin") && !callbackUrl.startsWith("/partner") ? callbackUrl : "/";
+      }
+    }
+  }, [user, callbackUrl]);
 
   // ── Forgot & Reset Password States ──────────────────────────────────────────
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
@@ -142,9 +155,9 @@ function LoginForm() {
 
   useEffect(() => {
     if (errorParam === "unauthorized") {
-      setFieldErrors({ general: t("toast_fill_required", "Vui lòng đăng nhập để tiếp tục truy cập trang này.") });
+      setFieldErrors({ general: t("auth_unauthorized_hint", "Vui lòng đăng nhập để tiếp tục truy cập trang này.") });
     } else if (errorParam === "forbidden") {
-      setFieldErrors({ general: "Tài khoản của bạn không có quyền truy cập vào phân hệ này." });
+      setFieldErrors({ general: t("auth_forbidden_hint", "Tài khoản của bạn không có quyền truy cập vào phân hệ này.") });
     }
   }, [errorParam, t]);
 
@@ -170,29 +183,34 @@ function LoginForm() {
     try {
       const loggedUser = await login(email.trim(), password);
       toast.success(`${t("toast_login_success", "Đăng nhập thành công!")} ${loggedUser.fullName}.`);
+      setFieldErrors({});
 
-      // Intelligent Redirection based on role
+      // Intelligent Redirection based on role & callbackUrl
+      let destination = "/";
       if (loggedUser.role === 0) {
-        router.push("/admin");
+        destination = callbackUrl && callbackUrl.startsWith("/admin") ? callbackUrl : "/admin";
       } else if (loggedUser.role === 1) {
-        try {
-          const stores = await api.partner.getStores();
-          const hasActiveStore = stores.some((s) => s.status === 1);
-          if (hasActiveStore) {
-            router.push("/partner");
-          } else {
-            router.push("/partner/onboarding");
+        if (callbackUrl && callbackUrl.startsWith("/partner")) {
+          destination = callbackUrl;
+        } else {
+          try {
+            const stores = await api.partner.getStores();
+            const hasActiveStore = Array.isArray(stores) && stores.some((s) => s.status === 1);
+            destination = hasActiveStore ? "/partner" : "/partner/onboarding";
+          } catch {
+            destination = "/partner/onboarding";
           }
-        } catch {
-          router.push("/partner/onboarding");
         }
       } else {
-        if (callbackUrl && !callbackUrl.startsWith("/admin") && !callbackUrl.startsWith("/partner")) {
-          router.push(callbackUrl);
-        } else {
-          router.push("/");
-        }
+        destination =
+          callbackUrl && !callbackUrl.startsWith("/admin") && !callbackUrl.startsWith("/partner")
+            ? callbackUrl
+            : "/";
       }
+
+      // Hard navigation to reset Next.js client router cache and guarantee cookie delivery to middleware
+      window.location.href = destination;
+      return;
     } catch (err: any) {
       let msg = err.message || t("toast_login_failed", "Email hoặc mật khẩu không chính xác.");
       if (msg === "Failed to fetch" || msg.includes("Failed to fetch") || msg.includes("NetworkError")) {

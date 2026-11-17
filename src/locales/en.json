@@ -385,6 +385,8 @@
   "toast_register_success": "Account registered successfully!",
   "toast_register_failed": "Registration failed. Please verify your details.",
   "toast_fill_required": "Please fill in all required fields!",
+  "auth_unauthorized_hint": "Please log in to continue accessing this page.",
+  "auth_forbidden_hint": "Your account does not have permission to access this portal.",
   "toast_server_error": "Could not connect to server. Please try again later.",
 
   "footer_tagline": "Vietnam's leading self-drive motorbike and automobile rental platform. Seamlessly connecting renters with verified vehicle hosts nationwide.",

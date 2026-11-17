@@ -75,7 +75,7 @@ function RegisterForm() {
           password,
         });
         toast.success(t("toast_register_success", "Đăng ký tài khoản Đối tác thành công! Hãy thiết lập hồ sơ cửa hàng."));
-        router.push("/partner/onboarding");
+        window.location.href = "/partner/onboarding";
       } else {
         await registerCustomer({
           fullName: fullName.trim(),
@@ -84,7 +84,7 @@ function RegisterForm() {
           password,
         });
         toast.success(t("toast_register_success", "Đăng ký tài khoản Khách thuê thành công! Chào mừng bạn."));
-        router.push("/");
+        window.location.href = "/";
       }
     } catch (err: any) {
       let msg = err.message || t("toast_register_failed", "Đăng ký thất bại. Email có thể đã được sử dụng.");

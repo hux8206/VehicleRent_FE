@@ -385,6 +385,8 @@
   "toast_register_success": "Đăng ký tài khoản thành công!",
   "toast_register_failed": "Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.",
   "toast_fill_required": "Vui lòng nhập đầy đủ các trường bắt buộc!",
+  "auth_unauthorized_hint": "Vui lòng đăng nhập để tiếp tục truy cập trang này.",
+  "auth_forbidden_hint": "Tài khoản của bạn không có quyền truy cập vào phân hệ này.",
   "toast_server_error": "Không thể kết nối máy chủ. Vui lòng thử lại sau.",
 
   "footer_tagline": "Nền tảng công nghệ cho thuê xe máy và ô tô tự lái hàng đầu Việt Nam. Kết nối khách thuê với mạng lưới đối tác nhà xe chính chủ trên toàn quốc.",

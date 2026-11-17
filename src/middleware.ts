@@ -3,8 +3,15 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("accessToken")?.value;
-  const userRole = request.cookies.get("userRole")?.value;
+  const token = request.cookies.get("accessToken")?.value?.trim();
+  const userRole = request.cookies.get("userRole")?.value?.trim();
+
+  // If already logged in, redirect away from login/register unless there's an explicit error param
+  if ((pathname === "/login" || pathname === "/register") && token && userRole && !request.nextUrl.searchParams.has("error")) {
+    if (userRole === "0") return NextResponse.redirect(new URL("/admin", request.url));
+    if (userRole === "1") return NextResponse.redirect(new URL("/partner", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 
   // Protect Admin Routes (/admin/*)
   if (pathname.startsWith("/admin")) {
@@ -54,6 +61,8 @@ export const config = {
     "/partner/:path*",
     "/customer/bookings/:path*",
     "/profile/:path*",
+    "/login",
+    "/register",
   ],
 };
 

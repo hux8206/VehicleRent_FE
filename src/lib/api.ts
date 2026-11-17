@@ -365,18 +365,21 @@ export function getAuthToken(): string | null {
 
 export function setAuthToken(token: string | null, role?: number | null) {
   if (typeof window === "undefined") return;
+  const isHttps = window.location.protocol === "https:";
+  const secureFlag = isHttps ? "; Secure" : "";
+
   if (token) {
     localStorage.setItem("accessToken", token);
-    document.cookie = `accessToken=${token}; path=/; max-age=604800; SameSite=Lax`;
+    document.cookie = `accessToken=${token}; path=/; max-age=604800; SameSite=Lax${secureFlag}`;
     if (role !== undefined && role !== null) {
       localStorage.setItem("userRole", String(role));
-      document.cookie = `userRole=${role}; path=/; max-age=604800; SameSite=Lax`;
+      document.cookie = `userRole=${role}; path=/; max-age=604800; SameSite=Lax${secureFlag}`;
     }
   } else {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("userRole");
-    document.cookie = "accessToken=; path=/; max-age=0";
-    document.cookie = "userRole=; path=/; max-age=0";
+    document.cookie = `accessToken=; path=/; max-age=0; SameSite=Lax${secureFlag}`;
+    document.cookie = `userRole=; path=/; max-age=0; SameSite=Lax${secureFlag}`;
   }
 }
 
