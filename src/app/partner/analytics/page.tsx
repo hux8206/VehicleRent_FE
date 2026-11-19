@@ -70,7 +70,8 @@ function PartnerAnalyticsContent() {
   const { user } = useAuth();
 
   // Mode: "owner" (Chủ chuỗi) | "branch" (Nhân viên / Quản lý điểm thuê)
-  const initialMode = searchParams.get("mode") === "owner" ? "owner" : "branch";
+  const isOwnerSession = searchParams.get("mode") === "owner";
+  const initialMode = isOwnerSession ? "owner" : "branch";
   const [currentMode, setCurrentMode] = useState<"owner" | "branch">(initialMode);
 
   // Selected Store ID (null = "Tất cả chi nhánh" - chỉ khả dụng ở mode owner)
@@ -606,35 +607,37 @@ function PartnerAnalyticsContent() {
 
         {/* Action Controls: Switch Mode & Export Dropdown */}
         <div className="flex flex-wrap items-center gap-3">
-          {/* Mode Switcher */}
-          <div className="bg-slate-200 dark:bg-slate-800 p-1 rounded-xl flex items-center text-xs font-bold shadow-2xs">
-            <button
-              onClick={() => {
-                setCurrentMode("branch");
-                router.replace(`/partner/analytics?mode=branch${selectedStoreId ? `&storeId=${selectedStoreId}` : ""}`);
-              }}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                currentMode === "branch"
-                  ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-              }`}
-            >
-              Cơ sở / điểm thuê
-            </button>
-            <button
-              onClick={() => {
-                setCurrentMode("owner");
-                router.replace("/partner/analytics?mode=owner");
-              }}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                currentMode === "owner"
-                  ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs"
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-              }`}
-            >
-              Chủ chuỗi (toàn sàn)
-            </button>
-          </div>
+          {/* Mode Switcher - Chỉ hiển thị cho phân hệ Chủ Cửa Hàng, ẩn hoàn toàn khi ở phân hệ nhân viên */}
+          {isOwnerSession && (
+            <div className="bg-slate-200 dark:bg-slate-800 p-1 rounded-xl flex items-center text-xs font-bold shadow-2xs">
+              <button
+                onClick={() => {
+                  setCurrentMode("branch");
+                  router.replace(`/partner/analytics?mode=branch${selectedStoreId ? `&storeId=${selectedStoreId}` : ""}`);
+                }}
+                className={`px-3 py-1.5 rounded-lg transition-all ${
+                  currentMode === "branch"
+                    ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                }`}
+              >
+                Cơ sở / điểm thuê
+              </button>
+              <button
+                onClick={() => {
+                  setCurrentMode("owner");
+                  router.replace("/partner/analytics?mode=owner");
+                }}
+                className={`px-3 py-1.5 rounded-lg transition-all ${
+                  currentMode === "owner"
+                    ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                }`}
+              >
+                Chủ chuỗi (toàn sàn)
+              </button>
+            </div>
+          )}
 
           {/* Export Report Dropdown (Excel XLSX & CSV) */}
           <DropdownMenu>

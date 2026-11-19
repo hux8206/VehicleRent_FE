@@ -1280,7 +1280,9 @@ export const api = {
     createWalkInBooking: async (dto: {
       storeId: number;
       modelId: number;
-      vehicleItemId: number;
+      vehicleItemId?: number;
+      vehicleItemIds?: number[];
+      quantity?: number;
       customerName: string;
       customerPhone: string;
       customerEmail?: string;

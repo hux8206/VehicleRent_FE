@@ -68,7 +68,8 @@ function PartnerBookingsContent() {
   const [isLoadingWalkInModels, setIsLoadingWalkInModels] = useState(false);
   const [walkInSelectedModelId, setWalkInSelectedModelId] = useState<number | null>(null);
   const [walkInVehicleItems, setWalkInVehicleItems] = useState<VehicleItem[]>([]);
-  const [walkInSelectedItemId, setWalkInSelectedItemId] = useState<number | null>(null);
+  const [walkInQuantity, setWalkInQuantity] = useState<number>(1);
+  const [walkInSelectedItemIds, setWalkInSelectedItemIds] = useState<number[]>([]);
   const [isLoadingItems, setIsLoadingItems] = useState(false);
 
   const [walkInCustomerName, setWalkInCustomerName] = useState("");
@@ -78,7 +79,6 @@ function PartnerBookingsContent() {
   const [walkInStartTime, setWalkInStartTime] = useState("");
   const [walkInEndTime, setWalkInEndTime] = useState("");
   const [walkInRentPrice, setWalkInRentPrice] = useState<number>(0);
-  const [walkInDepositAmount, setWalkInDepositAmount] = useState<number>(0);
   const [walkInTotalAmount, setWalkInTotalAmount] = useState<number>(0);
   const [walkInNote, setWalkInNote] = useState("");
   const [walkInHandoverNow, setWalkInHandoverNow] = useState(true);
@@ -284,21 +284,22 @@ function PartnerBookingsContent() {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  const recalcWalkInPrices = (startStr: string, endStr: string, price: number, depositPct: number) => {
-    if (!startStr || !endStr) return;
+  const recalcWalkInPrices = (startStr: string, endStr: string, price: number, qty: number = 1) => {
+    const validQty = Math.max(1, qty);
+    if (!startStr || !endStr) {
+      setWalkInTotalAmount(price * validQty);
+      return;
+    }
     const start = new Date(startStr);
     const end = new Date(endStr);
     if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
-      setWalkInTotalAmount(price);
-      setWalkInDepositAmount(Math.round((price * depositPct) / 100));
+      setWalkInTotalAmount(price * validQty);
       return;
     }
     const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
     const days = Math.max(1, Math.ceil(diffHours / 24));
-    const total = Math.round(days * price);
-    const deposit = Math.round((total * depositPct) / 100);
+    const total = Math.round(days * price * validQty);
     setWalkInTotalAmount(total);
-    setWalkInDepositAmount(deposit);
   };
 
   const loadItemsForModel = async (modelId: number) => {
@@ -308,13 +309,16 @@ function PartnerBookingsContent() {
       const availableItems = (items || []).filter((it) => it.status === 0);
       setWalkInVehicleItems(availableItems);
       if (availableItems.length > 0) {
-        setWalkInSelectedItemId(availableItems[0].id);
+        setWalkInQuantity(1);
+        setWalkInSelectedItemIds([availableItems[0].id]);
       } else {
-        setWalkInSelectedItemId(null);
+        setWalkInQuantity(1);
+        setWalkInSelectedItemIds([]);
       }
     } catch {
       setWalkInVehicleItems([]);
-      setWalkInSelectedItemId(null);
+      setWalkInQuantity(1);
+      setWalkInSelectedItemIds([]);
     } finally {
       setIsLoadingItems(false);
     }
@@ -341,6 +345,8 @@ function PartnerBookingsContent() {
     setWalkInDriverLicense("");
     setWalkInNote("Khách thuê trực tiếp tại quầy");
     setWalkInHandoverNow(true);
+    setWalkInQuantity(1);
+    setWalkInSelectedItemIds([]);
     setIsWalkInModalOpen(true);
 
     setIsLoadingWalkInModels(true);
@@ -352,13 +358,12 @@ function PartnerBookingsContent() {
         setWalkInSelectedModelId(firstModel.id);
         const price = Number(firstModel.rentPrice) || 0;
         setWalkInRentPrice(price);
-        const depositPct = Number(selectedStore.rentalPolicy?.depositPercent || 15);
-        recalcWalkInPrices(startStr, endStr, price, depositPct);
+        recalcWalkInPrices(startStr, endStr, price, 1);
         await loadItemsForModel(firstModel.id);
       } else {
         setWalkInSelectedModelId(null);
         setWalkInVehicleItems([]);
-        setWalkInSelectedItemId(null);
+        setWalkInSelectedItemIds([]);
       }
     } catch {
       toast.error("Không thể tải danh sách dòng xe.");
@@ -372,16 +377,15 @@ function PartnerBookingsContent() {
     const model = walkInModels.find((m) => m.id === modelId);
     const price = model ? Number(model.rentPrice) || 0 : 0;
     setWalkInRentPrice(price);
-    const depositPct = Number(selectedStore?.rentalPolicy?.depositPercent || 15);
-    recalcWalkInPrices(walkInStartTime, walkInEndTime, price, depositPct);
+    setWalkInQuantity(1);
+    recalcWalkInPrices(walkInStartTime, walkInEndTime, price, 1);
     await loadItemsForModel(modelId);
   };
 
   const handleWalkInTimeChange = (startStr: string, endStr: string) => {
     setWalkInStartTime(startStr);
     setWalkInEndTime(endStr);
-    const depositPct = Number(selectedStore?.rentalPolicy?.depositPercent || 15);
-    recalcWalkInPrices(startStr, endStr, walkInRentPrice, depositPct);
+    recalcWalkInPrices(startStr, endStr, walkInRentPrice, walkInQuantity);
   };
 
   const handleCreateWalkInBookingSubmit = async (e: React.FormEvent) => {
@@ -402,8 +406,13 @@ function PartnerBookingsContent() {
       toast.error("Vui lòng chọn dòng xe thuê!");
       return;
     }
-    if (!walkInSelectedItemId) {
-      toast.error("Dòng xe này hiện không có xe nào sẵn sàng (status = 0). Vui lòng chọn dòng xe khác!");
+    if (!walkInSelectedItemIds.length || walkInSelectedItemIds.some((id) => !id)) {
+      toast.error("Vui lòng chọn đủ biển số xe bàn giao cho số lượng xe đã chọn!");
+      return;
+    }
+    const uniqueIds = new Set(walkInSelectedItemIds);
+    if (uniqueIds.size !== walkInSelectedItemIds.length) {
+      toast.error("Biển số xe bàn giao không được trùng nhau!");
       return;
     }
     const start = new Date(walkInStartTime);
@@ -418,7 +427,9 @@ function PartnerBookingsContent() {
       await api.partner.createWalkInBooking({
         storeId: selectedStore.id,
         modelId: walkInSelectedModelId,
-        vehicleItemId: walkInSelectedItemId,
+        vehicleItemId: walkInSelectedItemIds[0],
+        vehicleItemIds: walkInSelectedItemIds,
+        quantity: walkInQuantity,
         customerName: walkInCustomerName.trim(),
         customerPhone: walkInCustomerPhone.trim(),
         customerEmail: walkInCustomerEmail.trim() || undefined,
@@ -426,7 +437,7 @@ function PartnerBookingsContent() {
         startTime: start.toISOString(),
         endTime: end.toISOString(),
         rentPrice: Number(walkInRentPrice),
-        depositAmount: Number(walkInDepositAmount),
+        depositAmount: 0,
         totalAmount: Number(walkInTotalAmount),
         note: walkInNote.trim() || undefined,
         handoverNow: walkInHandoverNow,
@@ -712,157 +723,97 @@ function PartnerBookingsContent() {
                         </div>
 
                         {/* Handover Plate Info */}
-                        {assignedVehicles.length > 0 && (
-                          <div className="pt-1 flex flex-wrap items-center gap-2">
-                            <span className="text-xs font-semibold text-slate-700">
-                              {isActive || isCompleted
-                                ? "Biển số bàn giao: "
-                                : isCancelled
-                                ? "Xe dự kiến (Đã giải phóng): "
-                                : "Xe giữ chỗ: "}
-                            </span>
+                        {assignedVehicles.length > 0 && !isCancelled && (
+                          <div className="pt-1 flex flex-wrap items-center gap-1.5">
+                            <span className="text-xs font-semibold text-slate-700">Biển số bàn giao:</span>
                             {assignedVehicles.map((vi) => (
                               <span
                                 key={vi.id}
-                                className={`font-mono font-bold text-xs px-2.5 py-0.5 rounded-lg flex items-center gap-1.5 ${
-                                  isCancelled
-                                    ? "bg-slate-100 text-slate-500 border border-slate-200 line-through decoration-slate-400"
-                                    : "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                                }`}
+                                className="font-mono font-bold text-xs px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200"
                               >
-                                {vi.licensePlate} ({vi.color || "Tiêu chuẩn"})
-                                {isCancelled ? (
-                                  <span className="text-[10px] bg-slate-200 text-slate-700 font-sans px-1.5 py-0.2 rounded font-semibold no-underline">
-                                    Đã nhả về kho
-                                  </span>
-                                ) : !isActive && !isCompleted ? (
-                                  <span className="text-[10px] bg-amber-100 text-amber-800 font-sans px-1.5 py-0.2 rounded font-semibold">
-                                    Đang giữ chỗ
-                                  </span>
-                                ) : null}
+                                {vi.licensePlate}
                               </span>
                             ))}
                           </div>
                         )}
 
-                        {/* Cancellation & Refund Details Banner for Partner */}
+                        {/* Cancellation & Refund Details - Tinh gọn 1 hộp súc tích */}
                         {isCancelled && (
-                          <div className="mt-3 p-3.5 bg-rose-50/70 border border-rose-200 rounded-xl text-xs space-y-2">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                              <span className="font-bold text-rose-900 flex items-center gap-1.5">
-                                <XCircle className="h-4 w-4 text-rose-600 shrink-0" />
-                                Đơn thuê đã bị hủy
-                                {b.cancelTime && (
-                                  <span className="font-normal text-slate-500 text-[11px]">
-                                    (Lúc {new Date(b.cancelTime).toLocaleString("vi-VN")})
-                                  </span>
-                                )}
-                              </span>
-                              {b.refundStatus === 1 ? (
-                                <Badge className="bg-emerald-600 text-white text-[10px] gap-1 shrink-0 w-fit">
-                                  <CheckCircle2 className="h-3 w-3" /> Đã hoàn cọc cho khách
-                                </Badge>
-                              ) : b.refundStatus === 2 ? (
-                                <Badge className="bg-rose-700 text-white text-[10px] gap-1 shrink-0 w-fit">
-                                  <ShieldCheck className="h-3 w-3" /> Nhà xe giữ 100% cọc (Khách mất cọc)
-                                </Badge>
-                              ) : (
-                                <Badge className="bg-amber-500 text-white text-[10px] gap-1 shrink-0 w-fit">
-                                  <Clock className="h-3 w-3" /> Chờ Admin xử lý hoàn cọc
-                                </Badge>
+                          <div className="mt-2.5 px-3.5 py-2.5 bg-rose-50/80 border border-rose-200 rounded-xl text-xs flex flex-wrap items-center justify-between gap-2 text-rose-900">
+                            <div className="flex flex-wrap items-center gap-1.5 font-medium">
+                              <XCircle className="h-4 w-4 text-rose-600 shrink-0" />
+                              <span>Lý do hủy: <strong className="font-semibold text-slate-900">{b.cancelReason || "Khách hủy đơn"}</strong></span>
+                              {b.cancelTime && (
+                                <span className="text-slate-500 text-[11px]">({format24hDateTime(b.cancelTime)})</span>
                               )}
                             </div>
-
-                            {/* Lý do hủy */}
-                            {b.cancelReason && (
-                              <div className="text-slate-700 text-xs">
-                                <span className="font-semibold text-slate-900">Lý do & Quy định: </span>
-                                <span className="italic">"{b.cancelReason}"</span>
-                              </div>
-                            )}
-
-                            {/* Chi tiết tiền cọc & phân chia */}
-                            {b.depositAmount && (
-                              <div className="pt-1.5 border-t border-rose-200/70 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-                                <div className="text-slate-600">
-                                  Tiền cọc khách đã đóng: <strong className="text-slate-900 font-bold">{Number(b.depositAmount).toLocaleString("vi-VN")} đ</strong>
-                                </div>
-                                <div className="text-slate-700">
-                                  {Number(b.refundAmount) > 0 ? (
-                                    <span>
-                                      Hoàn lại khách: <strong className="text-blue-700 font-bold">{Number(b.refundAmount).toLocaleString("vi-VN")} đ</strong>
-                                      {Number(b.depositAmount) > Number(b.refundAmount) && (
-                                        <span className="text-emerald-700 font-bold ml-1.5">
-                                          • Nhà xe giữ {(Number(b.depositAmount) - Number(b.refundAmount)).toLocaleString("vi-VN")} đ
-                                        </span>
-                                      )}
-                                    </span>
-                                  ) : (
-                                    <span className="text-emerald-700 font-bold">
-                                      Nhà xe giữ trọn 100% cọc ({Number(b.depositAmount).toLocaleString("vi-VN")} đ)
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-
-                            <div className="text-[11px] text-emerald-800 bg-emerald-50/80 p-2 rounded-lg border border-emerald-200 flex items-center gap-1.5">
-                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                              <span>Xe đã được tự động mở lại trạng thái Sẵn sàng (Available) cho khách hàng khác thuê trên hệ thống.</span>
+                            <div className="text-[11px] font-semibold shrink-0">
+                              {b.refundStatus === 1 ? (
+                                <Badge className="bg-emerald-600 text-white gap-1 text-[10px]">
+                                  <CheckCircle2 className="h-3 w-3" /> Đã hoàn cọc ({Number(b.refundAmount || 0).toLocaleString("vi-VN")} đ)
+                                </Badge>
+                              ) : b.refundStatus === 2 ? (
+                                <Badge className="bg-rose-700 text-white gap-1 text-[10px]">
+                                  <ShieldCheck className="h-3 w-3" /> Nhà xe giữ cọc ({Number(b.depositAmount || 0).toLocaleString("vi-VN")} đ)
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-amber-500 text-white gap-1 text-[10px]">
+                                  <Clock className="h-3 w-3" /> Chờ xử lý hoàn cọc
+                                </Badge>
+                              )}
                             </div>
                           </div>
                         )}
                       </div>
 
                       {/* Pricing breakdown & Commission */}
-                      <div className="text-left md:text-right border-t md:border-t-0 md:border-l md:pl-6 pt-3 md:pt-0 space-y-1 min-w-[200px]">
-                        <div className="text-xs text-slate-500">
-                          Doanh thu đơn: <strong className="text-slate-900 font-bold">{Number(b.rentAmount).toLocaleString("vi-VN")} đ</strong>
+                      <div className="text-left md:text-right border-t md:border-t-0 md:border-l md:pl-5 pt-3 md:pt-0 space-y-1 shrink-0 text-xs">
+                        <div>
+                          <span className="text-slate-500">Tổng tiền: </span>
+                          <strong className="text-slate-900 font-bold font-mono text-sm">{Number(b.rentAmount).toLocaleString("vi-VN")} đ</strong>
                         </div>
-                        <div className="text-xs text-blue-600 font-medium">
-                          Khách đã cọc: {Number(b.depositAmount).toLocaleString("vi-VN")} đ
-                        </div>
-                        <div className="text-xs text-amber-700 font-bold">
-                          Phí hoa hồng sàn 10%: -{Number(b.commissionAmount).toLocaleString("vi-VN")} đ
+                        {Number(b.depositAmount) > 0 && (
+                          <div className="text-blue-600 font-medium">
+                            Đã cọc: {Number(b.depositAmount).toLocaleString("vi-VN")} đ
+                          </div>
+                        )}
+                        <div className="text-amber-700 font-semibold text-[11px]">
+                          Hoa hồng 10%: -{Number(b.commissionAmount).toLocaleString("vi-VN")} đ
                         </div>
                       </div>
                     </div>
 
-                    {/* Actions Bar */}
-                    <div className="border-t pt-3 flex flex-wrap items-center justify-between gap-3">
-                      <div className="text-[11px] text-slate-500">
-                        {isWaiting && "Đơn tự động duyệt khi đối tác nạp đủ tiền bù hoa hồng sàn."}
-                        {isConfirmed && "Khách đã đến cửa hàng? Hãy chọn biển số xe rảnh để bàn giao."}
-                        {isActive && "Khách đã mang xe về trả lại cửa hàng?"}
-                        {isCancelled && (
-                          <span className="text-rose-600 font-medium flex items-center gap-1">
-                            <XCircle className="h-3.5 w-3.5 shrink-0" /> Đơn đã đóng do khách hủy hoặc hết hạn. Không cần bàn giao xe.
-                          </span>
-                        )}
-                      </div>
+                    {/* Actions Bar - Chỉ hiển thị khi cần thao tác */}
+                    {(isConfirmed || isActive || isWaiting) && (
+                      <div className="border-t pt-3 flex flex-wrap items-center justify-between gap-3">
+                        <div className="text-[11px] text-slate-500">
+                          {isWaiting && "Đơn tự động duyệt khi đối tác nạp đủ tiền bù hoa hồng sàn."}
+                          {isConfirmed && "Sẵn sàng bàn giao xe khi khách tới nhận."}
+                        </div>
 
-                      <div className="flex items-center gap-2">
-                        {isConfirmed && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleOpenHandover(b)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 rounded-xl gap-1.5"
-                          >
-                            <Bike className="h-3.5 w-3.5" /> Bàn giao xe cho khách
-                          </Button>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {isConfirmed && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleOpenHandover(b)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 rounded-xl gap-1.5"
+                            >
+                              <Bike className="h-3.5 w-3.5" /> Bàn giao xe cho khách
+                            </Button>
+                          )}
 
-                        {isActive && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleCompleteRental(b.id)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 rounded-xl gap-1.5"
-                          >
-                            <CheckCircle2 className="h-3.5 w-3.5" /> Xác nhận nhận lại xe
-                          </Button>
-                        )}
+                          {isActive && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleCompleteRental(b.id)}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 rounded-xl gap-1.5"
+                            >
+                              <CheckCircle2 className="h-3.5 w-3.5" /> Xác nhận nhận lại xe
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
               );
@@ -1080,14 +1031,14 @@ function PartnerBookingsContent() {
               </div>
             </div>
 
-            {/* Chọn dòng xe & biển số */}
+            {/* Chọn dòng xe, số lượng xe & biển số xe */}
             <div className="space-y-3 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80">
               <div className="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
                 <Car className="w-3.5 h-3.5 text-amber-600" />
                 Chọn phương tiện & biển số xe
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold text-slate-700">
                     Dòng xe thuê <span className="text-red-500">*</span>
@@ -1117,31 +1068,96 @@ function PartnerBookingsContent() {
 
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold text-slate-700">
-                    Biển số xe bàn giao <span className="text-red-500">*</span>
+                    Số lượng xe <span className="text-red-500">*</span>
                   </Label>
-                  {isLoadingItems ? (
-                    <div className="h-9.5 flex items-center gap-2 px-3 text-xs text-slate-500 bg-white border rounded-xl">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" /> Đang kiểm tra kho...
-                    </div>
-                  ) : walkInVehicleItems.length === 0 ? (
-                    <div className="h-9.5 flex items-center px-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl font-medium">
-                      Hết xe sẵn sàng (status = 0)
-                    </div>
-                  ) : (
-                    <select
-                      value={walkInSelectedItemId || ""}
-                      onChange={(e) => setWalkInSelectedItemId(Number(e.target.value))}
-                      className="w-full h-9.5 px-3 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 font-mono font-bold focus:ring-2 focus:ring-amber-500/20"
-                    >
-                      {walkInVehicleItems.map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.licensePlate} {item.color ? `(Màu: ${item.color})` : ""} - Sẵn sàng
+                  <select
+                    value={walkInQuantity}
+                    disabled={walkInVehicleItems.length === 0}
+                    onChange={(e) => {
+                      const qty = Math.max(1, Number(e.target.value));
+                      setWalkInQuantity(qty);
+                      const newIds = walkInVehicleItems.slice(0, qty).map((it) => it.id);
+                      setWalkInSelectedItemIds(newIds);
+                      recalcWalkInPrices(walkInStartTime, walkInEndTime, walkInRentPrice, qty);
+                    }}
+                    className="w-full h-9.5 px-3 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 font-semibold focus:ring-2 focus:ring-amber-500/20"
+                  >
+                    {walkInVehicleItems.length === 0 ? (
+                      <option value={1}>0 xe</option>
+                    ) : (
+                      Array.from({ length: walkInVehicleItems.length }, (_, i) => i + 1).map((num) => (
+                        <option key={num} value={num}>
+                          {num} xe ({walkInVehicleItems.length} xe sẵn sàng)
                         </option>
-                      ))}
-                    </select>
-                  )}
+                      ))
+                    )}
+                  </select>
                 </div>
+
+                {walkInQuantity === 1 && (
+                  <div className="space-y-1">
+                    <Label className="text-xs font-semibold text-slate-700">
+                      Biển số xe bàn giao <span className="text-red-500">*</span>
+                    </Label>
+                    {isLoadingItems ? (
+                      <div className="h-9.5 flex items-center gap-2 px-3 text-xs text-slate-500 bg-white border rounded-xl">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-600" /> Đang kiểm tra kho...
+                      </div>
+                    ) : walkInVehicleItems.length === 0 ? (
+                      <div className="h-9.5 flex items-center px-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl font-medium">
+                        Hết xe sẵn sàng (status = 0)
+                      </div>
+                    ) : (
+                      <select
+                        value={walkInSelectedItemIds[0] || ""}
+                        onChange={(e) => setWalkInSelectedItemIds([Number(e.target.value)])}
+                        className="w-full h-9.5 px-3 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 font-mono font-bold focus:ring-2 focus:ring-amber-500/20"
+                      >
+                        {walkInVehicleItems.map((item) => (
+                          <option key={item.id} value={item.id}>
+                            {item.licensePlate}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                )}
               </div>
+
+              {/* Danh sách chọn biển số xe khi số lượng > 1 */}
+              {walkInQuantity > 1 && (
+                <div className="space-y-2 pt-2 border-t border-slate-200/80">
+                  <Label className="text-xs font-semibold text-slate-700 block">
+                    Biển số xe bàn giao ({walkInQuantity} xe) <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                    {Array.from({ length: walkInQuantity }, (_, idx) => (
+                      <div key={idx} className="space-y-1">
+                        <span className="text-[11px] font-semibold text-slate-500">Xe #{idx + 1}:</span>
+                        <select
+                          value={walkInSelectedItemIds[idx] || ""}
+                          onChange={(e) => {
+                            const newId = Number(e.target.value);
+                            const updated = [...walkInSelectedItemIds];
+                            updated[idx] = newId;
+                            setWalkInSelectedItemIds(updated);
+                          }}
+                          className="w-full h-9 px-3 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 font-mono font-bold focus:ring-2 focus:ring-amber-500/20"
+                        >
+                          {walkInVehicleItems.map((item) => {
+                            const isChosenElsewhere = walkInSelectedItemIds.some((id, i) => i !== idx && id === item.id);
+                            return (
+                              <option key={item.id} value={item.id} disabled={isChosenElsewhere}>
+                                {item.licensePlate}{isChosenElsewhere ? " (Đã chọn)" : ""}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Thời gian & Chi phí */}
@@ -1151,7 +1167,7 @@ function PartnerBookingsContent() {
                 Thời gian thuê & Chi phí
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold text-slate-700">
                     Thời gian nhận xe <span className="text-red-500">*</span>
@@ -1189,38 +1205,19 @@ function PartnerBookingsContent() {
                     onChange={(e) => {
                       const val = Number(e.target.value);
                       setWalkInRentPrice(val);
-                      const depositPct = Number(selectedStore?.rentalPolicy?.depositPercent || 15);
-                      recalcWalkInPrices(walkInStartTime, walkInEndTime, val, depositPct);
+                      recalcWalkInPrices(walkInStartTime, walkInEndTime, val, walkInQuantity);
                     }}
                     className="h-9.5 text-xs rounded-xl bg-white font-mono font-semibold"
                   />
                 </div>
-
-                <div className="space-y-1">
-                  <Label className="text-xs font-semibold text-slate-700">
-                    Tiền cọc nhận tại quầy (VNĐ)
-                  </Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={walkInDepositAmount}
-                    onChange={(e) => setWalkInDepositAmount(Number(e.target.value))}
-                    className="h-9.5 text-xs rounded-xl bg-white font-mono font-semibold text-amber-700"
-                  />
-                </div>
               </div>
 
-              {/* Tổng tiền tổng hợp */}
+              {/* Tổng tiền tổng hợp - Không còn ô tiền cọc và không còn text cọc/còn lại */}
               <div className="p-3 bg-amber-50/80 rounded-xl border border-amber-200/80 flex items-center justify-between">
                 <span className="text-xs font-bold text-amber-950">Tổng tiền thuê dự kiến:</span>
-                <div className="text-right">
-                  <span className="text-base font-black text-amber-700 font-mono">
-                    {walkInTotalAmount.toLocaleString("vi-VN")} đ
-                  </span>
-                  <span className="block text-[11px] text-amber-900">
-                    (Cọc: {walkInDepositAmount.toLocaleString("vi-VN")} đ • Còn lại: {(walkInTotalAmount - walkInDepositAmount > 0 ? walkInTotalAmount - walkInDepositAmount : 0).toLocaleString("vi-VN")} đ)
-                  </span>
-                </div>
+                <span className="text-base font-black text-amber-700 font-mono">
+                  {walkInTotalAmount.toLocaleString("vi-VN")} đ
+                </span>
               </div>
             </div>
 
@@ -1268,7 +1265,7 @@ function PartnerBookingsContent() {
               <Button
                 type="submit"
                 size="sm"
-                disabled={isSubmittingWalkIn || !walkInSelectedItemId}
+                disabled={isSubmittingWalkIn || !walkInSelectedItemIds.length || walkInSelectedItemIds.some((id) => !id)}
                 className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-xs"
               >
                 {isSubmittingWalkIn ? (
