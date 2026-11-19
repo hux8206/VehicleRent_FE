@@ -12,6 +12,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import * as XLSX from "xlsx";
+import {
   BarChart3,
   TrendingUp,
   DollarSign,
@@ -392,6 +399,128 @@ function PartnerAnalyticsContent() {
       .slice(0, 5);
   }, [filteredModels, filteredBookings]);
 
+  const getStatusText = (status: number) => {
+    switch (status) {
+      case 0:
+        return "Chờ cọc";
+      case 1:
+        return "Đã cọc - Chờ giao xe";
+      case 2:
+        return "Chờ xếp xe";
+      case 3:
+        return "Đang thuê";
+      case 4:
+        return "Hoàn tất";
+      case 5:
+        return "Đã hủy";
+      default:
+        return "Khác";
+    }
+  };
+
+  const formatDateTime = (dateVal: string | Date | undefined) => {
+    if (!dateVal) return "";
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return "";
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  };
+
+  const reportHeaders = [
+    "Mã đơn hàng",
+    "Khách hàng",
+    "Số điện thoại",
+    "Chi nhánh",
+    "Dòng xe",
+    "Biển số xe",
+    "Thời gian nhận",
+    "Thời gian trả",
+    "Số ngày thuê",
+    "Hình thức nhận",
+    "Tổng tiền thuê (VNĐ)",
+    "Tiền cọc (VNĐ)",
+    "Phí sàn (VNĐ)",
+    "Thực nhận nhà xe (VNĐ)",
+    "Trạng thái đơn",
+    "Ngày tạo đơn",
+  ];
+
+  // Export Data to Excel (.xlsx) - Tối ưu tự căn chỉnh độ rộng cột và giữ text số điện thoại
+  const handleExportExcel = () => {
+    if (filteredBookings.length === 0) {
+      toast.warning("Không có dữ liệu đơn thuê nào trong khoảng thời gian này để xuất file.");
+      return;
+    }
+
+    const rows = filteredBookings.map((b) => {
+      const detail = b.bookingDetails?.[0];
+      const modelName = detail?.model?.name || "Xe máy";
+      const plate = detail?.vehicleItem?.licensePlate || "Chưa gắn xe";
+      const storeName = stores.find((s) => s.id === b.storeId)?.storeName || `Chi nhánh #${b.storeId}`;
+      const rent = Number(b.rentAmount || 0);
+      const comm = Number(b.commissionAmount || 0);
+      const net = rent - comm > 0 ? rent - comm : rent * 0.9;
+      const phone = b.customer?.phone ? String(b.customer.phone).trim() : "";
+
+      return [
+        b.bookingCode || `#${b.id}`,
+        b.customer?.fullName || "Khách lẻ",
+        phone,
+        storeName,
+        modelName,
+        plate,
+        formatDateTime(b.startTime),
+        formatDateTime(b.endTime),
+        Number(b.dayRent || 1),
+        b.pickupType === 1 ? "Giao tận nơi" : "Nhận tại cửa hàng",
+        rent,
+        Number(b.depositAmount || 0),
+        comm,
+        Math.round(net),
+        getStatusText(b.status),
+        formatDateTime(b.createdAt),
+      ];
+    });
+
+    const worksheet = XLSX.utils.aoa_to_sheet([reportHeaders, ...rows]);
+
+    // Format phone column (c: 2) explicitly as string so Excel preserves leading zero and avoids 3.84E+08
+    const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1:A1");
+    for (let R = 1; R <= range.e.r; ++R) {
+      const phoneCellRef = XLSX.utils.encode_cell({ c: 2, r: R });
+      if (worksheet[phoneCellRef]) {
+        worksheet[phoneCellRef].t = "s";
+        worksheet[phoneCellRef].z = "@";
+      }
+    }
+
+    // Auto-fit column widths based on maximum content length + padding
+    const colWidths = reportHeaders.map((header, colIdx) => {
+      let maxLen = header.length;
+      rows.forEach((row) => {
+        const val = row[colIdx] != null ? String(row[colIdx]) : "";
+        if (val.length > maxLen) maxLen = val.length;
+      });
+      return { wch: Math.min(Math.max(maxLen + 4, 12), 45) };
+    });
+    worksheet["!cols"] = colWidths;
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Báo cáo doanh thu");
+
+    const storeLabel = currentStore ? currentStore.storeName.replace(/[^a-zA-Z0-9]/g, "_") : "Toan_He_Thong";
+    const startStr = dateRange.start.toISOString().split("T")[0];
+    const endStr = dateRange.end.toISOString().split("T")[0];
+    const fileName = `Bao_Cao_Doanh_Thu_${storeLabel}_${startStr}_den_${endStr}.xlsx`;
+
+    XLSX.writeFile(workbook, fileName);
+    toast.success("Xuất file báo cáo Excel (.xlsx) thành công!");
+  };
+
   // Export Data to CSV
   const handleExportCSV = () => {
     if (filteredBookings.length === 0) {
@@ -399,62 +528,25 @@ function PartnerAnalyticsContent() {
       return;
     }
 
-    const headers = [
-      "Mã đơn hàng",
-      "Khách hàng",
-      "Số điện thoại",
-      "Chi nhánh",
-      "Dòng xe",
-      "Biển số xe",
-      "Thời gian nhận",
-      "Thời gian trả",
-      "Số ngày thuê",
-      "Hình thức nhận",
-      "Tổng tiền thuê (VNĐ)",
-      "Tiền cọc (VNĐ)",
-      "Phí hoa hồng (VNĐ)",
-      "Thực nhận nhà xe (VNĐ)",
-      "Trạng thái đơn",
-      "Ngày tạo đơn",
-    ];
-
-    const getStatusText = (status: number) => {
-      switch (status) {
-        case 0:
-          return "Chờ thanh toán";
-        case 1:
-          return "Đã cọc - Chờ giao xe";
-        case 2:
-          return "Chờ xếp xe";
-        case 3:
-          return "Đang thuê";
-        case 4:
-          return "Hoàn tất";
-        case 5:
-          return "Đã hủy";
-        default:
-          return "Khác";
-      }
-    };
-
     const rows = filteredBookings.map((b) => {
       const detail = b.bookingDetails?.[0];
       const modelName = detail?.model?.name || "Xe máy";
-      const plate = detail?.vehicleItem?.licensePlate || "Chưa gán";
+      const plate = detail?.vehicleItem?.licensePlate || "Chưa gắn xe";
       const storeName = stores.find((s) => s.id === b.storeId)?.storeName || `Chi nhánh #${b.storeId}`;
       const rent = Number(b.rentAmount || 0);
       const comm = Number(b.commissionAmount || 0);
       const net = rent - comm > 0 ? rent - comm : rent * 0.9;
+      const phone = b.customer?.phone ? String(b.customer.phone).trim() : "";
 
       return [
         `"${b.bookingCode || b.id}"`,
         `"${(b.customer?.fullName || "Khách lẻ").replace(/"/g, '""')}"`,
-        `"${b.customer?.phone || ""}"`,
+        `"=""${phone}"""`, // Trick: ="038..." keeps leading zero in CSV when opened in Excel
         `"${storeName.replace(/"/g, '""')}"`,
         `"${modelName.replace(/"/g, '""')}"`,
         `"${plate}"`,
-        `"${new Date(b.startTime).toLocaleString("vi-VN")}"`,
-        `"${new Date(b.endTime).toLocaleString("vi-VN")}"`,
+        `"${formatDateTime(b.startTime)}"`,
+        `"${formatDateTime(b.endTime)}"`,
         `"${b.dayRent || 1}"`,
         `"${b.pickupType === 1 ? "Giao tận nơi" : "Nhận tại cửa hàng"}"`,
         rent,
@@ -462,12 +554,12 @@ function PartnerAnalyticsContent() {
         comm,
         Math.round(net),
         `"${getStatusText(b.status)}"`,
-        `"${new Date(b.createdAt).toLocaleString("vi-VN")}"`,
+        `"${formatDateTime(b.createdAt)}"`,
       ].join(",");
     });
 
     // Add BOM for UTF-8 compatibility in Excel
-    const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\r\n");
+    const csvContent = "\uFEFF" + [reportHeaders.join(","), ...rows].join("\r\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -496,14 +588,14 @@ function PartnerAnalyticsContent() {
               className="hover:text-blue-600 flex items-center gap-1 transition-colors"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Quay lại Quản lý Vận hành</span>
+              <span>Quay lại quản lý vận hành</span>
             </Link>
             <span>/</span>
-            <span className="text-slate-900 dark:text-slate-100 font-bold">Thống kê & Báo cáo doanh thu</span>
+            <span className="text-slate-900 dark:text-slate-100 font-bold">Thống kê & báo cáo doanh thu</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-3">
             <BarChart3 className="h-7 w-7 text-blue-600 dark:text-blue-400" />
-            <span>Trung Tâm Phân Tích & Báo Cáo Doanh Thu</span>
+            <span>Trung tâm phân tích & báo cáo doanh thu</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
             {currentMode === "owner"
@@ -512,7 +604,7 @@ function PartnerAnalyticsContent() {
           </p>
         </div>
 
-        {/* Action Controls: Switch Mode & Export CSV */}
+        {/* Action Controls: Switch Mode & Export Dropdown */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Mode Switcher */}
           <div className="bg-slate-200 dark:bg-slate-800 p-1 rounded-xl flex items-center text-xs font-bold shadow-2xs">
@@ -527,7 +619,7 @@ function PartnerAnalyticsContent() {
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
               }`}
             >
-              Cơ Sở / Điểm Thuê
+              Cơ sở / điểm thuê
             </button>
             <button
               onClick={() => {
@@ -540,18 +632,52 @@ function PartnerAnalyticsContent() {
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
               }`}
             >
-              Chủ Chuỗi (Toàn Sàn)
+              Chủ chuỗi (toàn sàn)
             </button>
           </div>
 
-          {/* Export CSV Button */}
-          <Button
-            onClick={handleExportCSV}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-10 px-4 text-xs shadow-md flex items-center gap-2 transition-all hover:scale-[1.02]"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            <span>Tải Báo Cáo CSV</span>
-          </Button>
+          {/* Export Report Dropdown (Excel XLSX & CSV) */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl h-10 px-4 text-xs shadow-md flex items-center gap-2 transition-all hover:scale-[1.02]"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                <span>Tải báo cáo Excel / CSV</span>
+                <ChevronDown className="h-3.5 w-3.5 opacity-80" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64 rounded-2xl p-1.5 shadow-xl border-slate-200 dark:border-slate-800">
+              <DropdownMenuItem
+                onClick={handleExportExcel}
+                className="cursor-pointer gap-2.5 p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-800 dark:text-slate-100 transition-colors"
+              >
+                <div className="h-8 w-8 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300 flex items-center justify-center shrink-0">
+                  <FileSpreadsheet className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-xs flex items-center gap-1.5">
+                    Xuất file Excel (.xlsx)
+                    <Badge className="bg-emerald-600 text-white text-[9px] px-1.5 py-0 h-4">Tối ưu</Badge>
+                  </div>
+                  <div className="text-[11px] text-slate-400 dark:text-slate-500">Tự căn chỉnh cột, không lỗi ngày & SĐT</div>
+                </div>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={handleExportCSV}
+                className="cursor-pointer gap-2.5 p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+              >
+                <div className="h-8 w-8 rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 flex items-center justify-center shrink-0">
+                  <Download className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-xs">Xuất file CSV (.csv)</div>
+                  <div className="text-[11px] text-slate-400 dark:text-slate-500">Dữ liệu thô phân cách dấu phẩy</div>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Reload Button */}
           <Button
@@ -586,7 +712,7 @@ function PartnerAnalyticsContent() {
                 className="w-full text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 pr-8 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-2xs"
               >
                 {currentMode === "owner" && (
-                  <option value="all">🏢 Tất cả chi nhánh (Toàn hệ thống)</option>
+                  <option value="all">🏢 Tất cả chi nhánh (toàn hệ thống)</option>
                 )}
                 {stores.map((s) => (
                   <option key={s.id} value={String(s.id)}>
@@ -690,8 +816,8 @@ function PartnerAnalyticsContent() {
         {/* Gross Revenue */}
         <Card className="rounded-2xl border-slate-200 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 p-5 space-y-3 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-              Tổng Thu Khách (Gross)
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              Tổng thu khách (Gross)
             </span>
             <div className="h-9 w-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
               <DollarSign className="h-5 w-5" />
@@ -711,8 +837,8 @@ function PartnerAnalyticsContent() {
         {/* Net Revenue */}
         <Card className="rounded-2xl border-slate-200 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 p-5 space-y-3 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-              Thực Nhận Nhà Xe (Net)
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              Thực nhận nhà xe (Net)
             </span>
             <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold">
               <TrendingUp className="h-5 w-5" />
@@ -732,8 +858,8 @@ function PartnerAnalyticsContent() {
         {/* Customer Volume & Average Order Value */}
         <Card className="rounded-2xl border-slate-200 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 p-5 space-y-3 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-              Lượt Khách & Giá Trị Đơn
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              Lượt khách & giá trị đơn
             </span>
             <div className="h-9 w-9 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
               <Users className="h-5 w-5" />
@@ -754,8 +880,8 @@ function PartnerAnalyticsContent() {
         {/* Fleet Occupancy Rate */}
         <Card className="rounded-2xl border-slate-200 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 p-5 space-y-3 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-              Tỷ Lệ Khai Thác Đội Xe
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+              Tỷ lệ khai thác đội xe
             </span>
             <div className="h-9 w-9 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold">
               <Percent className="h-5 w-5" />
@@ -783,7 +909,7 @@ function PartnerAnalyticsContent() {
             <div>
               <CardTitle className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-amber-500" />
-                <span>Biểu Đồ Xu Hướng Doanh Thu Theo Thời Gian</span>
+                <span>Biểu đồ xu hướng doanh thu theo thời gian</span>
               </CardTitle>
               <CardDescription className="text-xs text-slate-500 mt-0.5">
                 Đối chiếu Tổng thu khách (Gross) và Thực nhận cơ sở (Net) trong mốc thời gian đã chọn
@@ -855,7 +981,7 @@ function PartnerAnalyticsContent() {
           <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
             <CardTitle className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <PieChartIcon className="h-5 w-5 text-blue-600" />
-              <span>Tình Trạng Kho Xe Thực Tế</span>
+              <span>Tình trạng kho xe thực tế</span>
             </CardTitle>
             <CardDescription className="text-xs text-slate-500 mt-0.5">
               {metrics.totalVehicles} phương tiện sẵn có trong kho
@@ -866,7 +992,7 @@ function PartnerAnalyticsContent() {
             <div className="h-60 w-full flex flex-col items-center justify-center text-center p-4">
               <Bike className="h-10 w-10 text-slate-300 mb-2" />
               <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Chưa có xe nào được ghi nhận</span>
-              <span className="text-[11px] text-slate-400 mt-0.5">Thêm biển số xe tại mục Dòng Xe để theo dõi kho.</span>
+              <span className="text-[11px] text-slate-400 mt-0.5">Thêm biển số xe tại mục dòng xe để theo dõi kho.</span>
             </div>
           ) : (
             <div className="space-y-4">
@@ -914,7 +1040,7 @@ function PartnerAnalyticsContent() {
           <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
             <CardTitle className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-indigo-600" />
-              <span>Cơ Cấu Trạng Thái Đơn Thuê</span>
+              <span>Cơ cấu trạng thái đơn thuê</span>
             </CardTitle>
             <CardDescription className="text-xs text-slate-500 mt-0.5">
               Phân bố các đơn thuê xe theo từng giai đoạn vận hành
@@ -943,7 +1069,7 @@ function PartnerAnalyticsContent() {
           <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
             <CardTitle className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Bike className="h-5 w-5 text-amber-600" />
-              <span>Top Dòng Xe Sinh Lời Cao Nhất</span>
+              <span>Top dòng xe sinh lời cao nhất</span>
             </CardTitle>
             <CardDescription className="text-xs text-slate-500 mt-0.5">
               Xếp hạng theo tổng doanh thu thực nhận và số chuyến đi hoàn tất
@@ -1001,10 +1127,10 @@ function PartnerAnalyticsContent() {
           <div>
             <CardTitle className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
-              <span>Dữ Liệu Đơn Thuê Chi Tiết Trong Kỳ Báo Cáo</span>
+              <span>Dữ liệu đơn thuê chi tiết trong kỳ báo cáo</span>
             </CardTitle>
             <CardDescription className="text-xs text-slate-500 mt-0.5">
-              Toàn bộ các đơn thuê phát sinh để đối soát và tải về file CSV
+              Toàn bộ các đơn thuê phát sinh để đối soát và tải về file báo cáo
             </CardDescription>
           </div>
 
@@ -1028,14 +1154,14 @@ function PartnerAnalyticsContent() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase">
-                  <TableHead className="font-bold">Mã Đơn</TableHead>
-                  <TableHead className="font-bold">Khách Hàng</TableHead>
-                  <TableHead className="font-bold">Dòng Xe & Biển Số</TableHead>
-                  <TableHead className="font-bold">Thời Gian Thuê</TableHead>
-                  <TableHead className="font-bold text-right">Tổng Tiền (Gross)</TableHead>
-                  <TableHead className="font-bold text-right">Thực Nhận (Net)</TableHead>
-                  <TableHead className="font-bold text-center">Trạng Thái</TableHead>
+                <TableRow className="border-b border-slate-200 dark:border-slate-800 text-[11px]">
+                  <TableHead className="font-bold">Mã đơn</TableHead>
+                  <TableHead className="font-bold">Khách hàng</TableHead>
+                  <TableHead className="font-bold">Dòng xe & biển số</TableHead>
+                  <TableHead className="font-bold">Thời gian thuê</TableHead>
+                  <TableHead className="font-bold text-right">Tổng tiền (Gross)</TableHead>
+                  <TableHead className="font-bold text-right">Thực nhận (Net)</TableHead>
+                  <TableHead className="font-bold text-center">Trạng thái</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

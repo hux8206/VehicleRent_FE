@@ -1362,7 +1362,7 @@ function PartnerDashboardContent() {
                   <div>
                     <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
                       <BarChart3 className="h-5 w-5 text-amber-600" />
-                      {t("partner_revenue_chart_title", "Doanh thu 7 ngày gần nhất (Gross vs net)")}
+                      {t("partner_revenue_chart_title", "Doanh thu 7 ngày gần nhất (Gross vs Net)")}
                     </CardTitle>
                     <CardDescription className="text-xs text-slate-500 mt-0.5">
                       {t("partner_revenue_chart_desc", "Số liệu thực tế tính theo các đơn hàng hoàn tất của nhà xe.")}
@@ -1859,7 +1859,7 @@ function PartnerDashboardContent() {
                       className="text-xs font-bold text-slate-700 border-slate-300 hover:bg-slate-100 h-9 rounded-xl gap-1.5 shadow-xs"
                     >
                       <Activity className="h-4 w-4 text-blue-600" />
-                      <span>Đổi Trạng Thái</span>
+                      <span>Đổi trạng thái</span>
                     </Button>
 
                     {approvedBranches.length > 1 && (
@@ -1905,7 +1905,7 @@ function PartnerDashboardContent() {
                       className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shrink-0 gap-1.5 shadow-xs"
                     >
                       <Power className="h-3.5 w-3.5" />
-                      <span>Mở Lại Hoạt Động (Active)</span>
+                      <span>Mở lại hoạt động (Active)</span>
                     </Button>
                   </div>
                 )}
@@ -1930,7 +1930,7 @@ function PartnerDashboardContent() {
                       className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shrink-0 gap-1.5 shadow-xs"
                     >
                       <Check className="h-3.5 w-3.5" />
-                      <span>Hoàn Tất Sửa Chữa & Mở Lại</span>
+                      <span>Hoàn tất sửa chữa & mở lại</span>
                     </Button>
                   </div>
                 )}
@@ -1988,7 +1988,7 @@ function PartnerDashboardContent() {
                         <Bike className="h-6 w-6" />
                       </div>
                       <div>
-                        <h3 className="text-base font-black text-slate-900">Dòng Xe & Kho Biển Số</h3>
+                        <h3 className="text-base font-black text-slate-900">Dòng xe & kho biển số</h3>
                         <p className="text-xs text-slate-500">Quản lý dòng xe và xe vật lý</p>
                       </div>
                     </div>
@@ -2061,12 +2061,12 @@ function PartnerDashboardContent() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                            Số Dư Ví Đối Tác (Chế Độ Quan Sát - Dành Cho Nhân Viên)
+                          <span className="text-xs font-bold text-emerald-800">
+                            Số dư ví đối tác (chế độ quan sát - dành cho nhân viên)
                           </span>
                           {Number(wallet?.balance || 0) < 0 && (
                             <Badge className="bg-orange-600 text-white text-[10px] animate-pulse">
-                              Đang Dùng Hạn Mức Nợ
+                              Đang dùng hạn mức nợ
                             </Badge>
                           )}
                         </div>
@@ -2097,7 +2097,7 @@ function PartnerDashboardContent() {
                           className="border-emerald-300 hover:bg-emerald-50 text-emerald-800 font-bold text-xs h-10 px-4 rounded-xl gap-2 shadow-xs cursor-pointer"
                         >
                           <CreditCard className="h-4 w-4 text-emerald-600" />
-                          <span>Xem Sổ Cái Giao Dịch Chi Nhánh</span>
+                          <span>Xem sổ cái giao dịch chi nhánh</span>
                           <ExternalLink className="h-3.5 w-3.5 text-emerald-600" />
                         </Button>
                       </Link>
@@ -2111,7 +2111,7 @@ function PartnerDashboardContent() {
                     <div>
                       <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
                         <BarChart3 className="h-5 w-5 text-blue-600" />
-                        Dashboard Thống Kê Hoạt Động Cơ Sở: {selectedBranch.storeName}
+                        Dashboard thống kê hoạt động cơ sở: {selectedBranch.storeName}
                       </h3>
                       <p className="text-xs text-slate-500 mt-0.5">
                         Số liệu doanh thu, tỷ lệ khai thác đội xe và phân tích đơn thuê tính riêng cho chi nhánh này.
@@ -2182,7 +2182,7 @@ function PartnerDashboardContent() {
                         <div>
                           <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
                             <TrendingUp className="h-5 w-5 text-amber-600" />
-                            Biểu Đồ Doanh Thu 7 Ngày Qua Tại Cơ Sở
+                            Biểu đồ doanh thu 7 ngày qua tại cơ sở
                           </CardTitle>
                           <CardDescription className="text-xs text-slate-500 mt-0.5">
                             So sánh Tổng tiền khách thanh toán (Gross) và Thực nhận chi nhánh (Net).
@@ -2193,7 +2193,7 @@ function PartnerDashboardContent() {
                           className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200 transition-colors self-start sm:self-auto"
                         >
                           <BarChart3 className="h-4 w-4" />
-                          <span>Xem Thống Kê Chi Tiết & Tải CSV →</span>
+                          <span>Xem thống kê chi tiết & tải báo cáo →</span>
                         </Link>
                       </div>
 
@@ -2232,7 +2232,7 @@ function PartnerDashboardContent() {
                       <div className="pb-2 border-b">
                         <CardTitle className="text-base font-extrabold text-slate-900 flex items-center gap-2">
                           <PieChartIcon className="h-5 w-5 text-blue-600" />
-                          Tình Trạng Kho Xe Chi Nhánh
+                          Tình trạng kho xe chi nhánh
                         </CardTitle>
                         <CardDescription className="text-xs text-slate-500 mt-0.5">
                           {branchAnalytics?.totalItems || 0} xe vật lý thuộc chi nhánh này.
@@ -2384,7 +2384,7 @@ function PartnerDashboardContent() {
                           className="text-xs font-bold text-emerald-700 border-emerald-200 hover:bg-emerald-50 h-9 rounded-xl gap-1.5 shadow-xs cursor-pointer"
                         >
                           <ExternalLink className="h-4 w-4" />
-                          <span>Mở Chi Tiết Sổ Quỹ Ví</span>
+                          <span>Mở chi tiết sổ quỹ ví</span>
                         </Button>
                       </Link>
                     </div>
@@ -3047,7 +3047,7 @@ function PartnerDashboardContent() {
                 disabled={isSubmittingUpdateRequest}
                 className="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl"
               >
-                {isSubmittingUpdateRequest ? "Đang gửi đề xuất..." : "Gửi Đề Xuất Cập Nhật"}
+                {isSubmittingUpdateRequest ? "Đang gửi đề xuất..." : "Gửi đề xuất cập nhật"}
               </Button>
             </DialogFooter>
           </form>
@@ -3264,10 +3264,10 @@ function PartnerDashboardContent() {
               >
                 {selectedStatusValue === 1 && <Check className="h-3 w-3 text-white" />}
               </div>
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
+              <div className="space-y-0.5 flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
                   <span className="font-extrabold text-sm text-slate-900">{t("partner_status_active_title", "🟢 Đang hoạt động (Active)")}</span>
-                  <Badge className="bg-emerald-600 text-white text-[10px]">{t("partner_status_active_badge", "Hiển thị")}</Badge>
+                  <Badge className="bg-emerald-600 text-white text-[10px] shrink-0 whitespace-nowrap">{t("partner_status_active_badge", "Hiển thị")}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">
                   {t("partner_status_active_desc", "Chi nhánh mở cửa đón khách. Xe của chi nhánh được hiển thị công khai trên website để khách hàng tìm kiếm và đặt thuê.")}
@@ -3291,10 +3291,10 @@ function PartnerDashboardContent() {
               >
                 {selectedStatusValue === 3 && <Check className="h-3 w-3 text-white" />}
               </div>
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_paused_title", "⏸️ tạm ngừng hoạt động (Paused)")}</span>
-                  <Badge className="bg-amber-500 text-white text-[10px]">{t("partner_status_paused_badge", "Tạm ẩn")}</Badge>
+              <div className="space-y-0.5 flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_paused_title", "⏸️ Tạm ngừng hoạt động (Paused)")}</span>
+                  <Badge className="bg-amber-500 text-white text-[10px] shrink-0 whitespace-nowrap">{t("partner_status_paused_badge", "Tạm ẩn")}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">
                   {t("partner_status_paused_desc", "Tạm dừng nhận khách mới (nghỉ phép, nghỉ lễ, đóng cửa tạm thời). Khách hàng sẽ không tìm thấy chi nhánh và các dòng xe này.")}
@@ -3318,10 +3318,10 @@ function PartnerDashboardContent() {
               >
                 {selectedStatusValue === 4 && <Check className="h-3 w-3 text-white" />}
               </div>
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
+              <div className="space-y-0.5 flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
                   <span className="font-extrabold text-sm text-slate-900">{t("partner_status_maint_title", "🔧 Đang sửa chữa / bảo trì (Maintenance)")}</span>
-                  <Badge className="bg-indigo-600 text-white text-[10px]">{t("partner_status_maint_badge", "Bảo trì")}</Badge>
+                  <Badge className="bg-indigo-600 text-white text-[10px] shrink-0 whitespace-nowrap">{t("partner_status_maint_badge", "Bảo trì")}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">
                   {t("partner_status_maint_desc", "Cơ sở đang sửa chữa mặt bằng, bảo dưỡng thiết bị hoặc kiểm kê lại kho xe. Khách hàng sẽ không thể đặt xe trong thời gian này.")}
