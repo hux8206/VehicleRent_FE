@@ -44,6 +44,48 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+function extractBookingCode(desc: string | undefined): string | null {
+  if (!desc) return null;
+  const match = desc.match(/BK-\d+-\d+/i);
+  return match ? match[0] : null;
+}
+
+function formatShortDescription(h: { type?: number; description?: string }): string {
+  const desc = h.description || "";
+  // 1. Khấu trừ hoa hồng sàn
+  if (h.type === 1 || desc.includes("Khấu trừ hoa hồng")) {
+    return "Khấu trừ hoa hồng sàn (bàn giao xe)";
+  }
+  // 2. Thu tiền / nạp ví
+  if (h.type === 0 || desc.includes("Cộng tiền") || desc.includes("thanh toán đơn")) {
+    if (desc.includes("VietQR") || desc.includes("NAP_VI")) {
+      return "Nạp tiền ví đối tác qua VietQR";
+    }
+    return "Thu tiền cọc / thanh toán chuyến";
+  }
+  // 3. Hoàn cọc hủy đơn
+  if (h.type === 2 || desc.toLowerCase().includes("hoàn cọc") || desc.toLowerCase().includes("hoàn tiền")) {
+    const bracketMatch = desc.match(/\[(.*?)\]/);
+    if (bracketMatch && bracketMatch[1]) {
+      const reason = bracketMatch[1].split("(")[0].trim();
+      return `Hoàn cọc hủy chuyến (${reason})`;
+    }
+    return "Hoàn tiền cọc đơn thuê";
+  }
+  // 4. Rút tiền
+  if (h.type === 3 || desc.includes("rút tiền")) {
+    return "Rút tiền về tài khoản ngân hàng";
+  }
+  // 5. Fallback clean up
+  return (
+    desc
+      .replace(/\s*\([+-]?\d+[\d.,]*\s*đ\)/gi, "")
+      .replace(/đơn\s+[A-Z0-9_-]+/gi, "")
+      .replace(/\s+/g, " ")
+      .trim() || "Giao dịch ví"
+  );
+}
+
 function PartnerWalletContent() {
   const searchParams = useSearchParams();
   const storeIdParam = searchParams?.get("storeId");
@@ -553,11 +595,11 @@ function PartnerWalletContent() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs">Loại GD</TableHead>
+                    <TableHead className="text-xs whitespace-nowrap">Loại GD</TableHead>
                     <TableHead className="text-xs">Mô tả / Mã đơn</TableHead>
-                    <TableHead className="text-xs text-right">Biến động</TableHead>
-                    <TableHead className="text-xs text-right">Số dư sau GD</TableHead>
-                    <TableHead className="text-xs text-right">Thời gian</TableHead>
+                    <TableHead className="text-xs text-right whitespace-nowrap">Biến động</TableHead>
+                    <TableHead className="text-xs text-right whitespace-nowrap">Số dư sau GD</TableHead>
+                    <TableHead className="text-xs text-right whitespace-nowrap">Thời gian</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -566,47 +608,52 @@ function PartnerWalletContent() {
                     const isCommission = h.type === 1;
                     const isRefund = h.type === 2;
                     const isWithdraw = h.type === 3;
+                    const bookingCode = h.booking?.bookingCode || extractBookingCode(h.description);
 
                     return (
                       <TableRow key={h.id}>
-                        <TableCell>
+                        <TableCell className="whitespace-nowrap">
                           {isDeposit && (
-                            <Badge className="bg-emerald-50 text-emerald-800 border-emerald-200 gap-1 text-[11px]">
-                              <ArrowDownLeft className="h-3 w-3 text-emerald-600" /> Cộng tiền / Nạp ví
+                            <Badge className="bg-emerald-50 text-emerald-800 border-emerald-200 gap-1 text-[11px] whitespace-nowrap">
+                              <ArrowDownLeft className="h-3 w-3 text-emerald-600 shrink-0" /> Cộng tiền ví
                             </Badge>
                           )}
                           {isCommission && (
-                            <Badge className="bg-amber-50 text-amber-800 border-amber-200 gap-1 text-[11px]">
-                              <ArrowUpRight className="h-3 w-3 text-amber-600" /> Khấu trừ hoa hồng sàn
+                            <Badge className="bg-amber-50 text-amber-800 border-amber-200 gap-1 text-[11px] whitespace-nowrap">
+                              <ArrowUpRight className="h-3 w-3 text-amber-600 shrink-0" /> Trừ hoa hồng sàn
                             </Badge>
                           )}
                           {isRefund && (
-                            <Badge className="bg-blue-50 text-blue-800 border-blue-200 gap-1 text-[11px]">
-                              <ArrowDownLeft className="h-3 w-3 text-blue-600" /> Hoàn tiền ví
+                            <Badge className="bg-blue-50 text-blue-800 border-blue-200 gap-1 text-[11px] whitespace-nowrap">
+                              <ArrowDownLeft className="h-3 w-3 text-blue-600 shrink-0" /> Hoàn tiền ví
                             </Badge>
                           )}
                           {isWithdraw && (
-                            <Badge className="bg-purple-50 text-purple-800 border-purple-200 gap-1 text-[11px]">
-                              <Building2 className="h-3 w-3 text-purple-600" /> Rút về tài khoản
+                            <Badge className="bg-purple-50 text-purple-800 border-purple-200 gap-1 text-[11px] whitespace-nowrap">
+                              <Building2 className="h-3 w-3 text-purple-600 shrink-0" /> Rút về tài khoản
                             </Badge>
                           )}
                         </TableCell>
 
                         <TableCell className="text-xs">
-                          <div className="font-semibold text-slate-800">{h.description}</div>
-                          {h.booking && (
-                            <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500">
-                              <span>Đơn: {h.booking.bookingCode}</span>
-                              {h.booking.store?.storeName && (
-                                <span className="text-[10px] bg-blue-50 text-blue-700 font-semibold px-1.5 py-0.5 rounded font-sans border border-blue-100">
-                                  {h.booking.store.storeName}
-                                </span>
-                              )}
-                            </div>
-                          )}
+                          <div className="font-semibold text-slate-800">
+                            {formatShortDescription(h)}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
+                            {bookingCode && (
+                              <span className="font-mono font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">
+                                Mã: {bookingCode}
+                              </span>
+                            )}
+                            {h.booking?.store?.storeName && (
+                              <span className="text-[10px] bg-slate-100 text-slate-600 font-medium px-1.5 py-0.5 rounded border border-slate-200">
+                                📍 {h.booking.store.storeName}
+                              </span>
+                            )}
+                          </div>
                         </TableCell>
 
-                        <TableCell className="text-xs text-right font-bold">
+                        <TableCell className="text-xs text-right font-bold whitespace-nowrap">
                           {isDeposit || isRefund ? (
                             <span className="text-emerald-600">
                               +{Number(h.amount).toLocaleString("vi-VN")} đ
@@ -622,11 +669,11 @@ function PartnerWalletContent() {
                           )}
                         </TableCell>
 
-                        <TableCell className="text-xs text-right font-mono font-medium text-slate-700">
+                        <TableCell className="text-xs text-right font-mono font-medium text-slate-700 whitespace-nowrap">
                           {Number(h.balanceAfter).toLocaleString("vi-VN")} đ
                         </TableCell>
 
-                        <TableCell className="text-xs text-right text-slate-500">
+                        <TableCell className="text-xs text-right text-slate-500 whitespace-nowrap">
                           {new Date(h.createdAt).toLocaleString("vi-VN")}
                         </TableCell>
                       </TableRow>

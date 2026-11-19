@@ -86,6 +86,43 @@ import {
 } from "recharts";
 import { toast } from "sonner";
 
+function extractBookingCode(desc: string | undefined): string | null {
+  if (!desc) return null;
+  const match = desc.match(/BK-\d+-\d+/i);
+  return match ? match[0] : null;
+}
+
+function formatShortDescription(h: { type?: number; description?: string }): string {
+  const desc = h.description || "";
+  if (h.type === 1 || desc.includes("Khấu trừ hoa hồng")) {
+    return "Khấu trừ hoa hồng sàn (bàn giao xe)";
+  }
+  if (h.type === 0 || desc.includes("Cộng tiền") || desc.includes("thanh toán đơn")) {
+    if (desc.includes("VietQR") || desc.includes("NAP_VI")) {
+      return "Nạp tiền ví đối tác qua VietQR";
+    }
+    return "Thu tiền cọc / thanh toán chuyến";
+  }
+  if (h.type === 2 || desc.toLowerCase().includes("hoàn cọc") || desc.toLowerCase().includes("hoàn tiền")) {
+    const bracketMatch = desc.match(/\[(.*?)\]/);
+    if (bracketMatch && bracketMatch[1]) {
+      const reason = bracketMatch[1].split("(")[0].trim();
+      return `Hoàn cọc hủy chuyến (${reason})`;
+    }
+    return "Hoàn tiền cọc đơn thuê";
+  }
+  if (h.type === 3 || desc.includes("rút tiền")) {
+    return "Rút tiền về tài khoản ngân hàng";
+  }
+  return (
+    desc
+      .replace(/\s*\([+-]?\d+[\d.,]*\s*đ\)/gi, "")
+      .replace(/đơn\s+[A-Z0-9_-]+/gi, "")
+      .replace(/\s+/g, " ")
+      .trim() || "Giao dịch ví"
+  );
+}
+
 function PartnerDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1850,18 +1887,8 @@ function PartnerDashboardContent() {
                     </p>
                   </div>
 
-                  {/* Quick Status Button & Branch Switcher Dropdown */}
+                  {/* Branch Switcher Dropdown */}
                   <div className="flex items-center gap-3">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleOpenStatusModal(selectedBranch)}
-                      className="text-xs font-bold text-slate-700 border-slate-300 hover:bg-slate-100 h-9 rounded-xl gap-1.5 shadow-xs"
-                    >
-                      <Activity className="h-4 w-4 text-blue-600" />
-                      <span>Đổi trạng thái</span>
-                    </Button>
-
                     {approvedBranches.length > 1 && (
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">Đổi nhanh:</span>
@@ -2463,11 +2490,11 @@ function PartnerDashboardContent() {
                       <Table>
                         <TableHeader>
                           <TableRow className="bg-slate-50/80">
-                            <TableHead className="text-xs font-bold text-slate-700">Loại giao dịch</TableHead>
+                            <TableHead className="text-xs font-bold text-slate-700 whitespace-nowrap">Loại giao dịch</TableHead>
                             <TableHead className="text-xs font-bold text-slate-700">Nội dung / Mã đơn</TableHead>
-                            <TableHead className="text-xs font-bold text-slate-700 text-right">Biến động</TableHead>
-                            <TableHead className="text-xs font-bold text-slate-700 text-right">Số dư ví sau GD</TableHead>
-                            <TableHead className="text-xs font-bold text-slate-700 text-right">Thời gian</TableHead>
+                            <TableHead className="text-xs font-bold text-slate-700 text-right whitespace-nowrap">Biến động</TableHead>
+                            <TableHead className="text-xs font-bold text-slate-700 text-right whitespace-nowrap">Số dư ví sau GD</TableHead>
+                            <TableHead className="text-xs font-bold text-slate-700 text-right whitespace-nowrap">Thời gian</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -2475,37 +2502,48 @@ function PartnerDashboardContent() {
                             const isDeposit = h.type === 0;
                             const isCommission = h.type === 1;
                             const isRefund = h.type === 2;
+                            const isWithdraw = h.type === 3;
+                            const bookingCode = h.booking?.bookingCode || extractBookingCode(h.description);
 
                             return (
                               <TableRow key={h.id} className="hover:bg-slate-50/50">
-                                <TableCell>
+                                <TableCell className="whitespace-nowrap">
                                   {isDeposit && (
-                                    <Badge className="bg-emerald-50 text-emerald-800 border-emerald-200 text-[11px]">
-                                      Nạp tiền ví
+                                    <Badge className="bg-emerald-50 text-emerald-800 border-emerald-200 text-[11px] whitespace-nowrap">
+                                      Cộng tiền ví
                                     </Badge>
                                   )}
                                   {isCommission && (
-                                    <Badge className="bg-amber-50 text-amber-800 border-amber-200 text-[11px]">
-                                      Hoa hồng sàn
+                                    <Badge className="bg-amber-50 text-amber-800 border-amber-200 text-[11px] whitespace-nowrap">
+                                      Trừ hoa hồng sàn
                                     </Badge>
                                   )}
                                   {isRefund && (
-                                    <Badge className="bg-blue-50 text-blue-800 border-blue-200 text-[11px]">
-                                      Hoàn cọc
+                                    <Badge className="bg-blue-50 text-blue-800 border-blue-200 text-[11px] whitespace-nowrap">
+                                      Hoàn tiền ví
+                                    </Badge>
+                                  )}
+                                  {isWithdraw && (
+                                    <Badge className="bg-purple-50 text-purple-800 border-purple-200 text-[11px] whitespace-nowrap">
+                                      Rút về tài khoản
                                     </Badge>
                                   )}
                                 </TableCell>
 
                                 <TableCell className="text-xs">
-                                  <div className="font-semibold text-slate-800">{h.description}</div>
-                                  {h.booking && (
-                                    <div className="text-[11px] font-mono text-blue-600 mt-0.5">
-                                      Mã đơn: {h.booking.bookingCode}
-                                    </div>
-                                  )}
+                                  <div className="font-semibold text-slate-800">
+                                    {formatShortDescription(h)}
+                                  </div>
+                                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
+                                    {bookingCode && (
+                                      <span className="font-mono font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">
+                                        Mã: {bookingCode}
+                                      </span>
+                                    )}
+                                  </div>
                                 </TableCell>
 
-                                <TableCell className="text-xs text-right font-bold">
+                                <TableCell className="text-xs text-right font-bold whitespace-nowrap">
                                   {isDeposit || isRefund ? (
                                     <span className="text-emerald-600 font-mono">
                                       +{Number(h.amount).toLocaleString("vi-VN")} đ
@@ -2517,11 +2555,11 @@ function PartnerDashboardContent() {
                                   )}
                                 </TableCell>
 
-                                <TableCell className="text-xs text-right font-mono font-medium text-slate-700">
+                                <TableCell className="text-xs text-right font-mono font-medium text-slate-700 whitespace-nowrap">
                                   {Number(h.balanceAfter).toLocaleString("vi-VN")} đ
                                 </TableCell>
 
-                                <TableCell className="text-xs text-right text-slate-500">
+                                <TableCell className="text-xs text-right text-slate-500 whitespace-nowrap">
                                   {new Date(h.createdAt).toLocaleString("vi-VN")}
                                 </TableCell>
                               </TableRow>
