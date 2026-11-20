@@ -312,7 +312,7 @@ function PartnerOnboardingContent() {
         return {
           title: "Cửa hàng đã được phê duyệt (ACTIVE)",
           desc: "Xin chúc mừng! Cửa hàng của bạn đã hoạt động chính thức trên sàn. Bạn có thể thêm dòng xe và đón nhận đơn đặt từ khách hàng.",
-          badge: <Badge className="bg-emerald-600 text-white gap-1"><CheckCircle2 className="h-3 w-3" /> Đã duyệt (Active)</Badge>,
+          badge: <Badge className="bg-emerald-600 text-white gap-1"><CheckCircle2 className="h-3 w-3" /> Đã duyệt</Badge>,
           color: "border-emerald-200 bg-emerald-50/40 text-emerald-900",
         };
       case 2:

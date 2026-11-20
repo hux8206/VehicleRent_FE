@@ -530,10 +530,10 @@ function PartnerBookingsContent() {
           <div className="flex flex-wrap items-center gap-2">
             {[
               { id: undefined, label: "Tất cả đơn" },
-              { id: 1, label: "Chờ bàn giao xe (Confirmed)" },
-              { id: 3, label: "Đang cho thuê (Active)" },
-              { id: 4, label: "Đã hoàn tất (Completed)" },
-              { id: 5, label: "Đã hủy (Cancelled)" },
+              { id: 1, label: "Chờ bàn giao xe" },
+              { id: 3, label: "Đang cho thuê" },
+              { id: 4, label: "Đã hoàn tất" },
+              { id: 5, label: "Đã hủy" },
               { id: 2, label: "Hàng chờ FIFO (Thiếu ví)" },
             ].map((tab) => (
               <button

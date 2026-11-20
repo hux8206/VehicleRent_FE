@@ -137,12 +137,16 @@ export function Navbar() {
   const effectiveBranchId = queryStoreId || activeBranchId;
   const isBranchRoute =
     isPartner &&
-    Boolean(effectiveBranchId) &&
-    (pathname.startsWith("/partner/vehicles") ||
-      pathname.startsWith("/partner/bookings") ||
+    (
+      // Analytics branch mode không yêu cầu effectiveBranchId vì page tự quản lý storeId
       (pathname.startsWith("/partner/analytics") && partnerMode !== "owner") ||
-      (pathname === "/partner" && partnerMode === "branch" && Boolean(queryStoreId)) ||
-      (pathname.startsWith("/partner/wallet") && Boolean(queryStoreId || activeBranchId)));
+      // Các route khác cần effectiveBranchId
+      (Boolean(effectiveBranchId) &&
+        (pathname.startsWith("/partner/vehicles") ||
+          pathname.startsWith("/partner/bookings") ||
+          (pathname === "/partner" && partnerMode === "branch" && Boolean(queryStoreId)) ||
+          (pathname.startsWith("/partner/wallet") && Boolean(queryStoreId || activeBranchId))))
+    );
 
   const isBranchSelecting =
     isPartner && pathname === "/partner" && partnerMode === "branch" && !queryStoreId;

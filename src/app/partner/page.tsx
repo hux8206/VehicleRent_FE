@@ -68,6 +68,8 @@ import {
   Search,
   RotateCcw,
   ExternalLink,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   AreaChart,
@@ -171,6 +173,11 @@ function PartnerDashboardContent() {
   const [currentPasswordInput, setCurrentPasswordInput] = useState("");
   const [newPasswordInput, setNewPasswordInput] = useState("");
   const [confirmPasswordInput, setConfirmPasswordInput] = useState("");
+  // Password visibility toggles
+  const [showUnlockPassword, setShowUnlockPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmittingPassword, setIsSubmittingPassword] = useState(false);
 
   // Modal: Add New Branch (Owner HQ)
@@ -1433,7 +1440,7 @@ function PartnerDashboardContent() {
                       <Tooltip
                         formatter={(value: any, name: any) => [
                           `${Number(value).toLocaleString("vi-VN")} đ`,
-                          name === "grossRevenue" ? "Tổng thu khách (Gross)" : "Thực nhận nhà xe (Net)",
+                          name === "grossRevenue" ? "Tổng thu khách" : "Thực nhận nhà xe",
                         ]}
                       />
                       <Legend verticalAlign="top" height={36} />
@@ -1932,7 +1939,7 @@ function PartnerDashboardContent() {
                       className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shrink-0 gap-1.5 shadow-xs"
                     >
                       <Power className="h-3.5 w-3.5" />
-                      <span>Mở lại hoạt động (Active)</span>
+                      <span>Mở lại hoạt động</span>
                     </Button>
                   </div>
                 )}
@@ -2155,7 +2162,7 @@ function PartnerDashboardContent() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <Card className="rounded-2xl border-slate-200 shadow-xs bg-white p-5 space-y-1.5">
                       <div className="flex items-center justify-between text-xs font-bold text-slate-500">
-                        <span>Tổng thu khách (Gross)</span>
+                        <span>Tổng thu khách</span>
                         <TrendingUp className="h-4 w-4 text-amber-500" />
                       </div>
                       <div className="text-2xl font-black text-amber-600 font-mono">
@@ -2167,7 +2174,7 @@ function PartnerDashboardContent() {
 
                     <Card className="rounded-2xl border-slate-200 shadow-xs bg-white p-5 space-y-1.5">
                       <div className="flex items-center justify-between text-xs font-bold text-slate-500">
-                        <span>Thực nhận cơ sở (Net)</span>
+                        <span>Thực nhận nhà xe</span>
                         <DollarSign className="h-4 w-4 text-emerald-500" />
                       </div>
                       <div className="text-2xl font-black text-emerald-600 font-mono">
@@ -2212,7 +2219,7 @@ function PartnerDashboardContent() {
                             Biểu đồ doanh thu 7 ngày qua tại cơ sở
                           </CardTitle>
                           <CardDescription className="text-xs text-slate-500 mt-0.5">
-                            So sánh Tổng tiền khách thanh toán (Gross) và Thực nhận chi nhánh (Net).
+                            So sánh tổng tiền khách thanh toán và thực nhận nhà xe.
                           </CardDescription>
                         </div>
                         <Link
@@ -2243,7 +2250,7 @@ function PartnerDashboardContent() {
                             <Tooltip
                               formatter={(value: any, name: any) => [
                                 `${Number(value).toLocaleString("vi-VN")} đ`,
-                                name === "grossRevenue" ? "Tổng thu khách (Gross)" : "Thực nhận cơ sở (Net)",
+                                name === "grossRevenue" ? "Tổng thu khách" : "Thực nhận nhà xe",
                               ]}
                             />
                             <Legend verticalAlign="top" height={36} />
@@ -2596,15 +2603,26 @@ function PartnerDashboardContent() {
           <form onSubmit={handleVerifyPasswordSubmit} className="space-y-4 pt-2">
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">{t("partner_unlock_label", "Mật khẩu chủ cửa hàng *")}</Label>
-              <Input
-                type="password"
-                placeholder={t("partner_unlock_placeholder", "Nhập mật khẩu...")}
-                value={unlockPassword}
-                onChange={(e) => setUnlockPassword(e.target.value)}
-                className="text-xs h-10 rounded-xl"
-                autoFocus
-                required
-              />
+              <div className="relative">
+                <Input
+                  type={showUnlockPassword ? "text" : "password"}
+                  placeholder={t("partner_unlock_placeholder", "Nhập mật khẩu...")}
+                  value={unlockPassword}
+                  onChange={(e) => setUnlockPassword(e.target.value)}
+                  className="text-xs h-10 rounded-xl pr-10"
+                  autoFocus
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowUnlockPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  tabIndex={-1}
+                  aria-label={showUnlockPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                >
+                  {showUnlockPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             <DialogFooter className="pt-2">
@@ -2655,39 +2673,72 @@ function PartnerDashboardContent() {
             {!isSettingInitialPassword && hasOwnerPassword && (
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">{t("partner_password_current_label", "Mật khẩu hiện tại *")}</Label>
-                <Input
-                  type="password"
-                  placeholder={t("partner_password_current_placeholder", "Nhập mật khẩu hiện tại...")}
-                  value={currentPasswordInput}
-                  onChange={(e) => setCurrentPasswordInput(e.target.value)}
-                  className="text-xs h-10 rounded-xl"
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    type={showCurrentPassword ? "text" : "password"}
+                    placeholder={t("partner_password_current_placeholder", "Nhập mật khẩu hiện tại...")}
+                    value={currentPasswordInput}
+                    onChange={(e) => setCurrentPasswordInput(e.target.value)}
+                    className="text-xs h-10 rounded-xl pr-10"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    tabIndex={-1}
+                    aria-label={showCurrentPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
             )}
 
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">{t("partner_password_new_label", "Mật khẩu mới (ít nhất 4 ký tự) *")}</Label>
-              <Input
-                type="password"
-                placeholder={t("partner_password_new_placeholder", "Nhập mật khẩu mới...")}
-                value={newPasswordInput}
-                onChange={(e) => setNewPasswordInput(e.target.value)}
-                className="text-xs h-10 rounded-xl"
-                required
-              />
+              <div className="relative">
+                <Input
+                  type={showNewPassword ? "text" : "password"}
+                  placeholder={t("partner_password_new_placeholder", "Nhập mật khẩu mới...")}
+                  value={newPasswordInput}
+                  onChange={(e) => setNewPasswordInput(e.target.value)}
+                  className="text-xs h-10 rounded-xl pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  tabIndex={-1}
+                  aria-label={showNewPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">{t("partner_password_confirm_label", "Xác nhận mật khẩu mới *")}</Label>
-              <Input
-                type="password"
-                placeholder={t("partner_password_confirm_placeholder", "Nhập lại mật khẩu mới...")}
-                value={confirmPasswordInput}
-                onChange={(e) => setConfirmPasswordInput(e.target.value)}
-                className="text-xs h-10 rounded-xl"
-                required
-              />
+              <div className="relative">
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder={t("partner_password_confirm_placeholder", "Nhập lại mật khẩu mới...")}
+                  value={confirmPasswordInput}
+                  onChange={(e) => setConfirmPasswordInput(e.target.value)}
+                  className="text-xs h-10 rounded-xl pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  tabIndex={-1}
+                  aria-label={showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             <DialogFooter className="pt-2">
@@ -3304,7 +3355,7 @@ function PartnerDashboardContent() {
               </div>
               <div className="space-y-0.5 flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_active_title", "🟢 Đang hoạt động (Active)")}</span>
+                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_active_title", "🟢 Đang hoạt động")}</span>
                   <Badge className="bg-emerald-600 text-white text-[10px] shrink-0 whitespace-nowrap">{t("partner_status_active_badge", "Hiển thị")}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">
@@ -3331,7 +3382,7 @@ function PartnerDashboardContent() {
               </div>
               <div className="space-y-0.5 flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_paused_title", "⏸️ Tạm ngừng hoạt động (Paused)")}</span>
+                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_paused_title", "⏸️ Tạm ngừng hoạt động")}</span>
                   <Badge className="bg-amber-500 text-white text-[10px] shrink-0 whitespace-nowrap">{t("partner_status_paused_badge", "Tạm ẩn")}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">
@@ -3358,7 +3409,7 @@ function PartnerDashboardContent() {
               </div>
               <div className="space-y-0.5 flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_maint_title", "🔧 Đang sửa chữa / bảo trì (Maintenance)")}</span>
+                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_maint_title", "🔧 Đang sửa chữa / bảo trì")}</span>
                   <Badge className="bg-indigo-600 text-white text-[10px] shrink-0 whitespace-nowrap">{t("partner_status_maint_badge", "Bảo trì")}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">

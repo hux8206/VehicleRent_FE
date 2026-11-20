@@ -579,7 +579,8 @@ function PartnerAnalyticsContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/60 dark:bg-slate-950 p-4 sm:p-6 lg:p-8 space-y-8">
+    <div className="min-h-screen bg-slate-50/60 dark:bg-slate-950">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
       {/* Top Navigation & Breadcrumb */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5">
         <div className="space-y-1">
@@ -820,7 +821,7 @@ function PartnerAnalyticsContent() {
         <Card className="rounded-2xl border-slate-200 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 p-5 space-y-3 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-              Tổng thu khách (Gross)
+              Tổng thu khách
             </span>
             <div className="h-9 w-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
               <DollarSign className="h-5 w-5" />
@@ -841,7 +842,7 @@ function PartnerAnalyticsContent() {
         <Card className="rounded-2xl border-slate-200 dark:border-slate-800 shadow-xs bg-white dark:bg-slate-900 p-5 space-y-3 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-              Thực nhận nhà xe (Net)
+              Thực nhận nhà xe
             </span>
             <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold">
               <TrendingUp className="h-5 w-5" />
@@ -915,7 +916,7 @@ function PartnerAnalyticsContent() {
                 <span>Biểu đồ xu hướng doanh thu theo thời gian</span>
               </CardTitle>
               <CardDescription className="text-xs text-slate-500 mt-0.5">
-                Đối chiếu Tổng thu khách (Gross) và Thực nhận cơ sở (Net) trong mốc thời gian đã chọn
+                Đối chiếu tổng thu khách và thực nhận nhà xe trong mốc thời gian đã chọn
               </CardDescription>
             </div>
             <Badge variant="outline" className="text-[11px] self-start sm:self-auto font-mono">
@@ -952,7 +953,7 @@ function PartnerAnalyticsContent() {
                 <Tooltip
                   formatter={(value: any, name: any) => [
                     `${Number(value).toLocaleString("vi-VN")} đ`,
-                    name === "grossRevenue" ? "Tổng thu khách (Gross)" : "Thực nhận nhà xe (Net)",
+                    name === "grossRevenue" ? "Tổng thu khách" : "Thực nhận nhà xe",
                   ]}
                 />
                 <Legend verticalAlign="top" height={36} />
@@ -1162,8 +1163,8 @@ function PartnerAnalyticsContent() {
                   <TableHead className="font-bold">Khách hàng</TableHead>
                   <TableHead className="font-bold">Dòng xe & biển số</TableHead>
                   <TableHead className="font-bold">Thời gian thuê</TableHead>
-                  <TableHead className="font-bold text-right">Tổng tiền (Gross)</TableHead>
-                  <TableHead className="font-bold text-right">Thực nhận (Net)</TableHead>
+                  <TableHead className="font-bold text-right">Tổng thu khách</TableHead>
+                  <TableHead className="font-bold text-right">Thực nhận nhà xe</TableHead>
                   <TableHead className="font-bold text-center">Trạng thái</TableHead>
                 </TableRow>
               </TableHeader>
@@ -1238,6 +1239,7 @@ function PartnerAnalyticsContent() {
           </div>
         )}
       </Card>
+    </div>
     </div>
   );
 }

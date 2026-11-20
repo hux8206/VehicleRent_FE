@@ -655,10 +655,10 @@ function PartnerVehiclesContent() {
   };
 
   const statusMap: Record<number, { label: string; color: string; icon: any }> = {
-    0: { label: "Sẵn sàng (Available)", color: "bg-emerald-50 text-emerald-800 border-emerald-200", icon: CheckCircle2 },
-    1: { label: "Đã giữ chỗ (Reserved)", color: "bg-blue-50 text-blue-800 border-blue-200", icon: Tag },
-    2: { label: "Đang cho thuê (Rented)", color: "bg-amber-50 text-amber-800 border-amber-200", icon: Car },
-    3: { label: "Bảo dưỡng (Maintenance)", color: "bg-rose-50 text-rose-800 border-rose-200", icon: Wrench },
+    0: { label: "Sẵn sàng", color: "bg-emerald-50 text-emerald-800 border-emerald-200", icon: CheckCircle2 },
+    1: { label: "Đã giữ chỗ", color: "bg-blue-50 text-blue-800 border-blue-200", icon: Tag },
+    2: { label: "Đang cho thuê", color: "bg-amber-50 text-amber-800 border-amber-200", icon: Car },
+    3: { label: "Bảo dưỡng", color: "bg-rose-50 text-rose-800 border-rose-200", icon: Wrench },
   };
 
   return (
@@ -932,8 +932,8 @@ function PartnerVehiclesContent() {
                                   className={`text-xs font-semibold px-2.5 py-1.5 rounded-xl border ${st.color} outline-none cursor-pointer`}
                                   title="Chuyển đổi trạng thái xe"
                                 >
-                                  <option value={0}>0: Sẵn sàng (Available)</option>
-                                  <option value={3}>3: Bảo dưỡng (Maintenance)</option>
+                                  <option value={0}>Sẵn sàng</option>
+                                  <option value={3}>Bảo dưỡng</option>
                                 </select>
                               )}
 
@@ -1341,8 +1341,8 @@ function PartnerVehiclesContent() {
                     onChange={(e) => setEditItemStatus(Number(e.target.value))}
                     className="w-full h-10 px-3 text-xs rounded-lg border bg-background font-semibold"
                   >
-                    <option value={0}>0: Sẵn sàng (Available)</option>
-                    <option value={3}>3: Bảo dưỡng (Maintenance)</option>
+                    <option value={0}>Sẵn sàng</option>
+                    <option value={3}>Bảo dưỡng</option>
                   </select>
                 )}
               </div>
