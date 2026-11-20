@@ -69,21 +69,33 @@ function PartnerAnalyticsContent() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
 
-  // Mode: "owner" (Chủ chuỗi) | "branch" (Nhân viên / Quản lý điểm thuê)
-  const isOwnerSession = searchParams.get("mode") === "owner";
-  const initialMode = isOwnerSession ? "owner" : "branch";
-  const [currentMode, setCurrentMode] = useState<"owner" | "branch">(initialMode);
+  // Xác định phiên làm việc là Chủ Cửa Hàng (Owner) hay Nhân Viên Chi Nhánh (Branch)
+  const isOwnerSession =
+    searchParams.get("mode") === "owner" ||
+    (typeof window !== "undefined" &&
+      sessionStorage.getItem("partner_owner_unlocked") === "true");
 
   // Selected Store ID (null = "Tất cả chi nhánh" - chỉ khả dụng ở mode owner)
   const initialStoreId = searchParams.get("storeId");
   const [selectedStoreId, setSelectedStoreId] = useState<number | null>(() => {
     if (initialStoreId) return Number(initialStoreId);
-    if (typeof window !== "undefined") {
+    if (!isOwnerSession && typeof window !== "undefined") {
       const saved = localStorage.getItem("active_partner_store_id");
       if (saved) return Number(saved);
     }
     return null;
   });
+
+  // Tự động bảo toàn mode=owner nếu đã mở khóa phân hệ chủ cửa hàng
+  useEffect(() => {
+    if (typeof window !== "undefined" && sessionStorage.getItem("partner_owner_unlocked") === "true") {
+      const m = searchParams.get("mode");
+      if (m !== "owner") {
+        const storeId = searchParams.get("storeId") || selectedStoreId;
+        router.replace(`/partner/analytics?mode=owner${storeId ? `&storeId=${storeId}` : ""}`);
+      }
+    }
+  }, [searchParams, router, selectedStoreId]);
 
   // Date Filter State
   const [datePreset, setDatePreset] = useState<DatePreset>("30d");
@@ -121,7 +133,7 @@ function PartnerAnalyticsContent() {
       setWallet(walletData || null);
 
       // Default store selection if in branch mode and no store selected yet
-      if (currentMode === "branch" && !selectedStoreId && storesData?.length > 0) {
+      if (!isOwnerSession && !selectedStoreId && storesData?.length > 0) {
         setSelectedStoreId(storesData[0].id);
         localStorage.setItem("active_partner_store_id", String(storesData[0].id));
         localStorage.setItem("active_partner_store_name", storesData[0].storeName);
@@ -137,13 +149,6 @@ function PartnerAnalyticsContent() {
     loadData();
   }, []);
 
-  // Sync mode from URL if changed
-  useEffect(() => {
-    const m = searchParams.get("mode");
-    if (m === "owner" && currentMode !== "owner") setCurrentMode("owner");
-    if (m === "branch" && currentMode !== "branch") setCurrentMode("branch");
-  }, [searchParams]);
-
   // When store selection changes
   const handleStoreChange = (storeId: number | null) => {
     setSelectedStoreId(storeId);
@@ -153,9 +158,17 @@ function PartnerAnalyticsContent() {
         localStorage.setItem("active_partner_store_id", String(storeId));
         localStorage.setItem("active_partner_store_name", storeObj.storeName);
       }
+      if (isOwnerSession) {
+        router.replace(`/partner/analytics?mode=owner&storeId=${storeId}`);
+      } else {
+        router.replace(`/partner/analytics?mode=branch&storeId=${storeId}`);
+      }
     } else {
       localStorage.removeItem("active_partner_store_id");
       localStorage.removeItem("active_partner_store_name");
+      if (isOwnerSession) {
+        router.replace("/partner/analytics?mode=owner");
+      }
     }
   };
 
@@ -586,11 +599,11 @@ function PartnerAnalyticsContent() {
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
             <Link
-              href={currentMode === "owner" ? "/partner?mode=owner" : `/partner?mode=branch${selectedStoreId ? `&storeId=${selectedStoreId}` : ""}`}
+              href={isOwnerSession ? "/partner?mode=owner" : `/partner?mode=branch${selectedStoreId ? `&storeId=${selectedStoreId}` : ""}`}
               className="hover:text-blue-600 flex items-center gap-1 transition-colors"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Quay lại quản lý vận hành</span>
+              <span>{isOwnerSession ? "Quay lại quản lý chủ cửa hàng" : "Quay lại quản lý vận hành"}</span>
             </Link>
             <span>/</span>
             <span className="text-slate-900 dark:text-slate-100 font-bold">Thống kê & báo cáo doanh thu</span>
@@ -600,7 +613,7 @@ function PartnerAnalyticsContent() {
             <span>Trung tâm phân tích & báo cáo doanh thu</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            {currentMode === "owner"
+            {selectedStoreId === null
               ? "Báo cáo hợp nhất toàn chuỗi và phân tích sâu dòng tiền từng điểm kinh doanh."
               : `Báo cáo chuyên sâu và hiệu suất vận hành riêng cho chi nhánh: ${currentStore?.storeName || "Điểm thuê"}.`}
           </p>
@@ -612,12 +625,13 @@ function PartnerAnalyticsContent() {
           {isOwnerSession && (
             <div className="bg-slate-200 dark:bg-slate-800 p-1 rounded-xl flex items-center text-xs font-bold shadow-2xs">
               <button
+                type="button"
                 onClick={() => {
-                  setCurrentMode("branch");
-                  router.replace(`/partner/analytics?mode=branch${selectedStoreId ? `&storeId=${selectedStoreId}` : ""}`);
+                  const targetStore = selectedStoreId || stores[0]?.id || null;
+                  handleStoreChange(targetStore);
                 }}
                 className={`px-3 py-1.5 rounded-lg transition-all ${
-                  currentMode === "branch"
+                  selectedStoreId !== null
                     ? "bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-xs"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                 }`}
@@ -625,12 +639,12 @@ function PartnerAnalyticsContent() {
                 Cơ sở / điểm thuê
               </button>
               <button
+                type="button"
                 onClick={() => {
-                  setCurrentMode("owner");
-                  router.replace("/partner/analytics?mode=owner");
+                  handleStoreChange(null);
                 }}
                 className={`px-3 py-1.5 rounded-lg transition-all ${
-                  currentMode === "owner"
+                  selectedStoreId === null
                     ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 shadow-xs"
                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                 }`}
@@ -715,7 +729,7 @@ function PartnerAnalyticsContent() {
                 }}
                 className="w-full text-xs font-bold bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 pr-8 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-2xs"
               >
-                {currentMode === "owner" && (
+                {isOwnerSession && (
                   <option value="all">🏢 Tất cả chi nhánh (toàn hệ thống)</option>
                 )}
                 {stores.map((s) => (

@@ -135,11 +135,14 @@ export function Navbar() {
   // - Hoặc ở /partner?mode=branch có storeId
   // - Hoặc ở /partner/wallet có queryStoreId hoặc activeBranchId
   const effectiveBranchId = queryStoreId || activeBranchId;
+  const isOwnerSessionUnlocked =
+    typeof window !== "undefined" && sessionStorage.getItem("partner_owner_unlocked") === "true";
+
   const isBranchRoute =
     isPartner &&
     (
-      // Analytics branch mode không yêu cầu effectiveBranchId vì page tự quản lý storeId
-      (pathname.startsWith("/partner/analytics") && partnerMode !== "owner") ||
+      // Analytics branch mode khi không phải là chủ cửa hàng
+      (pathname.startsWith("/partner/analytics") && partnerMode !== "owner" && !isOwnerSessionUnlocked) ||
       // Các route khác cần effectiveBranchId
       (Boolean(effectiveBranchId) &&
         (pathname.startsWith("/partner/vehicles") ||
@@ -154,7 +157,7 @@ export function Navbar() {
   const isOwnerRoute =
     isPartner &&
     ((pathname === "/partner" && partnerMode === "owner") ||
-      (pathname.startsWith("/partner/analytics") && partnerMode === "owner") ||
+      (pathname.startsWith("/partner/analytics") && (partnerMode === "owner" || isOwnerSessionUnlocked)) ||
       (pathname.startsWith("/partner/wallet") && !queryStoreId && !activeBranchId) ||
       pathname.startsWith("/partner/onboarding"));
 
