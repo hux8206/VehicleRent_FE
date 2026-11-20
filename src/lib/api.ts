@@ -79,6 +79,7 @@ export interface User {
 
 export interface UserDetail extends User {
   hasOwnerPassword?: boolean;
+  isOwnerPasswordEnabled?: boolean;
   stores?: Array<
     Store & {
       _count?: { vehicleModels: number; bookings: number };
@@ -1407,10 +1408,20 @@ export const api = {
 
     getOwnerPasswordStatus: async () => {
       try {
-        return await request<{ hasOwnerPassword: boolean }>("/partner/stores/security/owner-password-status");
+        return await request<{ hasOwnerPassword: boolean; isOwnerPasswordEnabled: boolean }>("/partner/stores/security/owner-password-status");
       } catch {
-        return { hasOwnerPassword: false };
+        return { hasOwnerPassword: false, isOwnerPasswordEnabled: true };
       }
+    },
+
+    toggleOwnerPassword: async (enabled: boolean) => {
+      return await request<{ success: boolean; isOwnerPasswordEnabled: boolean; message: string }>(
+        "/partner/stores/security/toggle-owner-password",
+        {
+          method: "POST",
+          body: JSON.stringify({ enabled }),
+        }
+      );
     },
 
     setOwnerPassword: async (dto: { currentPassword?: string; newPassword: string }) => {

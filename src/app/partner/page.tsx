@@ -163,6 +163,8 @@ function PartnerDashboardContent() {
   // Security: Owner Password
   const [isOwnerUnlocked, setIsOwnerUnlocked] = useState(false);
   const [hasOwnerPassword, setHasOwnerPassword] = useState(false);
+  const [isOwnerPasswordEnabled, setIsOwnerPasswordEnabled] = useState(true);
+  const [isTogglingPassword, setIsTogglingPassword] = useState(false);
   const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
   const [unlockPassword, setUnlockPassword] = useState("");
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
@@ -251,7 +253,7 @@ function PartnerDashboardContent() {
           api.partner.getWallet().catch(() => null),
           api.partner.getModels().catch(() => []),
           api.partner.getBookings().catch(() => []),
-          api.partner.getOwnerPasswordStatus().catch(() => ({ hasOwnerPassword: false })),
+          api.partner.getOwnerPasswordStatus().catch(() => ({ hasOwnerPassword: false, isOwnerPasswordEnabled: true })),
           api.config.get().catch(() => ({ minDepositPercent: 15 })),
           api.partner.getStoreUpdateRequests().catch(() => []),
           api.partner.getWalletHistory(1, 100).catch(() => ({ histories: [] })),
@@ -269,6 +271,7 @@ function PartnerDashboardContent() {
       setModels(modelsData || []);
       setBookings(bookingsData || []);
       setHasOwnerPassword(!!passStatus?.hasOwnerPassword);
+      setIsOwnerPasswordEnabled(passStatus?.isOwnerPasswordEnabled !== false);
       setMinDepositConfig(Number(sysConfig?.minDepositPercent || 15));
       setNewBranchDeposit(Number(sysConfig?.minDepositPercent || 15));
       setUpdateRequests(requestsData || []);
@@ -302,8 +305,8 @@ function PartnerDashboardContent() {
         setSelectedBranch(null);
       }
     } else if (modeParam === "owner") {
-      // Khi ở phân hệ chủ: Nếu đã mở khóa (từ session hoặc vừa nhập mật khẩu thành công) thì cho phép vào
-      if (sessionUnlocked || isOwnerUnlocked) {
+      // Khi ở phân hệ chủ: Nếu đã mở khóa (từ session hoặc vừa nhập mật khẩu thành công) hoặc mật khẩu đang tắt thì cho phép vào
+      if (sessionUnlocked || isOwnerUnlocked || !isOwnerPasswordEnabled) {
         setIsOwnerUnlocked(true);
         setCurrentMode("owner");
       } else {
@@ -338,18 +341,66 @@ function PartnerDashboardContent() {
   // ── Handlers: Security & Passwords ─────────────────────────────────────────
 
   const handleEnterOwnerPortal = () => {
-    // "cứ vào là phải nhập mật khẩu"
+    // Nếu tính năng bảo vệ mật khẩu đang TẮT -> cho phép vào trực tiếp phân hệ chủ
+    if (!isOwnerPasswordEnabled) {
+      setIsOwnerUnlocked(true);
+      sessionStorage.setItem("partner_owner_unlocked", "true");
+      setCurrentMode("owner");
+      router.push("/partner?mode=owner");
+      return;
+    }
+
     if (!hasOwnerPassword) {
-      // First time setup
+      // Thiết lập mật khẩu lần đầu
       setIsSettingInitialPassword(true);
       setCurrentPasswordInput("");
       setNewPasswordInput("");
       setConfirmPasswordInput("");
       setIsPasswordModalOpen(true);
     } else {
-      // Always prompt for PIN / Password
+      // Yêu cầu nhập mật khẩu bảo vệ
       setUnlockPassword("");
       setIsUnlockModalOpen(true);
+    }
+  };
+
+  const handleTogglePasswordProtection = async () => {
+    if (isTogglingPassword) return;
+
+    if (!isOwnerPasswordEnabled) {
+      // Đang tắt -> Muốn bật lại
+      if (!hasOwnerPassword) {
+        // Chưa có mật khẩu -> yêu cầu thiết lập mật khẩu lần đầu
+        setIsSettingInitialPassword(true);
+        setCurrentPasswordInput("");
+        setNewPasswordInput("");
+        setConfirmPasswordInput("");
+        setIsPasswordModalOpen(true);
+        return;
+      }
+
+      setIsTogglingPassword(true);
+      try {
+        const res = await api.partner.toggleOwnerPassword(true);
+        setIsOwnerPasswordEnabled(true);
+        toast.success(res.message || "Đã bật mật khẩu bảo vệ phân hệ chủ cửa hàng!");
+      } catch (err: any) {
+        toast.error(err.message || "Không thể bật mật khẩu bảo vệ");
+      } finally {
+        setIsTogglingPassword(false);
+      }
+    } else {
+      // Đang bật -> Muốn tắt
+      setIsTogglingPassword(true);
+      try {
+        const res = await api.partner.toggleOwnerPassword(false);
+        setIsOwnerPasswordEnabled(false);
+        toast.success("Đã tắt mật khẩu. Lần sau vào phân hệ chủ cửa hàng sẽ không cần nhập mật khẩu!");
+      } catch (err: any) {
+        toast.error(err.message || "Không thể tắt mật khẩu");
+      } finally {
+        setIsTogglingPassword(false);
+      }
     }
   };
 
@@ -401,6 +452,7 @@ function PartnerDashboardContent() {
       });
 
       setHasOwnerPassword(true);
+      setIsOwnerPasswordEnabled(true);
       setIsOwnerUnlocked(true);
       sessionStorage.setItem("partner_owner_unlocked", "true");
       setIsPasswordModalOpen(false);
@@ -1086,9 +1138,15 @@ function PartnerDashboardContent() {
                 className="group relative bg-white rounded-2xl p-7 border-2 border-slate-200 hover:border-amber-500 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between"
               >
                 <div className="absolute top-5 right-5">
-                  <span className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
-                    <Lock className="h-3 w-3 text-amber-600" /> {t("partner_owner_pin_required", "Cần mật khẩu cấp 2")}
-                  </span>
+                  {isOwnerPasswordEnabled ? (
+                    <span className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                      <Lock className="h-3 w-3 text-amber-600" /> {t("partner_owner_pin_required", "Mật khẩu: Bật")}
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      <Unlock className="h-3 w-3 text-emerald-600" /> {t("partner_owner_pin_disabled", "Mật khẩu: Tắt")}
+                    </span>
+                  )}
                 </div>
 
                 <div className="space-y-4">
@@ -1120,14 +1178,18 @@ function PartnerDashboardContent() {
                     </div>
                     <div className="flex items-center gap-2">
                       <KeyRound className="h-4 w-4 text-indigo-600 shrink-0" />
-                      <span>{t("partner_owner_bullet_4", "Bảo mật bằng mật khẩu cấp 2 (đặt & đổi mật khẩu tùy chỉnh)")}</span>
+                      <span>{t("partner_owner_bullet_4", "Bảo mật bằng mật khẩu cấp 2 (tùy chỉnh bật/tắt & đổi mật khẩu)")}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-6">
                   <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl h-11 text-xs gap-2 shadow-xs group-hover:shadow-md">
-                    <span>{t("partner_owner_unlock_btn", "Mở khóa khu vực chủ cửa hàng")}</span>
+                    <span>
+                      {isOwnerPasswordEnabled
+                        ? t("partner_owner_unlock_btn", "Mở khóa khu vực chủ cửa hàng")
+                        : t("partner_owner_enter_btn", "Vào khu vực chủ cửa hàng")}
+                    </span>
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -1231,6 +1293,36 @@ function PartnerDashboardContent() {
                 >
                   <Plus className="h-4 w-4 text-amber-600" />
                   <span>{t("partner_btn_add_branch", "Thêm chi nhánh mới")}</span>
+                </Button>
+
+                <Button
+                  onClick={handleTogglePasswordProtection}
+                  disabled={isTogglingPassword}
+                  variant="outline"
+                  size="sm"
+                  className={`font-bold text-xs h-9 rounded-xl gap-1.5 transition-all ${
+                    isOwnerPasswordEnabled
+                      ? "bg-amber-950/40 border-amber-500/40 text-amber-200 hover:bg-amber-950 hover:text-white"
+                      : "bg-emerald-950/40 border-emerald-500/40 text-emerald-200 hover:bg-emerald-950 hover:text-white"
+                  }`}
+                  title={
+                    isOwnerPasswordEnabled
+                      ? "Nhấn để tắt yêu cầu mật khẩu khi vào phân hệ chủ"
+                      : "Nhấn để bật yêu cầu mật khẩu khi vào phân hệ chủ"
+                  }
+                >
+                  {isTogglingPassword ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : isOwnerPasswordEnabled ? (
+                    <Lock className="h-3.5 w-3.5 text-amber-300" />
+                  ) : (
+                    <Unlock className="h-3.5 w-3.5 text-emerald-300" />
+                  )}
+                  <span>
+                    {isOwnerPasswordEnabled
+                      ? t("partner_btn_password_enabled", "Mật khẩu: Bật")
+                      : t("partner_btn_password_disabled", "Mật khẩu: Tắt")}
+                  </span>
                 </Button>
 
                 <Button
@@ -2625,6 +2717,16 @@ function PartnerDashboardContent() {
               </div>
             </div>
 
+            <div className="bg-amber-50/80 border border-amber-200/80 rounded-xl p-3 text-[11px] text-amber-900 flex items-start gap-2">
+              <HelpCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                {t(
+                  "partner_password_toggle_hint",
+                  "Bạn có thể bật hoặc tắt yêu cầu nhập mật khẩu này bất kỳ lúc nào bằng nút 'Mật khẩu: Bật/Tắt' trên thanh công cụ của phân hệ chủ cửa hàng."
+                )}
+              </span>
+            </div>
+
             <DialogFooter className="pt-2">
               <Button
                 type="button"
@@ -2739,6 +2841,16 @@ function PartnerDashboardContent() {
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+            </div>
+
+            <div className="bg-amber-50/80 border border-amber-200/80 rounded-xl p-3 text-[11px] text-amber-900 flex items-start gap-2">
+              <HelpCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                {t(
+                  "partner_password_toggle_hint",
+                  "Bạn có thể bật hoặc tắt yêu cầu nhập mật khẩu này bất kỳ lúc nào bằng nút 'Mật khẩu: Bật/Tắt' trên thanh công cụ của phân hệ chủ cửa hàng."
+                )}
+              </span>
             </div>
 
             <DialogFooter className="pt-2">
