@@ -1,40 +1,51 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from "next-themes";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-export type Theme = "light" | "dark" | "system";
+export type Theme = "light";
 
 export interface ThemeContextType {
-  theme: Theme;
-  resolvedTheme: "light" | "dark";
-  setTheme: (theme: Theme) => void;
+  theme: "light";
+  resolvedTheme: "light";
+  setTheme: (theme: any) => void;
   toggleTheme: () => void;
   mounted: boolean;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const defaultThemeContext: ThemeContextType = {
+  theme: "light",
+  resolvedTheme: "light",
+  setTheme: () => {},
+  toggleTheme: () => {},
+  mounted: true,
+};
+
+const ThemeContext = createContext<ThemeContextType>(defaultThemeContext);
 
 function ThemeBridge({ children }: { children: React.ReactNode }) {
-  const { theme, resolvedTheme, setTheme } = useNextTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    if (typeof document !== "undefined") {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.style.colorScheme = "light";
+      try {
+        localStorage.setItem("theme", "light");
+      } catch {
+        // ignore
+      }
+    }
   }, []);
-
-  const toggleTheme = () => {
-    const next = resolvedTheme === "dark" ? "light" : "dark";
-    setTheme(next);
-  };
 
   return (
     <ThemeContext.Provider
       value={{
-        theme: (theme as Theme) || "system",
-        resolvedTheme: (resolvedTheme as "light" | "dark") || "light",
-        setTheme: (t: Theme) => setTheme(t),
-        toggleTheme,
+        theme: "light",
+        resolvedTheme: "light",
+        setTheme: () => {},
+        toggleTheme: () => {},
         mounted,
       }}
     >
@@ -47,8 +58,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="light"
+      forcedTheme="light"
+      enableSystem={false}
       disableTransitionOnChange
     >
       <ThemeBridge>{children}</ThemeBridge>
@@ -57,9 +69,5 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return context;
+  return useContext(ThemeContext) || defaultThemeContext;
 }

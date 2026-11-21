@@ -112,15 +112,15 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&m)||(t==='system'&&m)){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}else{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';}var l=localStorage.getItem('vr_locale');if(l){document.documentElement.lang=l;}}catch(e){}})()`,
+            __html: `(function(){try{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';localStorage.setItem('theme','light');var l=localStorage.getItem('vr_locale');if(l){document.documentElement.lang=l;}}catch(e){}})()`,
           }}
         />
       </head>
-      <body className="min-h-screen flex flex-col antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-200" suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col antialiased bg-slate-50 text-slate-900 font-sans" suppressHydrationWarning>
         <ThemeProvider>
           <LanguageProvider>
             <AuthProvider>
-              <Suspense fallback={<div className="h-16 border-b bg-white dark:bg-slate-900 dark:border-slate-800" />}>
+              <Suspense fallback={<div className="h-16 border-b bg-white border-slate-100" />}>
                 <Navbar />
               </Suspense>
               <main className="flex-1">{children}</main>

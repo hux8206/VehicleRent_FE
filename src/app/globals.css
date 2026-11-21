@@ -34,36 +34,6 @@
 
     --radius: 0.75rem;
   }
-
-  .dark {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
-
-    --card: 224 71% 7%;
-    --card-foreground: 213 31% 91%;
-
-    --popover: 224 71% 7%;
-    --popover-foreground: 213 31% 91%;
-
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 215 28% 17%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 215 28% 17%;
-    --muted-foreground: 217 19% 65%;
-
-    --accent: 215 28% 17%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
-    --ring: 224.3 76.3% 48%;
-  }
 }
 
 @layer base {
@@ -79,52 +49,6 @@
   h1, h2, h3, h4, .font-heading {
     font-family: var(--font-heading), var(--font-sans), system-ui, sans-serif;
   }
-}
-
-/* Seamless Dark Mode Page Surfaces */
-.dark body {
-  background-color: #030712;
-  color: #f3f4f6;
-}
-
-.dark .bg-slate-50,
-.dark .bg-slate-50\/50,
-.dark .bg-slate-50\/60,
-.dark .bg-slate-50\/70,
-.dark .bg-slate-50\/80,
-.dark .bg-slate-50\/90 {
-  background-color: #030712;
-}
-
-.dark .bg-slate-100 {
-  background-color: #111827;
-}
-
-.dark .border-slate-200,
-.dark .border-slate-200\/80,
-.dark .border-slate-200\/90,
-.dark .border-slate-200\/60 {
-  border-color: #1f2937;
-}
-
-.dark .text-slate-900 {
-  color: #f9fafb;
-}
-
-.dark .text-slate-800 {
-  color: #f3f4f6;
-}
-
-.dark .text-slate-700 {
-  color: #e5e7eb;
-}
-
-.dark .text-slate-600 {
-  color: #9ca3af;
-}
-
-.dark .text-slate-500 {
-  color: #9ca3af;
 }
 
 @layer utilities {

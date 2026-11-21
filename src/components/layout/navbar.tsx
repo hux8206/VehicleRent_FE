@@ -43,7 +43,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/context/language-context";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { LanguageSelector } from "@/components/layout/language-selector";
 import { BrandLogo } from "@/components/layout/brand-logo";
 
@@ -414,10 +413,9 @@ export function Navbar() {
             </Link>
           )}
 
-          {/* Language Selector & Theme Toggle (Visible on sm+ screens; on mobile it is inside mobile drawer) */}
+          {/* Language Selector (Visible on sm+ screens; on mobile it is inside mobile drawer) */}
           <div className="hidden sm:flex items-center gap-1.5">
             <LanguageSelector />
-            <ThemeToggle />
           </div>
 
           {user ? (
@@ -674,14 +672,13 @@ export function Navbar() {
       {/* Mobile Navigation Drawer - Tailored by Role */}
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-4 space-y-3 shadow-xl">
-          {/* Mobile Theme & Language Controls Row */}
+          {/* Mobile Language Control Row */}
           <div className="pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between px-1">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              {t("theme_title", "Giao diện")} & {t("language_title", "Ngôn ngữ")}
+              {t("language_title", "Ngôn ngữ")}
             </span>
             <div className="flex items-center gap-2">
               <LanguageSelector />
-              <ThemeToggle />
             </div>
           </div>
 
