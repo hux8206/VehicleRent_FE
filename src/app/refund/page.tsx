@@ -47,7 +47,13 @@ export default function RefundPolicyPage() {
             Để đảm bảo quyền lợi công bằng cho cả Khách thuê xe và Đối tác nhà xe, VehicleRent áp dụng quy trình đặt cọc tự động qua VietQR và chính sách hoàn tiền minh bạch theo các mốc thời gian rõ ràng.
           </p>
           <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap gap-4 text-xs text-slate-500">
+            <span>Phiên bản: <strong>Tháng 11/2026</strong></span>
+            <span>•</span>
             <span>Tiêu chuẩn: <strong>Hệ thống VietQR tự động & Khấu trừ ví đối tác</strong></span>
+            <span>•</span>
+            <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              ✓ Bảo lãnh: Hoàn 150% tiền cọc nếu đối tác không đáp ứng được đơn đặt
+            </span>
             <span>•</span>
             <span>Thời gian xử lý hoàn cọc: <strong>24h - 48h làm việc</strong></span>
           </div>
@@ -59,26 +65,26 @@ export default function RefundPolicyPage() {
           <section className="space-y-3">
             <div className="flex items-center gap-2.5 text-slate-900 font-bold text-lg md:text-xl">
               <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold">1</span>
-              <h2>Cơ chế Đặt Cọc & Giữ Chỗ Tự Động 10 Phút</h2>
+              <h2>Cơ chế Đặt Cọc: Đơn Trực Tuyến & Đơn Tại Quầy</h2>
             </div>
             <p>
-              Khi bạn tạo đơn thuê xe trên sàn VehicleRent:
+              Tùy thuộc vào hình thức đặt thuê trên hệ thống VehicleRent, quy chế tiền cọc được phân định rõ:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                 <strong className="text-slate-900 block flex items-center gap-1.5">
-                  <CreditCard className="w-4 h-4 text-blue-600" /> Tỷ lệ đặt cọc đơn thuê:
+                  <CreditCard className="w-4 h-4 text-blue-600" /> Đơn trực tuyến (Online Booking):
                 </strong>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Tiền cọc được tính theo tỷ lệ phần trăm trên tổng giá trị đơn thuê (tối thiểu 15%, do từng đối tác nhà xe quy định cụ thể trong mục Chính sách của cơ sở).
+                  Tiền cọc được thanh toán trực tuyến qua cổng VietQR PayOS (tỷ lệ tối thiểu 15% do nhà xe quy định). Hệ thống tự động khóa xe độc quyền trong <strong>10 phút</strong> để khách thanh toán. Nếu quá 10 phút, đơn tự động hủy và xe được mở lại.
                 </p>
               </div>
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                 <strong className="text-slate-900 block flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-amber-600" /> Giữ chỗ độc quyền 10 phút:
+                  <Building className="w-4 h-4 text-amber-600" /> Đơn tạo tại quầy (Walk-in Booking):
                 </strong>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Hệ thống khóa xe vật lý trong vòng 10 phút để bạn quét mã VietQR PayOS. Nếu sau 10 phút chưa thanh toán cọc, đơn sẽ tự động hủy và xe được mở lại cho khách khác.
+                  Đối tác nhà xe trực tiếp thỏa thuận mức cọc (hỗ trợ cọc 0đ hoặc thu cọc tiền mặt) với khách vãng lai. Tiền cọc và tiền thuê đơn tại quầy không qua cổng thanh toán sàn và do hai bên tự quản lý.
                 </p>
               </div>
             </div>
@@ -88,10 +94,10 @@ export default function RefundPolicyPage() {
           <section className="space-y-4">
             <div className="flex items-center gap-2.5 text-slate-900 font-bold text-lg md:text-xl">
               <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold">2</span>
-              <h2>Bảng Quy Định Tỷ Lệ Hoàn Tiền Cọc Khi Hủy Chuyến</h2>
+              <h2>Bảng Quy Định Tỷ Lệ Hoàn Tiền Cọc Đơn Trực Tuyến</h2>
             </div>
             <p className="text-sm">
-              Trường hợp Khách hàng chủ động yêu cầu hủy đơn đã cọc thành công, mức hoàn tiền cọc được tính căn cứ theo khoảng cách đến <strong>Giờ Nhận Xe</strong> và <strong>Thời gian từ lúc tạo đơn (ân hạn 30 phút)</strong>:
+              Trường hợp Khách hàng chủ động yêu cầu hủy Đơn đặt trực tuyến đã cọc thành công qua cổng thanh toán sàn, mức hoàn tiền cọc được tính căn cứ theo khoảng cách đến <strong>Giờ Nhận Xe</strong> và <strong>Thời gian từ lúc tạo đơn (áp dụng cơ chế ân hạn 30 phút)</strong>:
             </p>
 
             <div className="overflow-x-auto rounded-2xl border border-slate-200">
@@ -178,16 +184,31 @@ export default function RefundPolicyPage() {
           <section className="space-y-3">
             <div className="flex items-center gap-2.5 text-slate-900 font-bold text-lg md:text-xl">
               <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold">3</span>
-              <h2>Trường hợp Hủy do Lỗi từ Cửa hàng hoặc Bất khả kháng</h2>
+              <h2>Trường hợp Hủy do Lỗi từ Cửa hàng (Hoàn 150% Cọc) hoặc Bất khả kháng (Hoàn 100%)</h2>
             </div>
             <p>
-              Khách hàng được <strong>hoàn tiền cọc 100% ngay lập tức</strong> kèm hỗ trợ tìm phương tiện thay thế nếu rơi vào các trường hợp:
+              Nhằm bảo vệ tối đa quyền lợi của Khách thuê xe và nâng cao tính cam kết trách nhiệm giữ chữ tín của Đối tác:
             </p>
-            <ul className="list-disc pl-5 space-y-1.5 text-slate-600 text-sm">
-              <li><strong>Lỗi từ Cửa hàng:</strong> Đến giờ bàn giao xe nhưng cửa hàng không có xe, xe bị sự cố kỹ thuật nghiêm trọng không thể vận hành và cửa hàng không cung cấp được dòng xe tương đương hoặc tốt hơn để thay thế.</li>
-              <li><strong>Thông tin xe không đúng mô tả:</strong> Xe giao thực tế sai lệch lớn so với hình ảnh hoặc phân loại dòng xe đã đăng ký trên sàn (ví dụ khách đặt xe ga nhưng giao xe số).</li>
-              <li><strong>Sự kiện bất khả kháng:</strong> Bão lũ, thiên tai, sạt lở đường hoặc các lệnh cấm di chuyển chính thức do cơ quan Nhà nước ban hành tại địa phương nhận xe.</li>
-            </ul>
+            <div className="space-y-3 text-sm">
+              <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-emerald-950 space-y-1.5">
+                <strong className="text-emerald-900 block font-bold text-base flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  Bảo lãnh Hoàn trả 150% Tiền Cọc khi Lỗi từ Cửa hàng:
+                </strong>
+                <p className="text-xs md:text-sm text-emerald-900/90 leading-relaxed">
+                  Nếu đến giờ hẹn nhận xe mà Cửa hàng không có xe giao, tự ý hủy đơn, xe bị sự cố kỹ thuật nghiêm trọng không thể vận hành và cửa hàng không cung cấp được dòng xe tương đương hoặc tốt hơn thay thế, hoặc xe thực tế sai lệch nghiêm trọng so với mô tả: <strong>Khách hàng được hoàn trả ngay lập tức 150% tiền cọc</strong> (bao gồm <strong>100% tiền cọc gốc</strong> đã thanh toán + <strong>50% tiền phạt bồi thường vi phạm hợp đồng</strong> do Đối tác chi trả thông qua cơ chế tự động khấu trừ ví sàn).
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 space-y-1.5">
+                <strong className="text-slate-900 block font-bold text-sm">
+                  🌧️ Sự kiện bất khả kháng (Hoàn 100% tiền cọc gốc):
+                </strong>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Trong trường hợp bão lũ, thiên tai, sạt lở đường hoặc các lệnh cấm di chuyển chính thức do cơ quan Nhà nước ban hành tại địa phương nhận xe khiến chuyến đi không thể thực hiện: Khách hàng được <strong>hoàn trả 100% tiền cọc gốc</strong>.
+                </p>
+              </div>
+            </div>
           </section>
 
           {/* Section 4 - REFUND PROCESS & TIME */}
@@ -220,6 +241,17 @@ export default function RefundPolicyPage() {
             </div>
             <p className="text-sm">
               Ngoài tiền cọc đơn thuê được thanh toán qua PayOS trên web, tại thời điểm nhận xe thực tế tại chi nhánh, tùy theo loại xe (xe máy phân khối lớn hoặc ô tô), cửa hàng có thể yêu cầu giữ Căn cước công dân gốc hoặc tiền cọc giữ xe (thế chân) theo thỏa thuận dân sự. Tiền thế chân này sẽ được cửa hàng <strong>hoàn trả 100% ngay khi khách hàng trả xe nguyên vẹn</strong> theo đúng biên bản bàn giao.
+            </p>
+          </section>
+
+          {/* Section 6 - COMPLAINTS & FEEDBACK */}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2.5 text-slate-900 font-bold text-lg md:text-xl">
+              <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold">6</span>
+              <h2>Kênh Tiếp Nhận Khiếu Nại & Đối Soát Hoàn Cọc</h2>
+            </div>
+            <p className="text-sm">
+              Nếu Quý khách gặp sự cố về việc nhận lại tiền hoàn cọc, tranh chấp hiện trạng xe hoặc đối tác nhà xe không hoàn trả tiền thế chân đúng cam kết, Quý khách vui lòng gửi thông tin tại trang <Link href="/feedback" className="text-blue-600 hover:underline font-semibold">Góp ý & Khiếu nại dịch vụ</Link>. Ban Quản Trị Sàn VehicleRent sẽ tiếp nhận, tiến hành đối chiếu hồ sơ và gửi thông báo phản hồi chính thức trong vòng <strong>24h đến 72h làm việc</strong>.
             </p>
           </section>
         </div>

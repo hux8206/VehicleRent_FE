@@ -608,7 +608,7 @@ export default function AdminUsersPage() {
                   1: "Tay ga",
                   2: "Côn tay",
                   3: "Xe điện",
-                  4: "Ô tô tự lái",
+                  4: "Ô tô",
                 };
 
                 const bookingStatusLabels: Record<number, { text: string; color: string }> = {

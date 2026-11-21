@@ -302,6 +302,15 @@ function PartnerBookingsContent() {
     setWalkInTotalAmount(total);
   };
 
+  const walkInDays = useMemo(() => {
+    if (!walkInStartTime || !walkInEndTime) return 1;
+    const start = new Date(walkInStartTime);
+    const end = new Date(walkInEndTime);
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) return 1;
+    const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    return Math.max(1, Math.ceil(diffHours / 24));
+  }, [walkInStartTime, walkInEndTime]);
+
   const loadItemsForModel = async (modelId: number) => {
     setIsLoadingItems(true);
     try {
@@ -383,9 +392,19 @@ function PartnerBookingsContent() {
   };
 
   const handleWalkInTimeChange = (startStr: string, endStr: string) => {
+    let adjustedEnd = endStr;
+    if (startStr && endStr) {
+      const start = new Date(startStr);
+      const end = new Date(endStr);
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end <= start) {
+        // Tự động điều chỉnh thời gian trả xe sau thời gian nhận xe 24 giờ
+        const newEnd = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+        adjustedEnd = toDateTimeLocalString(newEnd);
+      }
+    }
     setWalkInStartTime(startStr);
-    setWalkInEndTime(endStr);
-    recalcWalkInPrices(startStr, endStr, walkInRentPrice, walkInQuantity);
+    setWalkInEndTime(adjustedEnd);
+    recalcWalkInPrices(startStr, adjustedEnd, walkInRentPrice, walkInQuantity);
   };
 
   const handleCreateWalkInBookingSubmit = async (e: React.FormEvent) => {
@@ -777,9 +796,15 @@ function PartnerBookingsContent() {
                             Đã cọc: {Number(b.depositAmount).toLocaleString("vi-VN")} đ
                           </div>
                         )}
-                        <div className="text-amber-700 font-semibold text-[11px]">
-                          Hoa hồng 10%: -{Number(b.commissionAmount).toLocaleString("vi-VN")} đ
-                        </div>
+                        {Number(b.commissionAmount) === 0 ? (
+                          <div className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-bold text-[11px] inline-flex items-center gap-1">
+                            <span>🎁 Miễn 100% hoa hồng (Ưu đãi 5 đơn đầu)</span>
+                          </div>
+                        ) : (
+                          <div className="text-amber-700 font-semibold text-[11px]">
+                            Hoa hồng sàn: -{Number(b.commissionAmount).toLocaleString("vi-VN")} đ
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -1167,7 +1192,8 @@ function PartnerBookingsContent() {
                 Thời gian thuê & Chi phí
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Hàng 1: Thời gian nhận & trả xe (chia 2 cột rộng rãi để hiển thị trọn vẹn datetime và icon lịch) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold text-slate-700">
                     Thời gian nhận xe <span className="text-red-500">*</span>
@@ -1177,7 +1203,12 @@ function PartnerBookingsContent() {
                     required
                     value={walkInStartTime}
                     onChange={(e) => handleWalkInTimeChange(e.target.value, walkInEndTime)}
-                    className="h-9.5 text-xs rounded-xl bg-white"
+                    onClick={(e) => {
+                      try {
+                        (e.target as HTMLInputElement).showPicker?.();
+                      } catch {}
+                    }}
+                    className="h-9.5 text-xs rounded-xl bg-white px-3 cursor-pointer [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-75 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                   />
                 </div>
 
@@ -1188,12 +1219,21 @@ function PartnerBookingsContent() {
                   <Input
                     type="datetime-local"
                     required
+                    min={walkInStartTime}
                     value={walkInEndTime}
                     onChange={(e) => handleWalkInTimeChange(walkInStartTime, e.target.value)}
-                    className="h-9.5 text-xs rounded-xl bg-white"
+                    onClick={(e) => {
+                      try {
+                        (e.target as HTMLInputElement).showPicker?.();
+                      } catch {}
+                    }}
+                    className="h-9.5 text-xs rounded-xl bg-white px-3 cursor-pointer [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-75 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
                   />
                 </div>
+              </div>
 
+              {/* Hàng 2: Đơn giá thuê / ngày và Tổng tiền dự kiến */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
                 <div className="space-y-1">
                   <Label className="text-xs font-semibold text-slate-700">
                     Đơn giá thuê / ngày (VNĐ)
@@ -1210,14 +1250,20 @@ function PartnerBookingsContent() {
                     className="h-9.5 text-xs rounded-xl bg-white font-mono font-semibold"
                   />
                 </div>
-              </div>
 
-              {/* Tổng tiền tổng hợp - Không còn ô tiền cọc và không còn text cọc/còn lại */}
-              <div className="p-3 bg-amber-50/80 rounded-xl border border-amber-200/80 flex items-center justify-between">
-                <span className="text-xs font-bold text-amber-950">Tổng tiền thuê dự kiến:</span>
-                <span className="text-base font-black text-amber-700 font-mono">
-                  {walkInTotalAmount.toLocaleString("vi-VN")} đ
-                </span>
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-amber-950">
+                    Tổng tiền thuê dự kiến
+                  </Label>
+                  <div className="h-9.5 px-3.5 bg-amber-50/90 rounded-xl border border-amber-300/80 flex items-center justify-between">
+                    <span className="text-xs font-medium text-amber-900">
+                      Tạm tính ({walkInDays} ngày{walkInQuantity > 1 ? ` × ${walkInQuantity} xe` : ""}):
+                    </span>
+                    <span className="text-base font-black text-amber-700 font-mono">
+                      {walkInTotalAmount.toLocaleString("vi-VN")} đ
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 

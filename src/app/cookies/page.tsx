@@ -81,7 +81,7 @@ export default function CookiesPolicyPage() {
                   <h3>2. Bộ nhớ Tùy Chọn & Trải Nghiệm (Functional Storage)</h3>
                 </div>
                 <p className="text-slate-600 text-xs md:text-sm">
-                  Ghi nhớ khoảng thời gian nhận - trả xe, vị trí tỉnh/thành phố và phân loại xe (xe số, xe ga, xe côn, ô tô 4 chỗ, 7 chỗ) mà bạn vừa tìm kiếm, giúp bạn không phải chọn lại từ đầu khi quay lại trang chủ.
+                  Ghi nhớ khoảng thời gian nhận - trả xe, vị trí tỉnh/thành phố và phân loại xe (xe số, xe tay ga, xe côn tay, xe điện, ô tô) mà bạn vừa tìm kiếm, giúp bạn không phải chọn lại từ đầu khi quay lại trang chủ.
                 </p>
               </div>
 

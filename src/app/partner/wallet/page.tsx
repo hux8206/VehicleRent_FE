@@ -454,6 +454,31 @@ function PartnerWalletContent() {
           )}
         </div>
 
+        {/* Banner Ưu Đãi Đối Tác Mới */}
+        {wallet && Number((wallet as any).freeCommissionRemaining || 0) > 0 && (
+          <div className="p-4 bg-linear-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/5 rounded-2xl border border-emerald-200/80 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-xs">
+                🎁
+              </div>
+              <div>
+                <h4 className="text-sm font-black text-emerald-950">
+                  Chính Sách Chào Mừng Đối Tác Mới: Miễn 100% Hoa Hồng Sàn
+                </h4>
+                <p className="text-xs text-emerald-800 mt-0.5">
+                  Tài khoản của bạn được miễn phí hoa hồng sàn cho <strong>5 đơn thành công đầu tiên</strong>.
+                  Hiện còn <strong>{(wallet as any).freeCommissionRemaining}/5 đơn</strong> được áp dụng ưu đãi!
+                </p>
+              </div>
+            </div>
+            <div className="hidden sm:block text-right shrink-0">
+              <span className="text-xs font-bold text-emerald-700 bg-white px-3 py-1.5 rounded-full border border-emerald-200 shadow-2xs">
+                {(wallet as any).freeCommissionRemaining} đơn miễn phí còn lại
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Overview Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Balance Card */}

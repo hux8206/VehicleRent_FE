@@ -514,15 +514,20 @@ export default function AdminFeedbacksPage() {
                 </div>
               </div>
 
-              {/* Update Status form */}
+              {/* Update Status & Reply form */}
               <div className="space-y-3 pt-3 border-t border-slate-100">
-                <span className="text-xs font-bold text-slate-900 block uppercase tracking-wider">
-                  Cập nhật tiến độ xử lý của Admin
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    Cập nhật tiến độ & Phản hồi cho khách hàng
+                  </span>
+                  <span className="text-[11px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md font-semibold">
+                    Khách sẽ nhận được phản hồi này
+                  </span>
+                </div>
 
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { val: 0, label: "Mới gửi (Chờ)", color: "border-amber-300 bg-amber-50 text-amber-800" },
+                    { val: 0, label: "Mới tiếp nhận", color: "border-amber-300 bg-amber-50 text-amber-800" },
                     { val: 1, label: "Đang xử lý", color: "border-blue-300 bg-blue-50 text-blue-800" },
                     { val: 2, label: "Đã giải quyết", color: "border-emerald-300 bg-emerald-50 text-emerald-800" },
                   ].map((s) => (
@@ -542,16 +547,19 @@ export default function AdminFeedbacksPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">
-                    Ghi chú nội bộ / Kế hoạch phản hồi
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Nội dung phản hồi chính thức cho khách hàng:
                   </label>
                   <textarea
-                    rows={3}
+                    rows={4}
                     value={adminNote}
                     onChange={(e) => setAdminNote(e.target.value)}
-                    placeholder="Ghi chú nội dung đã trao đổi với khách hoặc phương án giải quyết kỹ thuật..."
-                    className="w-full p-3 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+                    placeholder="Nhập nội dung giải đáp, lời cảm ơn hoặc thông báo kết quả xử lý gửi tới khách hàng..."
+                    className="w-full p-3 rounded-xl border border-slate-200 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
                   />
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Nội dung này được hiển thị công khai trong mục <strong>&ldquo;Hòm thư phản hồi&rdquo;</strong> của tài khoản khách hàng.
+                  </p>
                 </div>
               </div>
             </div>
@@ -573,7 +581,7 @@ export default function AdminFeedbacksPage() {
                 className="rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white gap-1.5 shadow-sm"
               >
                 {isUpdating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                <span>Lưu Cập Nhật</span>
+                <span>Lưu & Gửi Phản Hồi</span>
               </Button>
             </div>
           </div>

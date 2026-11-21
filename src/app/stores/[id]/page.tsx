@@ -238,7 +238,7 @@ export default function StoreDetailPage() {
                           />
                           <div className="absolute top-3 left-3 flex gap-1.5">
                             <span className="bg-white/95 text-slate-900 font-bold text-[10px] px-2.5 py-1 rounded-full shadow-xs">
-                              {v.type === 1 ? "Tay ga" : v.type === 0 ? "Xe số" : v.type === 2 ? "Côn tay" : v.type === 3 ? "Xe điện" : "Ô tô tự lái"}
+                              {v.type === 1 ? "Tay ga" : v.type === 0 ? "Xe số" : v.type === 2 ? "Côn tay" : v.type === 3 ? "Xe điện" : "Ô tô"}
                             </span>
                             <span className="bg-slate-900/80 text-white font-semibold text-[10px] px-2.5 py-1 rounded-full">
                               {v.brand}

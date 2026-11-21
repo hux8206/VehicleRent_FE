@@ -21,6 +21,7 @@ import {
   Heart,
   Compass,
   Scale,
+  Ticket,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ProvinceCombobox } from "@/components/common/province-combobox";
@@ -83,7 +84,7 @@ function HeroVehicleTiltCard() {
         {/* Vehicle Image */}
         <img
           src={getOptimizedImageUrl("https://images.unsplash.com/photo-1558981403-c5f9899a28bc", { width: 1000, height: 600, crop: "fill" })}
-          alt="Xe tay ga Honda Air Blade 125cc đời mới cho thuê tự lái"
+          alt="Xe tay ga"
           className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
         />
 
@@ -141,7 +142,7 @@ function HeroVehicleTiltCard() {
         </div>
         <div>
           <div className="text-xs font-bold text-slate-900 dark:text-slate-100">Bàn giao xe nhanh</div>
-          <div className="text-[10px] text-slate-500 dark:text-slate-400">Giao tận nơi sân bay & khách sạn</div>
+          <div className="text-[10px] text-slate-500 dark:text-slate-400">Giao tận nơi</div>
         </div>
       </div>
     </div>
@@ -202,16 +203,20 @@ export default function HomePage() {
   const [baseVehicles, setBaseVehicles] = useState<VehicleModel[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [hasLoadedPromos, setHasLoadedPromos] = useState<boolean>(false);
 
   useEffect(() => {
     api.promotions
       .getActive()
       .then((list) => {
-        if (Array.isArray(list) && list.length > 0) {
-          setPromotions(list);
-        }
+        setPromotions(Array.isArray(list) ? list : []);
       })
-      .catch(() => { });
+      .catch(() => {
+        setPromotions([]);
+      })
+      .finally(() => {
+        setHasLoadedPromos(true);
+      });
   }, []);
 
   const handleCopyPromo = (code: string) => {
@@ -330,15 +335,15 @@ export default function HomePage() {
                 variants={heroItemVariants}
                 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-950 dark:text-white leading-[1.12]"
               >
-                {t("hero_title_1", "Thuê xe tự lái — ")}<br className="hidden sm:inline" />
-                {t("hero_title_2", "tự do khám phá mọi cung đường")}
+                {t("hero_title_1", "VehicleRent — ")}<br className="hidden sm:inline" />
+                {t("hero_title_2", "Nền tảng cho thuê xe uy tín")}
               </motion.h1>
 
               <motion.p
                 variants={heroItemVariants}
                 className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed"
               >
-                {t("hero_desc", "Trải nghiệm những chiếc xe đời mới được bảo dưỡng kỹ lưỡng từ các chủ xe uy tín. Thủ tục nhanh gọn, nhận xe tận nơi hoặc tại cửa hàng, sẵn sàng cho mọi hành trình của bạn.")}
+                {t("hero_desc", "Dịch vụ uy tín, thủ tục nhanh gọn")}
               </motion.p>
 
               {/* ─── Floating Pill Search Bar (Turo & Mioto signature dock) ─── */}
@@ -359,7 +364,7 @@ export default function HomePage() {
                         fetchVehicles(val);
                       }}
                       includeAllOption={true}
-                      allOptionLabel={t("search_all_provinces", "Toàn quốc (Tất cả tỉnh/thành)")}
+                      allOptionLabel={t("search_all_provinces", "Toàn quốc")}
                       placeholder={t("search_pickup_location", "Chọn tỉnh / thành phố...")}
                     />
                   </div>
@@ -428,7 +433,7 @@ export default function HomePage() {
                     { type: 0, label: t("type_manual", "Xe số") },
                     { type: 2, label: t("type_clutch", "Xe tay côn") },
                     { type: 3, label: t("type_electric", "Xe điện") },
-                    { type: 4, label: t("type_car", "Ô tô tự lái") },
+                    { type: 4, label: t("type_car", "Ô tô") },
                   ].map((item) => (
                     <motion.button
                       key={item.type}
@@ -516,16 +521,6 @@ export default function HomePage() {
                   const isOutOfStock = available <= 0;
                   const isFav = favorites[v.id] || false;
                   const isCompared = comparedVehicles.some((item) => item.id === v.id);
-
-                  // Specs highlights based on type
-                  const specHighlights: Record<number, { tag1: string; tag2: string }> = {
-                    1: { tag1: "125cc", tag2: "Cốp rộng 23L" },
-                    0: { tag1: "110cc", tag2: "1.7L / 100km" },
-                    2: { tag1: "155cc VVA", tag2: "Côn tay 6 số" },
-                    3: { tag1: "Pin 198km", tag2: "Chống nước IP67" },
-                    4: { tag1: "4 - 7 chỗ", tag2: "Số tự động" },
-                  };
-                  const spec = specHighlights[v.type] || { tag1: "Đời mới", tag2: "Tiết kiệm xăng" };
 
                   return (
                     <Link
@@ -621,16 +616,6 @@ export default function HomePage() {
                               </h3>
                             </div>
 
-                            {/* Quick Spec Chips */}
-                            <div className="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-300">
-                              <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md font-medium">
-                                {spec.tag1}
-                              </span>
-                              <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md font-medium">
-                                {spec.tag2}
-                              </span>
-                            </div>
-
                             {/* Store Info & Province Badge & Rating */}
                             <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
                               <div className="flex items-center gap-1.5 truncate pr-2">
@@ -695,106 +680,93 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {(promotions.length > 0 ? promotions : [
-              {
-                id: 1,
-                code: "CHAOBANMOI",
-                title: "Giảm 10% Chuyến Đầu",
-                description: "Nhập mã ưu đãi khi xác nhận thanh toán đặt cọc cho mọi dòng xe trên hệ thống.",
-                tag: "Tân thủ",
-                bullets: ["Áp dụng từ đơn đầu tiên", "Giữ xe 10 phút chống xung đột"],
-              },
-              {
-                id: 2,
-                code: "VIETNAMROAD",
-                title: "Giảm 15% – 25% Thuê Dài Ngày",
-                description: "Ưu đãi giảm trực tiếp theo ngày cho các chuyến du lịch, công tác từ 3 ngày trở lên.",
-                tag: "Gói phổ biến",
-                bullets: ["Từ 3 ngày: Giảm ngay 15%", "Từ 7 ngày: Giảm ngay 25%"],
-              },
-              {
-                id: 3,
-                code: "FREESHIP5K",
-                title: "Giao Xe Tận Khách Sạn & Sân Bay",
-                description: "Đối tác liên kết hỗ trợ bàn giao và nhận lại xe tận nơi trong bán kính nội thành.",
-                tag: "Tiện ích",
-                bullets: ["Miễn phí giao xe dưới 5km", "Hỗ trợ mũ bảo hiểm & áo mưa"],
-              },
-            ]).map((p, idx) => {
-              const tagLower = (p.tag || "").toLowerCase();
-              const isPopular = tagLower.includes("phổ biến") || tagLower.includes("hot");
-              const isUtility = tagLower.includes("tiện ích");
-              const isNewbie = tagLower.includes("tân thủ");
+          {promotions.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {promotions.map((p, idx) => {
+                const tagLower = (p.tag || "").toLowerCase();
+                const isPopular = tagLower.includes("phổ biến") || tagLower.includes("hot");
+                const isUtility = tagLower.includes("tiện ích");
+                const isNewbie = tagLower.includes("tân thủ");
 
-              return (
-                <div
-                  key={p.id || idx}
-                  className={`bg-white rounded-2xl p-6 border transition-all relative overflow-hidden group flex flex-col justify-between ${isPopular
-                    ? "border-2 border-blue-600 shadow-lg shadow-blue-500/10"
-                    : "border-slate-200/80 shadow-xs hover:shadow-md"
-                    }`}
-                >
-                  <div>
-                    {p.tag && (
-                      <div
-                        className={`absolute top-0 right-0 font-extrabold text-[10px] uppercase tracking-wider py-1 px-4 rounded-bl-2xl text-white ${isUtility ? "bg-amber-500" : isPopular ? "bg-blue-600" : "bg-blue-600"
-                          }`}
-                      >
-                        {p.tag}
-                      </div>
-                    )}
-                    <h3 className="text-xl font-black text-slate-900 mt-1">{p.title}</h3>
-                    <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                      {p.description || "Ưu đãi giảm giá áp dụng trực tiếp khi đặt xe trên hệ thống VehicleRent."}
-                    </p>
+                return (
+                  <div
+                    key={p.id || idx}
+                    className={`bg-white rounded-2xl p-6 border transition-all relative overflow-hidden group flex flex-col justify-between ${isPopular
+                      ? "border-2 border-blue-600 shadow-lg shadow-blue-500/10"
+                      : "border-slate-200/80 shadow-xs hover:shadow-md"
+                      }`}
+                  >
+                    <div>
+                      {p.tag && (
+                        <div
+                          className={`absolute top-0 right-0 font-extrabold text-[10px] uppercase tracking-wider py-1 px-4 rounded-bl-2xl text-white ${isUtility ? "bg-amber-500" : isPopular ? "bg-blue-600" : "bg-blue-600"
+                            }`}
+                        >
+                          {p.tag}
+                        </div>
+                      )}
+                      <h3 className="text-xl font-black text-slate-900 mt-1">{p.title}</h3>
+                      <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                        {p.description || "Ưu đãi giảm giá áp dụng trực tiếp khi đặt xe trên hệ thống VehicleRent."}
+                      </p>
 
-                    {/* Interactive Code Box */}
-                    <div className="mt-5 p-3 rounded-2xl bg-blue-50/60 border border-dashed border-blue-200 flex items-center justify-between gap-2">
-                      <span className="font-mono font-black text-sm text-blue-700">{p.code}</span>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => handleCopyPromo(p.code)}
-                          className="text-[11px] font-bold text-blue-600 bg-blue-100 hover:bg-blue-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
-                          title="Sao chép mã vào bộ nhớ tạm"
-                        >
-                          Copy mã
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleApplyPromoFromCard(p.code)}
-                          className="text-[11px] font-bold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-colors cursor-pointer shadow-xs"
-                          title="Lưu mã và chọn xe thuê"
-                        >
-                          Áp dụng
-                        </button>
+                      {/* Interactive Code Box */}
+                      <div className="mt-5 p-3 rounded-2xl bg-blue-50/60 border border-dashed border-blue-200 flex items-center justify-between gap-2">
+                        <span className="font-mono font-black text-sm text-blue-700">{p.code}</span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleCopyPromo(p.code)}
+                            className="text-[11px] font-bold text-blue-600 bg-blue-100 hover:bg-blue-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                            title="Sao chép mã vào bộ nhớ tạm"
+                          >
+                            Copy mã
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleApplyPromoFromCard(p.code)}
+                            className="text-[11px] font-bold text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1 rounded-lg transition-colors cursor-pointer shadow-xs"
+                            title="Lưu mã và chọn xe thuê"
+                          >
+                            Áp dụng
+                          </button>
+                        </div>
                       </div>
+
+                      {/* Bullets */}
+                      {Array.isArray(p.bullets) && p.bullets.length > 0 && (
+                        <ul className="mt-5 space-y-2 text-xs text-slate-600">
+                          {p.bullets.map((b, bIdx) => (
+                            <li key={bIdx} className="flex items-center gap-2">
+                              <CheckCircle2
+                                className={`h-4 w-4 shrink-0 ${isUtility
+                                  ? "text-amber-600"
+                                  : isPopular
+                                    ? "text-emerald-600"
+                                    : "text-blue-600"
+                                  }`}
+                              />
+                              <span>{b}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
-
-                    {/* Bullets */}
-                    {Array.isArray(p.bullets) && p.bullets.length > 0 && (
-                      <ul className="mt-5 space-y-2 text-xs text-slate-600">
-                        {p.bullets.map((b, bIdx) => (
-                          <li key={bIdx} className="flex items-center gap-2">
-                            <CheckCircle2
-                              className={`h-4 w-4 shrink-0 ${isUtility
-                                ? "text-amber-600"
-                                : isPopular
-                                  ? "text-emerald-600"
-                                  : "text-blue-600"
-                                }`}
-                            />
-                            <span>{b}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-2xl border border-slate-200/80 p-8 shadow-xs max-w-xl mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
+                <Ticket className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-slate-900 text-base">Hiện chưa có mã ưu đãi công khai</h3>
+              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Ban Quản Trị sẽ sớm cập nhật các chương trình voucher và khuyến mãi mới cho từng hành trình tại đây.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 

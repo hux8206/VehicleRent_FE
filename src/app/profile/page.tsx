@@ -39,6 +39,7 @@ import {
   Wallet,
   ArrowRight,
   Bike,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -310,6 +311,27 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           )}
+
+          {/* Section: Hòm thư phản hồi & Hỗ trợ dịch vụ */}
+          <Card className="rounded-2xl border-blue-200/80 shadow-xs bg-linear-to-r from-blue-50/40 via-sky-50/30 to-indigo-50/30 overflow-hidden">
+            <CardHeader className="p-6 pb-4 border-b border-blue-100/70">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-900">
+                    <MessageSquare className="h-5 w-5 text-blue-600" /> Hòm Thư Góp Ý & Phản Hồi Từ Ban Quản Trị
+                  </CardTitle>
+                  <CardDescription className="text-xs text-slate-500 mt-0.5">
+                    Gửi góp ý, khiếu nại dịch vụ và theo dõi câu trả lời giải đáp chính thức từ Ban Quản Trị Sàn.
+                  </CardDescription>
+                </div>
+                <Link href="/feedback">
+                  <Button type="button" variant="outline" size="sm" className="text-xs font-bold rounded-xl gap-1.5 border-blue-200 text-blue-700 hover:bg-blue-50 cursor-pointer">
+                    Mở Hòm Thư <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+          </Card>
 
           {/* PRIVACY & DATA RIGHTS: NGHỊ ĐỊNH 13/2023/NĐ-CP */}
           <Card className="rounded-2xl border-red-200/80 shadow-xs bg-red-50/20 overflow-hidden">

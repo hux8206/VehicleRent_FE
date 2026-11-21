@@ -71,7 +71,7 @@ export function BookingModal({
   const [step, setStep] = useState<"form" | "payment">("form");
   const [pickupType, setPickupType] = useState<number>(0); // 0: Tại cửa hàng, 1: Giao tận nơi
   const [deliveryAddress, setDeliveryAddress] = useState<string>("");
-  const [paymentType, setPaymentType] = useState<number>(1); // 1: Cọc 30%, 0: Toàn bộ
+  const [paymentType, setPaymentType] = useState<number>(1); // 1: Cọc theo tỷ lệ %, 0: Toàn bộ 100%
   const [quantity, setQuantity] = useState<number>(1);
   const [hasAgreedLicense, setHasAgreedLicense] = useState<boolean>(false);
   const [hasAgreedTerms, setHasAgreedTerms] = useState<boolean>(false);
@@ -403,11 +403,21 @@ export function BookingModal({
                   </div>
                 </div>
                 <div className="text-left sm:text-right sm:border-l sm:pl-4 border-blue-200 dark:border-blue-900/60">
-                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block">{t("booking_deposit_rate", "Tổng tiền cọc cần thanh toán:")}</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-[11px] block">
+                    {paymentType === 1
+                      ? t("booking_deposit_rate", { percent: depositPercent }, `Tiền cọc giữ xe (${depositPercent}%):`)
+                      : t("booking_full_opt", "Thanh toán 100%:")}
+                  </span>
                   <div className="text-lg font-black text-blue-700 dark:text-blue-400">
                     {isTimeValid ? `${depositAmount.toLocaleString("vi-VN")} đ` : "0 đ"}
                   </div>
                 </div>
+              </div>
+
+              {/* Trust Guarantee Badge: 150% deposit refund if store fails to deliver */}
+              <div className="flex items-center gap-2 p-2.5 px-3.5 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200/90 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 text-xs font-semibold shadow-2xs">
+                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>Bảo lãnh sàn VehicleRent: <strong>Hoàn 150% tiền cọc</strong> nếu chủ thuê không đáp ứng được đơn đặt!</span>
               </div>
 
               {/* Vehicle Quantity Selector */}
@@ -675,7 +685,7 @@ export function BookingModal({
                         <Tag className="h-3.5 w-3.5 text-slate-400 absolute left-3 top-3" />
                         <Input
                           type="text"
-                          placeholder="Nhập mã voucher (VD: CHAOBANMOI)..."
+                          placeholder={promotions.length > 0 ? `Nhập mã voucher (VD: ${promotions[0].code})...` : "Nhập mã voucher giảm giá..."}
                           value={promoCodeInput}
                           onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
                           className="pl-9 text-xs h-9 uppercase font-mono font-bold rounded-xl bg-white border-slate-200"
@@ -818,6 +828,7 @@ export function BookingModal({
                   <p>• <strong>Hủy trước ≥ 24h:</strong> Hoàn 100% tiền cọc.</p>
                   <p>• <strong>Hủy 6h - 24h:</strong> Hoàn 100% (nếu đặt ≤30p) hoặc Hoàn 50% (quá 30p).</p>
                   <p>• <strong>Hủy &lt; 6h:</strong> Hoàn 50% (nếu đặt ≤30p) hoặc Mất cọc 100% (quá 30p).</p>
+                  <p className="text-emerald-700 dark:text-emerald-400 font-bold">• <strong>Chủ xe không đáp ứng đơn:</strong> Hoàn 150% tiền cọc (100% cọc + 50% bồi thường vi phạm).</p>
                 </div>
               </div>
             </form>
@@ -955,7 +966,7 @@ export function BookingModal({
                       </div>
                     </div>
                     <div className="flex justify-between items-center text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700 pt-2">
-                      <span>{t("booking_deposit_transfer", "Số tiền cọc cần chuyển:")}</span>
+                      <span>{paymentType === 1 ? t("booking_deposit_transfer", "Số tiền cọc cần chuyển:") : "Số tiền thanh toán:"}</span>
                       <span className="text-base font-black text-blue-700 dark:text-blue-400">
                         {depositAmount.toLocaleString("vi-VN")} đ
                       </span>
@@ -1097,7 +1108,9 @@ export function BookingModal({
               <span className="font-semibold text-slate-800 dark:text-slate-200">{format24hDateTime(startTime)} → {format24hDateTime(endTime)} ({dayRent} ngày)</span>
             </div>
             <div className="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-1">
-              <span className="text-slate-500 dark:text-slate-400">Số tiền cọc cần chuyển:</span>
+              <span className="text-slate-500 dark:text-slate-400">
+                {paymentType === 1 ? "Số tiền cọc cần chuyển:" : "Số tiền thanh toán:"}
+              </span>
               <span className="font-black text-blue-600 dark:text-blue-400 text-sm">{depositAmount.toLocaleString("vi-VN")} đ</span>
             </div>
           </div>
@@ -1139,6 +1152,16 @@ export function BookingModal({
                 <p className="text-[11px] text-rose-800 dark:text-rose-400 mt-0.5 leading-relaxed">
                   • <strong>Hoàn 50% cọc:</strong> Nếu đơn mới đặt dưới 30 phút.<br />
                   • <strong>Mất 100% cọc (0% hoàn):</strong> Nếu đã quá 30 phút từ lúc đặt.
+                </p>
+              </div>
+
+              <div className="p-2.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/60 dark:bg-blue-950/30">
+                <div className="flex justify-between items-center font-bold text-blue-900 dark:text-blue-300">
+                  <span>4. Lỗi từ Chủ xe / Không đáp ứng được đơn</span>
+                  <Badge className="bg-blue-600 text-white text-[10px]">Hoàn 150% cọc</Badge>
+                </div>
+                <p className="text-[11px] text-blue-800 dark:text-blue-400 mt-0.5 leading-relaxed">
+                  Trường hợp Chủ xe không có xe hoặc không đáp ứng được đơn đã cọc, khách hàng được <strong>hoàn trả 150% tiền cọc</strong> (100% tiền cọc gốc + 50% tiền bồi thường vi phạm thỏa thuận do nhà xe chi trả).
                 </p>
               </div>
             </div>

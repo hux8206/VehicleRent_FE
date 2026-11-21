@@ -250,6 +250,9 @@ export interface PartnerWallet {
   balance: number | string;
   creditLimit: number | string;
   status: number;
+  freeCommissionRemaining?: number;
+  freeCommissionTotal?: number;
+  successfulBookingsCount?: number;
   histories?: WalletHistory[];
 }
 
@@ -1892,6 +1895,13 @@ export const api = {
   },
 
   feedbacks: {
+    getMyFeedbacks: async () => {
+      try {
+        return await request<Feedback[]>("/feedbacks/my-feedbacks");
+      } catch {
+        return [];
+      }
+    },
     submit: async (data: {
       fullName: string;
       email: string;
@@ -1900,11 +1910,11 @@ export const api = {
       rating?: number;
       subject: string;
       content: string;
-      userId?: number;
     }) => {
+      const { ...payload } = data;
       return await request<Feedback>("/feedbacks", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
     },
   },

@@ -825,7 +825,7 @@ function PartnerVehiclesContent() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <Badge variant="outline" className="text-xs bg-white text-blue-700">
-                        {selectedModel.brand} • {selectedModel.type === 1 ? "Tay ga" : selectedModel.type === 0 ? "Xe số" : selectedModel.type === 2 ? "Côn tay" : selectedModel.type === 3 ? "Xe điện" : "Ô tô tự lái"}
+                        {selectedModel.brand} • {selectedModel.type === 1 ? "Tay ga" : selectedModel.type === 0 ? "Xe số" : selectedModel.type === 2 ? "Côn tay" : selectedModel.type === 3 ? "Xe điện" : "Ô tô"}
                       </Badge>
                       <button
                         type="button"
@@ -1025,7 +1025,7 @@ function PartnerVehiclesContent() {
                   <option value={0}>0: Xe số phổ thông</option>
                   <option value={2}>2: Xe côn tay / Phượt</option>
                   <option value={3}>3: Xe điện thông minh</option>
-                  <option value={4}>4: Ô tô tự lái (4 - 7 chỗ)</option>
+                  <option value={4}>4: Ô tô (4 - 7 chỗ)</option>
                 </select>
               </div>
             </div>
@@ -1154,7 +1154,7 @@ function PartnerVehiclesContent() {
                   <option value={0}>0: Xe số phổ thông</option>
                   <option value={2}>2: Xe côn tay / Phượt</option>
                   <option value={3}>3: Xe điện thông minh</option>
-                  <option value={4}>4: Ô tô tự lái (4 - 7 chỗ)</option>
+                  <option value={4}>4: Ô tô (4 - 7 chỗ)</option>
                 </select>
               </div>
             </div>

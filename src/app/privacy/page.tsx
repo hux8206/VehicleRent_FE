@@ -38,12 +38,12 @@ export default function PrivacyPolicyPage() {
             theo quy định của pháp luật Việt Nam (Nghị định 52/2013/NĐ-CP, Nghị định 85/2021/NĐ-CP và Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân).
           </p>
           <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500">
-            <span>Phiên bản: <strong>2.5 (Cập nhật ngày 09/11/2026)</strong></span>
+            <span>Phiên bản: <strong>2.6 (Cập nhật tháng 11/2026)</strong></span>
             <span>•</span>
             <span>Phạm vi: <strong>Toàn bộ nền tảng Web & API VehicleRent</strong></span>
             <span>•</span>
             <span className="text-emerald-700 font-medium bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
-              ✓ Cập nhật ngày 09/11/2026: Bổ sung biểu ngữ Cookie Consent, tối ưu WCAG 2.1 và kiểm soát bí mật API
+              ✓ Cập nhật tháng 11/2026: Bổ sung quyền xóa dữ liệu cá nhân (NĐ 13/2023), kênh tiếp nhận góp ý & phản hồi BQT, và chuẩn hóa danh mục Ô tô
             </span>
           </div>
         </div>
@@ -61,8 +61,9 @@ export default function PrivacyPolicyPage() {
             </p>
             <ul className="list-disc pl-5 space-y-1.5 text-slate-600 text-sm">
               <li>Xác thực danh tính tài khoản đăng nhập và phân quyền (Khách hàng, Đối tác nhà xe, Quản trị viên).</li>
-              <li>Tạo lập và xử lý đơn đặt xe, theo dõi trạng thái thanh toán cọc tự động qua VietQR PayOS.</li>
+              <li>Tạo lập và xử lý đơn đặt xe trực tuyến (Online Booking) hoặc ghi nhận đơn tại quầy (Walk-in Booking), theo dõi trạng thái thanh toán cọc tự động qua VietQR PayOS.</li>
               <li>Kết nối liên lạc giữa Khách thuê và Cơ sở cho thuê để thực hiện bàn giao và nhận lại xe thực tế.</li>
+              <li>Tiếp nhận, xử lý ý kiến đóng góp, khiếu nại dịch vụ và gửi thông báo phản hồi chính thức từ Ban Quản Trị đến người dùng qua Hòm thư phản hồi.</li>
               <li>Hỗ trợ khách hàng giải quyết tranh chấp, xử lý sự cố va chạm hoặc thông báo vi phạm luật giao thông (phạt nguội) nếu có.</li>
               <li>Ngăn chặn các hành vi gian lận tài chính, rửa tiền hoặc phá hoại hệ thống.</li>
             </ul>
@@ -80,11 +81,11 @@ export default function PrivacyPolicyPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
                 <strong className="text-slate-900 block mb-1">Dành cho Khách thuê:</strong>
-                Họ và tên, Số điện thoại liên hệ, Địa chỉ Email, Lịch sử đặt xe và đánh giá trải nghiệm dịch vụ.
+                Họ và tên, Số điện thoại liên hệ, Địa chỉ Email, Lịch sử đặt xe, nội dung gửi đóng góp ý kiến & khiếu nại, và đánh giá trải nghiệm dịch vụ.
               </div>
               <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
                 <strong className="text-slate-900 block mb-1">Dành cho Đối tác nhà xe:</strong>
-                Tên cơ sở kinh doanh, Địa chỉ cửa hàng, Số tài khoản ngân hàng nhận doanh thu, Giờ hoạt động và danh sách phương tiện.
+                Tên cơ sở kinh doanh, Địa chỉ cửa hàng, Số tài khoản ngân hàng nhận doanh thu, Giờ hoạt động và danh sách phương tiện (xe số, xe tay ga, xe côn tay, xe điện, ô tô).
               </div>
             </div>
 
@@ -209,16 +210,24 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-3">
             <div className="flex items-center gap-2.5 text-slate-900 font-bold text-lg md:text-xl">
               <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-100 text-blue-700 text-xs font-bold">7</span>
-              <h2>Quyền của người dùng & Thông tin liên hệ</h2>
+              <h2>Quyền của người dùng & Yêu cầu xóa dữ liệu cá nhân</h2>
             </div>
             <p className="text-sm">
-              Quý khách có toàn quyền xem, chỉnh sửa thông tin hồ sơ của mình tại mục <Link href="/profile" className="text-blue-600 font-semibold hover:underline">Hồ Sơ Cá Nhân</Link>. Mọi thắc mắc, khiếu nại hoặc yêu cầu hủy bỏ thông tin, vui lòng gửi phản hồi về Ban Quản Trị Sàn:
+              Căn cứ theo Nghị định 13/2023/NĐ-CP về Bảo vệ dữ liệu cá nhân, Quý khách có các quyền sau:
             </p>
-            <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-100 text-xs md:text-sm text-slate-700 space-y-1">
+            <div className="space-y-2 text-xs md:text-sm text-slate-600">
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <strong>Quyền xem & chỉnh sửa:</strong> Quý khách có toàn quyền xem và cập nhật thông tin tài khoản của mình tại mục <Link href="/profile" className="text-blue-600 font-semibold hover:underline">Hồ Sơ Cá Nhân</Link>.
+              </div>
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <strong>Quyền yêu cầu xóa tài khoản & dữ liệu:</strong> Quý khách có thể yêu cầu xóa vĩnh viễn tài khoản và xóa bỏ thông tin cá nhân lưu trữ trên hệ thống bất cứ lúc nào trực tiếp tại trang Hồ Sơ Cá Nhân hoặc qua kênh <Link href="/feedback" className="text-blue-600 font-semibold hover:underline">Góp ý & Khiếu nại</Link>. Ban Quản Trị sẽ xử lý gỡ bỏ dữ liệu cá nhân trong vòng <strong>72 giờ làm việc</strong> (ngoại trừ các dữ liệu hóa đơn/giao dịch tài chính bắt buộc lưu trữ theo Luật Kế toán và Thuế).
+              </div>
+            </div>
+            <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-100 text-xs md:text-sm text-slate-700 space-y-1 mt-3">
               <p><strong>Bộ phận An toàn & Bảo mật Dữ liệu VehicleRent</strong></p>
-              <p>Email: <a href="huunguyen0802@gmail.com" className="text-blue-600 hover:underline">privacy@vehiclerent.vn</a></p>
-              <p>Hotline hỗ trợ: <strong>0384340974(8:00 - 21:00 hàng ngày)</strong></p>
-              <p>Địa chỉ văn phòng:phường Cẩm Lệ, TP. Đà Nẵng, Việt Nam.</p>
+              <p>Email: <a href="mailto:privacy@vehiclerent.vn" className="text-blue-600 hover:underline">privacy@vehiclerent.vn</a></p>
+              <p>Hotline hỗ trợ: <strong>0384 340 974 (8:00 - 21:00 hàng ngày)</strong></p>
+              <p>Địa chỉ văn phòng: Phường Cẩm Lệ, TP. Đà Nẵng, Việt Nam.</p>
             </div>
           </section>
         </div>

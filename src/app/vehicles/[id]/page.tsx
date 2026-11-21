@@ -594,6 +594,10 @@ export default function VehicleDetailPage() {
                     <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" />
                     <span>Quét mã VietQR chuyển khoản tức thì</span>
                   </div>
+                  <div className="flex items-center gap-2 font-semibold text-emerald-700 dark:text-emerald-400">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                    <span>Bảo lãnh hoàn 150% cọc nếu chủ xe không đáp ứng đơn</span>
+                  </div>
                 </div>
 
                 {/* CTA Button */}

@@ -47,7 +47,7 @@ export function VehicleCompareModal({
     1: t("vehicle_type_scooter_auto", "Tay ga"),
     2: t("vehicle_type_clutch", "Côn tay"),
     3: t("vehicle_type_electric", "Xe điện"),
-    4: t("vehicle_type_car", "Ô tô tự lái"),
+    4: t("vehicle_type_car", "Ô tô"),
   };
 
   const typeSpecs: Record<

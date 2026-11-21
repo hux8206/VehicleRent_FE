@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 import { useLanguage } from "@/context/language-context";
-import { api } from "@/lib/api";
+import { api, Feedback } from "@/lib/api";
 import {
   MessageSquare,
   Send,
@@ -19,6 +19,9 @@ import {
   ArrowLeft,
   Loader2,
   ThumbsUp,
+  Inbox,
+  Clock,
+  RotateCw,
 } from "lucide-react";
 
 const CATEGORIES = [
@@ -81,16 +84,34 @@ export default function CustomerFeedbackPage() {
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
 
+  const [activeTab, setActiveTab] = useState<"send" | "inbox">("send");
+  const [myFeedbacks, setMyFeedbacks] = useState<Feedback[]>([]);
+  const [isLoadingMyFeedbacks, setIsLoadingMyFeedbacks] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Auto-fill thông tin nếu người dùng đã đăng nhập
+  const fetchMyFeedbacks = async () => {
+    if (!user) return;
+    setIsLoadingMyFeedbacks(true);
+    try {
+      const data = await api.feedbacks.getMyFeedbacks();
+      setMyFeedbacks(data || []);
+    } catch {
+      setMyFeedbacks([]);
+    } finally {
+      setIsLoadingMyFeedbacks(false);
+    }
+  };
+
+  // Auto-fill thông tin nếu người dùng đã đăng nhập & tải danh sách phản hồi của tôi
   useEffect(() => {
     if (user) {
       if (!fullName && user.fullName) setFullName(user.fullName);
       if (!email && user.email) setEmail(user.email);
       if (!phone && user.phone) setPhone(user.phone);
+      fetchMyFeedbacks();
     }
   }, [user]);
 
@@ -113,10 +134,12 @@ export default function CustomerFeedbackPage() {
         rating,
         subject: subject.trim(),
         content: content.trim(),
-        userId: user?.id,
       });
 
       setIsSuccess(true);
+      if (user) {
+        fetchMyFeedbacks();
+      }
     } catch (err: any) {
       setErrorMessage(
         err?.message || t("feedback_error_generic", "Không thể gửi ý kiến đóng góp lúc này. Vui lòng thử lại sau ít phút.")
@@ -163,9 +186,196 @@ export default function CustomerFeedbackPage() {
           </p>
         </div>
 
+        {/* Tab Navigation */}
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("send");
+              setIsSuccess(false);
+            }}
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === "send"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+            }`}
+          >
+            <Send className="w-3.5 h-3.5" />
+            <span>Gửi Ý Kiến & Góp Ý</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("inbox");
+              if (user) fetchMyFeedbacks();
+            }}
+            className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              activeTab === "inbox"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+            }`}
+          >
+            <Inbox className="w-3.5 h-3.5" />
+            <span>Hòm Thư Phản Hồi Từ BQT</span>
+            {user && myFeedbacks.length > 0 && (
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                  activeTab === "inbox" ? "bg-white text-blue-700" : "bg-blue-100 text-blue-700"
+                }`}
+              >
+                {myFeedbacks.length}
+              </span>
+            )}
+          </button>
+        </div>
+
         {/* Content Card */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xl overflow-hidden">
-          {isSuccess ? (
+          {activeTab === "inbox" ? (
+            /* Customer Feedback Inbox & BQT Replies */
+            <div className="p-6 sm:p-10 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">
+                    Ý Kiến & Phản Hồi Của Bạn
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Theo dõi tiến độ xử lý và câu trả lời chính thức từ Ban Quản Trị VehicleRent
+                  </p>
+                </div>
+                {user && (
+                  <button
+                    type="button"
+                    onClick={fetchMyFeedbacks}
+                    disabled={isLoadingMyFeedbacks}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors self-start sm:self-auto cursor-pointer"
+                  >
+                    <RotateCw className={`w-3.5 h-3.5 ${isLoadingMyFeedbacks ? "animate-spin text-blue-600" : ""}`} />
+                    <span>Làm mới</span>
+                  </button>
+                )}
+              </div>
+
+              {!user ? (
+                <div className="text-center py-12 px-4 space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto shadow-2xs">
+                    <ShieldCheck className="w-7 h-7" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-base font-bold text-slate-900">
+                      Đăng nhập để xem phản hồi từ Ban Quản Trị
+                    </h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+                      Các ý kiến đóng góp cùng câu trả lời giải đáp từ Ban Quản Trị sẽ được lưu giữ đồng bộ trong tài khoản của bạn.
+                    </p>
+                  </div>
+                  <Link
+                    href="/login?redirect=/feedback"
+                    className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/25 transition-colors"
+                  >
+                    Đăng nhập ngay
+                  </Link>
+                </div>
+              ) : isLoadingMyFeedbacks ? (
+                <div className="py-16 text-center text-slate-400 space-y-2">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-600" />
+                  <p className="text-xs font-semibold">Đang tải danh sách phản hồi...</p>
+                </div>
+              ) : myFeedbacks.length === 0 ? (
+                <div className="text-center py-12 px-4 space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                    <MessageSquare className="w-7 h-7" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-base font-bold text-slate-900">
+                      Bạn chưa gửi ý kiến đóng góp nào
+                    </h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+                      Mọi thắc mắc, phản ánh dịch vụ hoặc đề xuất cải tiến của bạn đều được Ban Quản Trị tiếp nhận và xử lý nghiêm túc.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("send")}
+                    className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/25 transition-colors cursor-pointer"
+                  >
+                    <Send className="w-3.5 h-3.5" /> Gửi góp ý ngay
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {myFeedbacks.map((f) => {
+                    const catObj = CATEGORIES.find((c) => c.id === f.category);
+                    const statusInfo =
+                      f.status === 2
+                        ? { label: "Đã giải quyết", color: "bg-emerald-50 text-emerald-700 border-emerald-200" }
+                        : f.status === 1
+                        ? { label: "Đang xử lý", color: "bg-blue-50 text-blue-700 border-blue-200" }
+                        : { label: "Mới tiếp nhận", color: "bg-amber-50 text-amber-700 border-amber-200" };
+
+                    return (
+                      <div
+                        key={f.id}
+                        className="p-5 rounded-2xl border border-slate-200/90 bg-white hover:border-blue-300 transition-colors shadow-2xs space-y-3.5"
+                      >
+                        {/* Meta info */}
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+                              {catObj?.label || f.category}
+                            </span>
+                            <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border ${statusInfo.color}`}>
+                              {statusInfo.label}
+                            </span>
+                            <span className="text-amber-500 text-xs font-bold">
+                              {"★".repeat(f.rating)}
+                            </span>
+                          </div>
+                          <span className="text-[11px] font-medium text-slate-400">
+                            {new Date(f.createdAt).toLocaleDateString("vi-VN")}
+                          </span>
+                        </div>
+
+                        {/* Subject & User content */}
+                        <div className="space-y-1.5">
+                          <h4 className="text-sm sm:text-base font-black text-slate-900">
+                            {f.subject}
+                          </h4>
+                          <div className="p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/70 text-xs text-slate-700 leading-relaxed whitespace-pre-line">
+                            {f.content}
+                          </div>
+                        </div>
+
+                        {/* Admin Response Box */}
+                        {f.adminNote ? (
+                          <div className="p-4 bg-linear-to-r from-blue-50/90 via-sky-50/80 to-blue-50/90 rounded-2xl border border-blue-200/90 space-y-2">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-extrabold text-blue-900 flex items-center gap-1.5">
+                                <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
+                                Phản hồi chính thức từ Ban Quản Trị Sàn
+                              </span>
+                              <span className="text-[11px] text-blue-700 font-semibold">
+                                {new Date(f.updatedAt).toLocaleDateString("vi-VN")}
+                              </span>
+                            </div>
+                            <p className="text-xs sm:text-sm text-blue-950 font-medium whitespace-pre-line leading-relaxed pl-1">
+                              {f.adminNote}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="p-3 bg-amber-50/70 border border-amber-200/70 rounded-xl text-xs text-amber-800 flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+                            <span>Ý kiến của bạn đã được tiếp nhận. Ban Quản Trị đang xem xét và sẽ gửi phản hồi trực tiếp tại đây trong thời gian sớm nhất.</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ) : isSuccess ? (
             /* Success State */
             <div className="p-8 sm:p-14 text-center space-y-6">
               <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
@@ -204,16 +414,30 @@ export default function CustomerFeedbackPage() {
                 <button
                   type="button"
                   onClick={handleResetForm}
-                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition-colors"
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition-colors cursor-pointer"
                 >
                   Gửi thêm ý kiến khác
                 </button>
-                <Link
-                  href="/"
-                  className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/25 transition-colors"
-                >
-                  Trở về trang chủ
-                </Link>
+                {user ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleResetForm();
+                      setActiveTab("inbox");
+                      fetchMyFeedbacks();
+                    }}
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/25 transition-colors cursor-pointer"
+                  >
+                    Xem hòm thư phản hồi của bạn →
+                  </button>
+                ) : (
+                  <Link
+                    href="/"
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/25 transition-colors"
+                  >
+                    Trở về trang chủ
+                  </Link>
+                )}
               </div>
             </div>
           ) : (

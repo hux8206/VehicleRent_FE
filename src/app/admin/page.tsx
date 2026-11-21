@@ -221,7 +221,7 @@ export default function AdminDashboardPage() {
       { category: "Xe tay ga", type: 1, total: 0, rented: 0 },
       { category: "Côn tay", type: 2, total: 0, rented: 0 },
       { category: "Xe điện", type: 3, total: 0, rented: 0 },
-      { category: "Ô tô tự lái", type: 4, total: 0, rented: 0 },
+      { category: "Ô tô", type: 4, total: 0, rented: 0 },
     ];
   }, [platformStats]);
 
