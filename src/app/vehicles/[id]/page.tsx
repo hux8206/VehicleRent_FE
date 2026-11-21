@@ -8,8 +8,6 @@ import { getVehicleDetailImageUrl, getVehicleThumbnailUrl } from "@/lib/image-op
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { BookingModal } from "@/components/customer/booking-modal";
 import { DigitalHandoverModal } from "@/components/customer/digital-handover-modal";
 import {
@@ -19,17 +17,12 @@ import {
 } from "@/components/common/datetime-24h-picker";
 import {
   ArrowLeft,
-  Calendar,
   Clock,
-  MapPin,
   Phone,
   ShieldCheck,
   CheckCircle2,
   Store,
-  Info,
-  Car,
   Bike,
-  HelpCircle,
   AlertCircle,
   FileCheck2,
   Star,
@@ -136,7 +129,7 @@ export default function VehicleDetailPage() {
   const depositPercent = Math.max(minDeposit, rawDepositPercent);
   const depositAmount = Math.round((rentAmount * depositPercent) / 100);
 
-  // Giờ hoạt động của cửa hàng (Requirement 1)
+  // Giờ hoạt động của cửa hàng
   const storeOpenTime = model.store?.openTime || "07:00";
   const storeCloseTime = model.store?.closeTime || "21:00";
 
@@ -163,8 +156,6 @@ export default function VehicleDetailPage() {
   const isEndWithinHours = endMins === -1 || (endMins >= openMins && endMins <= closeMins);
   const isHoursValid = isStartWithinHours && isEndWithinHours;
 
-  // Khi chọn thời gian nhận xe: hệ thống tự động tính toán đủ 24h cho 1 ngày và hiện số thời gian trả tương ứng.
-  // Trường hợp thời gian trả tính toán trễ hơn giờ mở cửa của cửa hàng -> điều chỉnh về thời gian mở cửa cuối cùng của cửa hàng (closeTime).
   const handleStartTimeChange = (newStart: string) => {
     setStartTime(newStart);
     const newEnd = calculate24hReturnTime(newStart, storeOpenTime, storeCloseTime);
@@ -185,12 +176,23 @@ export default function VehicleDetailPage() {
           <ArrowLeft className="h-4 w-4" /> Quay lại danh sách xe
         </Link>
 
+        {/* 
+          Grid Layout with CSS Grid:
+          - Mobile (< lg): Single column (grid-cols-1) with custom order:
+              1. Section 1 (order-1): Gallery + Title & Store & Price Overview
+              2. Section 2 (order-2): Booking & Pricing Box (Top placement on mobile)
+              3. Section 3 (order-3): Specs, Digital Handover, Store Policy & Reviews
+          - Desktop (lg:): 3 columns (lg:grid-cols-3) keeping original 2-column sidebar layout:
+              1. Section 1: lg:col-span-2 lg:col-start-1 lg:row-start-1
+              2. Section 2: lg:col-span-1 lg:col-start-3 lg:row-start-1 lg:row-span-2 (Sticky Sidebar)
+              3. Section 3: lg:col-span-2 lg:col-start-1 lg:row-start-2
+        */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left 2 Cols: Gallery, Details, Store, Policy */}
-          <div className="lg:col-span-2 space-y-6">
+          {/* Section 1: Vehicle Image Gallery & Title Overview (Top on Mobile & Desktop) */}
+          <div className="order-1 lg:order-none lg:col-span-2 lg:col-start-1 lg:row-start-1 space-y-6">
             {/* Gallery */}
             <div className="space-y-3">
-              <div className="h-80 sm:h-96 w-full rounded-2xl overflow-hidden border bg-white shadow-xs">
+              <div className="h-72 sm:h-96 w-full rounded-2xl overflow-hidden border border-slate-200/80 bg-white shadow-xs">
                 <img
                   src={getVehicleDetailImageUrl(selectedImg)}
                   alt={`Hình ảnh xe ${model.brand ? model.brand + " " : ""}${model.name || "cho thuê tự lái"} tại nhà xe ${model.store?.storeName || ""}`}
@@ -202,14 +204,14 @@ export default function VehicleDetailPage() {
               </div>
 
               {model.images && model.images.length > 1 && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
                   {model.images.map((img, idx) => (
                     <button
                       key={idx}
                       type="button"
                       aria-label={`Xem ảnh ${idx + 1} của dòng xe ${model.name}`}
                       onClick={() => setSelectedImg(img)}
-                      className={`h-20 w-24 rounded-xl overflow-hidden border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${selectedImg === img ? "border-blue-600 ring-2 ring-blue-600/30" : "border-slate-200 opacity-70 hover:opacity-100"
+                      className={`h-16 w-20 sm:h-20 sm:w-24 shrink-0 rounded-xl overflow-hidden border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${selectedImg === img ? "border-blue-600 ring-2 ring-blue-600/30" : "border-slate-200 opacity-70 hover:opacity-100"
                         }`}
                     >
                       <img src={getVehicleThumbnailUrl(img)} alt={`${model.name || "Dòng xe"} - Ảnh chi tiết ${idx + 1}`} className="w-full h-full object-cover" loading="lazy" />
@@ -219,9 +221,9 @@ export default function VehicleDetailPage() {
               )}
             </div>
 
-            {/* Title & Overview */}
-            <Card className="rounded-2xl border-slate-200/80 shadow-xs">
-              <CardHeader className="p-6 pb-4">
+            {/* Title & Overview Card */}
+            <Card className="rounded-2xl border-slate-200/80 shadow-xs bg-white">
+              <CardHeader className="p-5 sm:p-6">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Badge className="bg-blue-600 text-white font-semibold text-xs">{model.brand}</Badge>
@@ -237,10 +239,10 @@ export default function VehicleDetailPage() {
                   </Badge>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
+                <h1 className="text-xl sm:text-3xl font-black text-slate-900 mt-2">
                   {model.name}
                 </h1>
-                <div className="flex flex-wrap items-center gap-3 mt-2">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
                   <div className="flex items-center gap-1.5 text-amber-500 font-bold text-xs bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 shadow-2xs">
                     <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-500" />
                     <span className="text-amber-900 font-mono text-sm">{model.avgRating || 5.0}</span>
@@ -248,269 +250,50 @@ export default function VehicleDetailPage() {
                       ({model.reviewCount || model.reviews?.length || 0} đánh giá)
                     </span>
                   </div>
+                  {model.store?.storeName && (
+                    <>
+                      <span className="text-xs text-slate-300">•</span>
+                      <Link
+                        href={`/stores/${model.storeId || model.store.id}`}
+                        className="text-xs font-semibold text-slate-700 hover:text-blue-600 flex items-center gap-1 transition-colors"
+                      >
+                        <Store className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                        <span className="truncate max-w-[200px] sm:max-w-none">{model.store.storeName}</span>
+                      </Link>
+                    </>
+                  )}
                   <span className="text-xs text-slate-300">•</span>
                   <p className="text-xs text-slate-500">
                     Đơn giá niêm yết: <span className="font-bold text-blue-600 text-sm">{pricePerDay.toLocaleString("vi-VN")} đ</span>/ngày 24h
                   </p>
                 </div>
               </CardHeader>
-
-              <CardContent className="p-6 pt-0 space-y-4 text-xs text-slate-600">
-                <div className="space-y-1.5">
-                  <h4 className="font-bold text-slate-800 text-sm">Thông số kỹ thuật & Tiện ích</h4>
-                  <p className="leading-relaxed bg-slate-50 p-3.5 rounded-xl border">
-                    {model.specifications || "Trang bị động cơ đời mới, khóa thông minh Smartkey, cốp rộng chứa đồ, phanh an toàn. Đã qua bảo dưỡng và kiểm định định kỳ."}
-                  </p>
-                </div>
-
-                {/* Plates list */}
-                {model.vehicleItems && (
-                  <div className="space-y-1.5">
-                    <h4 className="font-bold text-slate-800 text-sm">Danh sách biển số xe thuộc dòng này:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {model.vehicleItems.map((item) => (
-                        <span
-                          key={item.id}
-                          className={`px-2.5 py-1 rounded-lg border font-mono font-medium text-xs ${item.status === 0
-                              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                              : item.status === 2
-                                ? "bg-slate-100 text-slate-500 border-slate-200 line-through"
-                                : "bg-amber-50 text-amber-800 border-amber-200"
-                            }`}
-                        >
-                          {item.licensePlate} ({item.color || "Tiêu chuẩn"})
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* 6-Point Safety Inspection & Digital Handover Seal */}
-            <Card className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-xs overflow-hidden">
-              <CardContent className="p-6 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                      <FileCheck2 className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold">
-                        <CheckCircle2 className="h-3 w-3" /> Kiểm định 6 điểm kỹ thuật số
-                      </div>
-                      <h3 className="text-base font-black text-slate-900 dark:text-slate-100 mt-0.5">
-                        Biên Bản Bàn Giao & Kiểm Tra 6 Điểm Kỹ Thuật Số
-                      </h3>
-                    </div>
-                  </div>
-
-                  <Button
-                    type="button"
-                    onClick={() => setIsHandoverOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl h-9 px-4 gap-1.5 shadow-xs"
-                  >
-                    <span>Xem biên bản bàn giao xe</span>
-                    <FileCheck2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Trước khi nhận xe, cửa hàng cùng bạn kiểm tra phanh, lốp, đèn, gương, vạch xăng và chụp ảnh 4 góc lưu trữ điện tử. Cam kết <strong className="text-slate-900 dark:text-slate-200 font-bold">Không phạt vạ trầy xước hao mòn</strong> và <strong className="text-slate-900 dark:text-slate-200 font-bold">Cứu hộ khẩn cấp 24/7</strong> mọi cung đường.
-                </p>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-center">
-                    <div className="text-[11px] font-bold text-slate-700">Phanh & Tay Lái</div>
-                    <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ Đã kiểm tra</div>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
-                    <div className="text-[11px] font-bold text-slate-700">Đèn & Xi-Nhan</div>
-                    <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ Đạt chuẩn đêm</div>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
-                    <div className="text-[11px] font-bold text-slate-700">Lốp & Áp Suất</div>
-                    <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ Gai sâu an toàn</div>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
-                    <div className="text-[11px] font-bold text-slate-700">Hợp Đồng & Ảnh</div>
-                    <div className="text-[10px] text-blue-600 font-semibold mt-0.5">✓ Ký số minh bạch</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Store & Rental Policy Card */}
-            <Card className="rounded-2xl border-slate-200/80 shadow-xs">
-              <CardHeader className="p-6 pb-3 border-b">
-                <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <Store className="h-5 w-5 text-blue-600" /> Thông tin nhà xe & Chính sách thuê
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4 text-xs">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <span className="text-slate-500 font-semibold">Tên cửa hàng:</span>
-                    <div className="flex items-center gap-2">
-                      <div className="font-bold text-slate-900 text-sm">{model.store?.storeName || "Nhà xe Thành Đạt"}</div>
-                      <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-full border border-amber-200">
-                        <Star className="h-3 w-3 fill-amber-400 text-amber-500" />
-                        {model.store?.avgRating ? Number(model.store.avgRating).toFixed(1) : "5.0"}
-                        <span className="text-[10px] text-slate-500 font-normal">
-                          ({model.store?.reviewCount || 0})
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-slate-500 font-semibold">Hotline & Zalo liên hệ:</span>
-                    <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                      <a
-                        href={`tel:${(model.store?.phoneContact || "0902000002").replace(/\D/g, "")}`}
-                        className="font-bold text-slate-900 dark:text-slate-100 hover:text-blue-600 flex items-center gap-1 transition-colors"
-                      >
-                        <Phone className="h-3.5 w-3.5 text-blue-600" />
-                        <span>{model.store?.phoneContact || "0902000002"}</span>
-                      </a>
-                      <ZaloChatButton
-                        phone={model.store?.phoneContact || "0902000002"}
-                        label="Nhắn Zalo"
-                        variant="compact"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-slate-500 font-semibold">Giờ mở cửa đón khách:</span>
-                    <div className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
-                      <Clock className="h-4 w-4 text-cyan-600" />
-                      <span>{storeOpenTime} - {storeCloseTime}</span>
-                    </div>
-                  </div>
-                  <div className="sm:col-span-2 space-y-1">
-                    <span className="text-slate-500 font-semibold">Địa chỉ cửa hàng:</span>
-                    <div className="text-slate-700">
-                      {model.store?.address || "123 Xuân Thủy, Cầu Giấy, Hà Nội"}
-                      {model.store?.province && (
-                        <span className="ml-2 inline-block bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-blue-100">
-                          {model.store.province}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border-t pt-4 space-y-3">
-                  <h5 className="font-bold text-slate-800">Chính sách cọc & Hoàn tiền:</h5>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-600">
-                    <div className="bg-slate-50 p-3 rounded-xl border">
-                      <span className="font-semibold text-slate-800 block mb-0.5">Mức đặt cọc giữ xe:</span>
-                      <span>Chỉ cần cọc <strong className="text-blue-600 font-bold">{depositPercent}%</strong> tổng tiền thuê.</span>
-                    </div>
-                    <div className="bg-slate-50 p-3 rounded-xl border">
-                      <span className="font-semibold text-slate-800 block mb-0.5">Quy định hủy đơn:</span>
-                      <span>{model.store?.rentalPolicy?.cancelRule || "Hủy trước 24h được hoàn 100% tiền cọc."}</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Reviews and Ratings Section */}
-            <Card className="rounded-2xl border-slate-200/80 shadow-xs">
-              <CardHeader className="p-6 pb-3 border-b flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-base font-bold flex items-center gap-2">
-                    <Star className="h-5 w-5 text-amber-500 fill-amber-400" /> Đánh giá từ khách hàng
-                  </CardTitle>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Trải nghiệm thực tế từ những khách hàng đã thuê dòng xe này
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-500" />
-                  <span className="font-extrabold text-amber-900 text-sm">{model.avgRating ?? 5.0}</span>
-                  <span className="text-xs text-amber-700">({model.reviewCount ?? 0} đánh giá)</span>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                {model.reviews && model.reviews.length > 0 ? (
-                  <div className="divide-y divide-slate-100 space-y-4">
-                    {model.reviews.map((rev) => (
-                      <div key={rev.id} className="pt-4 first:pt-0 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
-                              <User className="h-4 w-4" />
-                            </div>
-                            <div>
-                              <div className="font-semibold text-xs text-slate-800">
-                                {rev.customerName || rev.customer?.fullName || "Khách hàng"}
-                              </div>
-                              <div className="text-[10px] text-slate-400">
-                                {rev.createdAt
-                                  ? new Date(rev.createdAt).toLocaleDateString("vi-VN", {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                  })
-                                  : "Gần đây"}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-0.5">
-                            {[1, 2, 3, 4, 5].map((s) => (
-                              <Star
-                                key={s}
-                                className={`h-3.5 w-3.5 ${s <= rev.rateStar
-                                    ? "fill-amber-400 text-amber-500"
-                                    : "fill-slate-100 text-slate-200"
-                                  }`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        {rev.comment && (
-                          <p className="text-xs text-slate-600 bg-slate-50/70 p-3 rounded-xl border border-slate-100 leading-relaxed">
-                            {rev.comment}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-slate-400 text-xs">
-                    <Star className="h-8 w-8 mx-auto mb-2 text-slate-300 stroke-1" />
-                    <p className="font-medium text-slate-600">Chưa có đánh giá nào cho mẫu xe này</p>
-                    <p className="text-[11px] mt-0.5">Hãy là người đầu tiên trải nghiệm và chia sẻ đánh giá nhé!</p>
-                  </div>
-                )}
-              </CardContent>
             </Card>
           </div>
 
-          {/* Right Col: Reservation Booking Sidebar */}
-          <div className="space-y-6">
-            <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800 shadow-lg sticky top-20 bg-white dark:bg-slate-900">
-              <CardHeader className="p-6 pb-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50">
-                <span className="text-xs font-bold text-blue-700 dark:text-blue-400">
+          {/* Section 2: Reservation Booking Sidebar (Order 2 on Mobile, Col 3 Row 1 on Desktop) */}
+          <div className="order-2 lg:order-none lg:col-span-1 lg:col-start-3 lg:row-start-1 lg:row-span-2 space-y-6">
+            <Card className="rounded-2xl border-slate-200/80 shadow-lg lg:sticky lg:top-20 bg-white">
+              <CardHeader className="p-5 sm:p-6 pb-4 border-b border-slate-100 bg-slate-50/70">
+                <span className="text-xs font-bold text-blue-700">
                   Tính tiền & Đặt chỗ tức thì
                 </span>
                 <div className="flex items-baseline justify-between mt-1">
-                  <span className="text-2xl font-black text-blue-700 dark:text-blue-400">
+                  <span className="text-2xl font-black text-blue-700">
                     {pricePerDay.toLocaleString("vi-VN")} đ
                   </span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">/ 24 giờ thuê</span>
+                  <span className="text-xs text-slate-500">/ 24 giờ thuê</span>
                 </div>
               </CardHeader>
 
-              <CardContent className="p-6 space-y-5">
+              <CardContent className="p-5 sm:p-6 space-y-5">
                 {/* Store Operating Hours Pill */}
-                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs">
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs">
                   <span className="flex items-center gap-1.5 font-semibold">
-                    <Clock className="h-4 w-4 text-cyan-600 dark:text-cyan-400 shrink-0" />
+                    <Clock className="h-4 w-4 text-cyan-600 shrink-0" />
                     <span>Giờ mở cửa đón khách:</span>
                   </span>
-                  <span className="font-bold text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 shadow-2xs">
+                  <span className="font-bold text-slate-900 bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-2xs">
                     {storeOpenTime} - {storeCloseTime}
                   </span>
                 </div>
@@ -594,7 +377,7 @@ export default function VehicleDetailPage() {
                     <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" />
                     <span>Quét mã VietQR chuyển khoản tức thì</span>
                   </div>
-                  <div className="flex items-center gap-2 font-semibold text-emerald-700 dark:text-emerald-400">
+                  <div className="flex items-center gap-2 font-semibold text-emerald-700">
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
                     <span>Bảo lãnh hoàn 150% cọc nếu chủ xe không đáp ứng đơn</span>
                   </div>
@@ -616,7 +399,7 @@ export default function VehicleDetailPage() {
                 </Button>
 
                 {/* Direct Store Contact & Zalo Consultation */}
-                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+                <div className="pt-2 border-t border-slate-200 flex items-center justify-between gap-2">
                   <div className="text-[11px] text-slate-500">
                     Cần tư vấn xe qua Zalo?
                   </div>
@@ -627,6 +410,248 @@ export default function VehicleDetailPage() {
                     size="sm"
                   />
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Section 3: Specs, Inspection, Store Policy & Reviews (Order 3 on Mobile, Col 1-2 Row 2 on Desktop) */}
+          <div className="order-3 lg:order-none lg:col-span-2 lg:col-start-1 lg:row-start-2 space-y-6">
+            {/* Specs & Plates Card */}
+            <Card className="rounded-2xl border-slate-200/80 shadow-xs bg-white">
+              <CardHeader className="p-5 sm:p-6 pb-2 border-b">
+                <CardTitle className="text-base font-bold text-slate-900">
+                  Thông số kỹ thuật & Chi tiết xe
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-5 sm:p-6 space-y-4 text-xs text-slate-600">
+                <div className="space-y-1.5">
+                  <h4 className="font-bold text-slate-800 text-sm">Thông số kỹ thuật & Tiện ích</h4>
+                  <p className="leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+                    {model.specifications || "Trang bị động cơ đời mới, khóa thông minh Smartkey, cốp rộng chứa đồ, phanh an toàn. Đã qua bảo dưỡng và kiểm định định kỳ."}
+                  </p>
+                </div>
+
+                {/* Plates list */}
+                {model.vehicleItems && (
+                  <div className="space-y-1.5">
+                    <h4 className="font-bold text-slate-800 text-sm">Danh sách biển số xe thuộc dòng này:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {model.vehicleItems.map((item) => (
+                        <span
+                          key={item.id}
+                          className={`px-2.5 py-1 rounded-lg border font-mono font-medium text-xs ${item.status === 0
+                              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                              : item.status === 2
+                                ? "bg-slate-100 text-slate-500 border-slate-200 line-through"
+                                : "bg-amber-50 text-amber-800 border-amber-200"
+                            }`}
+                        >
+                          {item.licensePlate} ({item.color || "Tiêu chuẩn"})
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* 6-Point Safety Inspection & Digital Handover Seal */}
+            <Card className="rounded-2xl border border-slate-200/90 bg-white text-slate-900 shadow-xs overflow-hidden">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
+                      <FileCheck2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold">
+                        <CheckCircle2 className="h-3 w-3" /> Kiểm định 6 điểm kỹ thuật số
+                      </div>
+                      <h3 className="text-base font-black text-slate-900 mt-0.5">
+                        Biên Bản Bàn Giao & Kiểm Tra 6 Điểm Kỹ Thuật Số
+                      </h3>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    onClick={() => setIsHandoverOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl h-9 px-4 gap-1.5 shadow-xs"
+                  >
+                    <span>Xem biên bản bàn giao xe</span>
+                    <FileCheck2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  Trước khi nhận xe, cửa hàng cùng bạn kiểm tra phanh, lốp, đèn, gương, vạch xăng và chụp ảnh 4 góc lưu trữ điện tử. Cam kết <strong className="text-slate-900 font-bold">Không phạt vạ trầy xước hao mòn</strong> và <strong className="text-slate-900 font-bold">Cứu hộ khẩn cấp 24/7</strong> mọi cung đường.
+                </p>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
+                    <div className="text-[11px] font-bold text-slate-700">Phanh & Tay Lái</div>
+                    <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ Đã kiểm tra</div>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
+                    <div className="text-[11px] font-bold text-slate-700">Đèn & Xi-Nhan</div>
+                    <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ Đạt chuẩn đêm</div>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
+                    <div className="text-[11px] font-bold text-slate-700">Lốp & Áp Suất</div>
+                    <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ Gai sâu an toàn</div>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
+                    <div className="text-[11px] font-bold text-slate-700">Hợp Đồng & Ảnh</div>
+                    <div className="text-[10px] text-blue-600 font-semibold mt-0.5">✓ Ký số minh bạch</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Store & Rental Policy Card */}
+            <Card className="rounded-2xl border-slate-200/80 shadow-xs bg-white">
+              <CardHeader className="p-6 pb-3 border-b">
+                <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-900">
+                  <Store className="h-5 w-5 text-blue-600" /> Thông tin nhà xe & Chính sách thuê
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <span className="text-slate-500 font-semibold">Tên cửa hàng:</span>
+                    <div className="flex items-center gap-2">
+                      <div className="font-bold text-slate-900 text-sm">{model.store?.storeName || "Nhà xe Thành Đạt"}</div>
+                      <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-full border border-amber-200">
+                        <Star className="h-3 w-3 fill-amber-400 text-amber-500" />
+                        {model.store?.avgRating ? Number(model.store.avgRating).toFixed(1) : "5.0"}
+                        <span className="text-[10px] text-slate-500 font-normal">
+                          ({model.store?.reviewCount || 0})
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-slate-500 font-semibold">Hotline & Zalo liên hệ:</span>
+                    <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                      <a
+                        href={`tel:${(model.store?.phoneContact || "0902000002").replace(/\D/g, "")}`}
+                        className="font-bold text-slate-900 hover:text-blue-600 flex items-center gap-1 transition-colors"
+                      >
+                        <Phone className="h-3.5 w-3.5 text-blue-600" />
+                        <span>{model.store?.phoneContact || "0902000002"}</span>
+                      </a>
+                      <ZaloChatButton
+                        phone={model.store?.phoneContact || "0902000002"}
+                        label="Nhắn Zalo"
+                        variant="compact"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-slate-500 font-semibold">Giờ mở cửa đón khách:</span>
+                    <div className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+                      <Clock className="h-4 w-4 text-cyan-600" />
+                      <span>{storeOpenTime} - {storeCloseTime}</span>
+                    </div>
+                  </div>
+                  <div className="sm:col-span-2 space-y-1">
+                    <span className="text-slate-500 font-semibold">Địa chỉ cửa hàng:</span>
+                    <div className="text-slate-700">
+                      {model.store?.address || "123 Xuân Thủy, Cầu Giấy, Hà Nội"}
+                      {model.store?.province && (
+                        <span className="ml-2 inline-block bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-md border border-blue-100">
+                          {model.store.province}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4 space-y-3">
+                  <h5 className="font-bold text-slate-800">Chính sách cọc & Hoàn tiền:</h5>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-600">
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                      <span className="font-semibold text-slate-800 block mb-0.5">Mức đặt cọc giữ xe:</span>
+                      <span>Chỉ cần cọc <strong className="text-blue-600 font-bold">{depositPercent}%</strong> tổng tiền thuê.</span>
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                      <span className="font-semibold text-slate-800 block mb-0.5">Quy định hủy đơn:</span>
+                      <span>{model.store?.rentalPolicy?.cancelRule || "Hủy trước 24h được hoàn 100% tiền cọc."}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Reviews and Ratings Section */}
+            <Card className="rounded-2xl border-slate-200/80 shadow-xs bg-white">
+              <CardHeader className="p-6 pb-3 border-b flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-base font-bold flex items-center gap-2 text-slate-900">
+                    <Star className="h-5 w-5 text-amber-500 fill-amber-400" /> Đánh giá từ khách hàng
+                  </CardTitle>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Trải nghiệm thực tế từ những khách hàng đã thuê dòng xe này
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200">
+                  <Star className="h-4 w-4 fill-amber-400 text-amber-500" />
+                  <span className="font-extrabold text-amber-900 text-sm">{model.avgRating ?? 5.0}</span>
+                  <span className="text-xs text-amber-700">({model.reviewCount ?? 0} đánh giá)</span>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                {model.reviews && model.reviews.length > 0 ? (
+                  <div className="divide-y divide-slate-100 space-y-4">
+                    {model.reviews.map((rev) => (
+                      <div key={rev.id} className="pt-4 first:pt-0 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+                              <User className="h-4 w-4" />
+                            </div>
+                            <div>
+                              <div className="font-semibold text-xs text-slate-800">
+                                {rev.customerName || rev.customer?.fullName || "Khách hàng"}
+                              </div>
+                              <div className="text-[10px] text-slate-400">
+                                {rev.createdAt
+                                  ? new Date(rev.createdAt).toLocaleDateString("vi-VN", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                  })
+                                  : "Gần đây"}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star
+                                key={s}
+                                className={`h-3.5 w-3.5 ${s <= rev.rateStar
+                                    ? "fill-amber-400 text-amber-500"
+                                    : "fill-slate-100 text-slate-200"
+                                  }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        {rev.comment && (
+                          <p className="text-xs text-slate-600 bg-slate-50/70 p-3 rounded-xl border border-slate-100 leading-relaxed">
+                            {rev.comment}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-slate-400 text-xs">
+                    <Star className="h-8 w-8 mx-auto mb-2 text-slate-300 stroke-1" />
+                    <p className="font-medium text-slate-600">Chưa có đánh giá nào cho mẫu xe này</p>
+                    <p className="text-[11px] mt-0.5">Hãy là người đầu tiên trải nghiệm và chia sẻ đánh giá nhé!</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
