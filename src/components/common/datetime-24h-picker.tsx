@@ -74,24 +74,24 @@ export function DateTime24hPicker({
   if (variant === "compact") {
     // For Home Hero Search Dock (horizontal compact)
     return (
-      <div className={`flex items-center gap-1.5 ${className}`}>
-        <div className="flex items-center gap-1 bg-transparent">
-          <Calendar className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+      <div className={`flex items-center justify-between gap-1 sm:gap-2 w-full min-w-0 ${className}`}>
+        <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden">
+          <Calendar className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
           <input
             type="date"
             value={datePart}
             min={minDate}
             onChange={(e) => handleDateChange(e.target.value)}
-            className="bg-transparent outline-none font-semibold text-xs text-slate-800 dark:text-slate-100 w-[115px] cursor-pointer"
+            className="bg-transparent outline-none font-semibold text-xs sm:text-sm text-slate-800 dark:text-slate-100 min-w-0 w-full whitespace-nowrap cursor-pointer [color-scheme:light] dark:[color-scheme:dark]"
           />
         </div>
-        <span className="text-slate-300 dark:text-slate-600 font-normal">|</span>
-        <div className="flex items-center gap-1">
+        <span className="text-slate-300 dark:text-slate-600 font-normal shrink-0">|</span>
+        <div className="flex items-center gap-1 shrink-0">
           <Clock className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
           <select
             value={timePart}
             onChange={(e) => handleTimeChange(e.target.value)}
-            className="bg-transparent outline-none font-bold text-xs text-blue-700 dark:text-blue-400 cursor-pointer"
+            className="bg-transparent outline-none font-bold text-xs sm:text-sm text-blue-700 dark:text-blue-400 cursor-pointer shrink-0"
             title="Chọn giờ"
           >
             {TIME_SLOTS.map((slot) => (

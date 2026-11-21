@@ -476,42 +476,42 @@ export default function CustomerBookingsPage() {
 
         {/* Search & Date Range Filter Bar */}
         <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-2xs mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
-          <div className="lg:col-span-5 relative">
-            <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <div className="col-span-1 sm:col-span-2 lg:col-span-4 relative">
+            <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
               type="text"
               placeholder={t("bookings_search_placeholder", "Tìm theo mã đơn BK-..., dòng xe, tên nhà xe...")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9.5 text-xs h-9.5 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
+              className="pl-10 sm:pl-11 text-xs h-10 sm:h-11 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 w-full min-w-0"
             />
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="col-span-1 sm:col-span-1 lg:col-span-2">
             <Input
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="text-xs h-9.5 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
+              className="text-xs h-10 sm:h-11 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 w-full min-w-0 [color-scheme:light] dark:[color-scheme:dark]"
               title={t("bookings_from_date", "Từ ngày đặt xe")}
             />
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="col-span-1 sm:col-span-1 lg:col-span-2">
             <Input
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="text-xs h-9.5 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
+              className="text-xs h-10 sm:h-11 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 w-full min-w-0 [color-scheme:light] dark:[color-scheme:dark]"
               title={t("bookings_to_date", "Đến ngày")}
             />
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="col-span-1 sm:col-span-1 lg:col-span-3">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full h-9.5 text-xs font-semibold px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-200"
+              className="w-full min-w-0 h-10 sm:h-11 text-xs font-semibold px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
             >
               <option value="ALL">{t("bookings_tab_all", "Tất cả trạng thái")}</option>
               <option value="0">{t("bookings_tab_pending", "Chờ thanh toán cọc")}</option>
@@ -523,7 +523,7 @@ export default function CustomerBookingsPage() {
             </select>
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="col-span-1 sm:col-span-1 lg:col-span-1">
             <Button
               variant="outline"
               size="sm"
@@ -533,10 +533,11 @@ export default function CustomerBookingsPage() {
                 setToDate("");
                 setStatusFilter("ALL");
               }}
-              className="w-full h-9.5 rounded-xl text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-slate-700 cursor-pointer"
+              className="w-full min-w-0 h-10 sm:h-11 rounded-xl text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-slate-700 cursor-pointer flex items-center justify-center gap-2"
               title={t("bookings_btn_reset_filter", "Đặt lại bộ lọc")}
             >
-              <RotateCcw className="h-3.5 w-3.5" />
+              <RotateCcw className="h-4 w-4 shrink-0" />
+              <span className="sm:hidden font-medium">{t("bookings_btn_reset_filter", "Đặt lại bộ lọc")}</span>
             </Button>
           </div>
         </div>
@@ -686,11 +687,11 @@ export default function CustomerBookingsPage() {
 
                       {/* Pricing breakdown */}
                       <div className="text-left md:text-right border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 md:pl-6 pt-3 md:pt-0 space-y-1 min-w-[180px]">
-                        <div className="text-xs text-slate-500 dark:text-slate-400">
-                          {t("bookings_total_amount", "Tổng tiền:")} <strong className="text-slate-800 dark:text-slate-200 font-bold">{Number(b.rentAmount).toLocaleString("vi-VN")} đ</strong>
+                        <div className="text-xs text-slate-500 dark:text-slate-200">
+                          {t("bookings_total_amount", "Tổng tiền:")} <strong className="text-slate-900 dark:text-slate-100 font-bold">{Number(b.rentAmount).toLocaleString("vi-VN")} đ</strong>
                         </div>
                         <div className="text-xs text-blue-600 dark:text-blue-400 font-bold">
-                          {t("bookings_deposit_amount", "Tiền cọc:")} {Number(b.depositAmount).toLocaleString("vi-VN")} đ
+                          <span className="text-slate-500 dark:text-slate-200 font-normal">{t("bookings_deposit_amount", "Tiền cọc:")}</span> {Number(b.depositAmount).toLocaleString("vi-VN")} đ
                         </div>
                       </div>
                     </div>

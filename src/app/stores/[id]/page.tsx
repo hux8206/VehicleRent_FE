@@ -91,18 +91,18 @@ export default function StoreDetailPage() {
   const reviewsList = store.reviews || [];
 
   return (
-    <div className="py-8 bg-slate-50/60 min-h-screen">
+    <div className="py-8 bg-slate-50/60 dark:bg-slate-950 min-h-screen">
       <div className="container max-w-6xl mx-auto px-4 space-y-8">
         {/* Back Link */}
         <Link
           href="/stores"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Quay lại danh sách cửa hàng
         </Link>
 
         {/* Store Header Banner Card */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white overflow-hidden shadow-xs">
+        <div className="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-xs">
           <div className="relative h-64 sm:h-72 w-full bg-slate-900">
             <img
               src={getStoreBannerImageUrl(store.storeImage)}
@@ -171,24 +171,24 @@ export default function StoreDetailPage() {
             </div>
           </div>
 
-          <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-600">
+          <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-600 dark:text-slate-400">
             <div className="md:col-span-2 space-y-2">
-              <h4 className="font-bold text-slate-900 text-sm">Giới thiệu nhà xe</h4>
-              <p className="leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
+              <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Giới thiệu nhà xe</h4>
+              <p className="leading-relaxed bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/60">
                 {store.description || "Nhà xe chuyên nghiệp, dịch vụ chu đáo, hỗ trợ giao xe tận nơi nhanh chóng, xe luôn được bảo dưỡng định kỳ."}
               </p>
             </div>
 
             <div className="space-y-2">
-              <h4 className="font-bold text-slate-900 text-sm">Chính sách cọc & Hoàn tiền</h4>
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2">
+              <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Chính sách cọc & Hoàn tiền</h4>
+              <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/60 space-y-2">
                 <div>
-                  <span className="font-semibold text-slate-800 block">Quy định hủy đơn:</span>
-                  <span className="text-slate-600">{store.rentalPolicy?.cancelRule || "Hủy trước 24h hoàn 100% cọc."}</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 block">Quy định hủy đơn:</span>
+                  <span className="text-slate-600 dark:text-slate-400">{store.rentalPolicy?.cancelRule || "Hủy trước 24h hoàn 100% cọc."}</span>
                 </div>
-                <div className="border-t pt-2">
-                  <span className="font-semibold text-slate-800 block">Điều kiện hoàn tiền:</span>
-                  <span className="text-slate-600">{store.rentalPolicy?.refundCondition || "Hoàn tiền nhanh qua tài khoản ngân hàng."}</span>
+                <div className="border-t border-slate-200 dark:border-slate-700 pt-2">
+                  <span className="font-semibold text-slate-800 dark:text-slate-200 block">Điều kiện hoàn tiền:</span>
+                  <span className="text-slate-600 dark:text-slate-400">{store.rentalPolicy?.refundCondition || "Hoàn tiền nhanh qua tài khoản ngân hàng."}</span>
                 </div>
               </div>
             </div>
@@ -199,19 +199,19 @@ export default function StoreDetailPage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-black text-slate-900">
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white">
                 Dòng Xe Thuộc Cửa Hàng ({vehicles.length})
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Các phương tiện sẵn sàng bàn giao trực tiếp tại cửa hàng hoặc giao tận nơi theo yêu cầu.
               </p>
             </div>
           </div>
 
           {vehicles.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-400">
-              <Bike className="h-10 w-10 mx-auto text-slate-300 mb-2" />
-              <p className="text-xs font-semibold">Cửa hàng hiện chưa cập nhật dòng xe nào.</p>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-8 text-center text-slate-400">
+              <Bike className="h-10 w-10 mx-auto text-slate-300 dark:text-slate-600 mb-2" />
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">Cửa hàng hiện chưa cập nhật dòng xe nào.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -224,9 +224,9 @@ export default function StoreDetailPage() {
                     href={`/vehicles/${v.id}`}
                     className="block h-full group outline-none"
                   >
-                    <div className="h-full bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-xl hover:border-blue-400/50 transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer">
+                    <div className="h-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-xl hover:border-blue-400/50 transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer">
                       <div>
-                        <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
+                        <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                           <img
                             src={getVehicleCardImageUrl(v.images?.[0])}
                             alt={`Dòng xe ${v.brand ? v.brand + " " : ""}${v.name || ""} tại ${store.storeName}`}
@@ -237,7 +237,7 @@ export default function StoreDetailPage() {
                             loading="lazy"
                           />
                           <div className="absolute top-3 left-3 flex gap-1.5">
-                            <span className="bg-white/95 text-slate-900 font-bold text-[10px] px-2.5 py-1 rounded-full shadow-xs">
+                            <span className="bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100 font-bold text-[10px] px-2.5 py-1 rounded-full shadow-xs">
                               {v.type === 1 ? "Tay ga" : v.type === 0 ? "Xe số" : v.type === 2 ? "Côn tay" : v.type === 3 ? "Xe điện" : "Ô tô"}
                             </span>
                             <span className="bg-slate-900/80 text-white font-semibold text-[10px] px-2.5 py-1 rounded-full">
@@ -247,25 +247,25 @@ export default function StoreDetailPage() {
                         </div>
 
                         <div className="p-5 space-y-2.5">
-                          <h3 className="font-extrabold text-base text-slate-900 truncate group-hover:text-blue-600 transition-colors">
+                          <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 truncate group-hover:text-blue-600 transition-colors">
                             {v.name}
                           </h3>
-                          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
                             {v.specifications || "Xe đời mới, trang bị khóa thông minh Smartkey, cốp rộng chứa đồ, động cơ êm ái."}
                           </p>
                         </div>
                       </div>
 
-                      <div className="p-5 pt-0 flex items-center justify-between gap-3 border-t border-slate-100 mt-2 pt-4">
+                      <div className="p-5 pt-0 flex items-center justify-between gap-3 border-t border-slate-100 dark:border-slate-800 mt-2 pt-4">
                         <div>
-                          <div className="text-[10px] uppercase font-bold text-slate-400">Đơn giá</div>
-                          <div className="text-base font-black text-slate-900">
+                          <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-400">Đơn giá</div>
+                          <div className="text-base font-black text-slate-900 dark:text-white">
                             {Number(v.rentPrice).toLocaleString("vi-VN")} đ
-                            <span className="text-xs font-normal text-slate-500">/ngày</span>
+                            <span className="text-xs font-normal text-slate-500 dark:text-slate-400">/ngày</span>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1 text-xs font-bold text-blue-600 group-hover:translate-x-1 transition-transform">
+                        <div className="flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-transform">
                           <span>Xem chi tiết xe</span>
                           <span className="text-sm font-black">→</span>
                         </div>
@@ -279,28 +279,28 @@ export default function StoreDetailPage() {
         </div>
 
         {/* Customer Reviews Section */}
-        <div className="space-y-6 pt-4 border-t border-slate-200">
+        <div className="space-y-6 pt-4 border-t border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-black text-slate-900">
-                  Đánh Giá Từ Khách Hàng
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white">
+                  Đánh giá từ khách hàng
                 </h2>
-                <span className="bg-amber-50 text-amber-800 font-bold text-xs px-2.5 py-0.5 rounded-full border border-amber-200">
+                <span className="bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 font-bold text-xs px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800 whitespace-nowrap shrink-0">
                   ★ {rating} ({reviewCount} đánh giá)
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Điểm số được tổng hợp từ tất cả đánh giá của khách thuê các dòng xe thuộc nhà xe này.
               </p>
             </div>
           </div>
 
           {reviewsList.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-8 text-center text-slate-400">
-              <MessageSquare className="h-10 w-10 mx-auto text-slate-300 mb-2" />
-              <h4 className="text-sm font-bold text-slate-700">Chưa có đánh giá nào</h4>
-              <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-8 text-center text-slate-400">
+              <MessageSquare className="h-10 w-10 mx-auto text-slate-300 dark:text-slate-600 mb-2" />
+              <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200">Chưa có đánh giá nào</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
                 Nhà xe này hiện chưa có lượt đánh giá nào từ khách thuê. Hãy là người đầu tiên thuê xe và chia sẻ trải nghiệm của bạn!
               </p>
             </div>
@@ -319,16 +319,16 @@ export default function StoreDetailPage() {
                 return (
                   <div
                     key={rev.id}
-                    className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between space-y-3"
+                    className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between space-y-3"
                   >
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2.5">
-                          <div className="h-9 w-9 rounded-full bg-blue-100 text-blue-700 font-black text-xs flex items-center justify-center shrink-0">
+                          <div className="h-9 w-9 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 font-black text-xs flex items-center justify-center shrink-0">
                             {customerName.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <div className="text-xs font-bold text-slate-900">{customerName}</div>
+                            <div className="text-xs font-bold text-slate-900 dark:text-slate-100">{customerName}</div>
                             <div className="text-[10px] text-slate-400 flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
                               {createdDate}
@@ -344,7 +344,7 @@ export default function StoreDetailPage() {
                               className={`h-3.5 w-3.5 ${
                                 s <= rev.rateStar
                                   ? "fill-amber-400 text-amber-500"
-                                  : "text-slate-200"
+                                  : "text-slate-200 dark:text-slate-700"
                               }`}
                             />
                           ))}
@@ -352,14 +352,14 @@ export default function StoreDetailPage() {
                       </div>
 
                       {/* Comment */}
-                      <p className="text-xs text-slate-700 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60">
                         &quot;{rev.comment}&quot;
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                      <span className="font-medium text-slate-600">Đã thuê:</span>
-                      <span className="font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md truncate max-w-[200px]">
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                      <span className="font-medium text-slate-600 dark:text-slate-400">Đã thuê:</span>
+                      <span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2 py-0.5 rounded-md truncate max-w-[200px]">
                         {bookedModelName}
                       </span>
                     </div>
@@ -373,12 +373,11 @@ export default function StoreDetailPage() {
 
       {/* Floating Zalo Fast Action */}
       {store?.phoneContact && (
-        <div className="fixed bottom-6 right-6 z-40">
+        <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40">
           <ZaloChatButton
             phone={store.phoneContact}
             label="Chat Zalo nhà xe"
-            variant="pill"
-            size="lg"
+            variant="floating"
             className="shadow-2xl hover:scale-105"
           />
         </div>

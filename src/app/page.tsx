@@ -456,19 +456,19 @@ export default function HomePage() {
               {/* Trust & Guarantee points */}
               <motion.div
                 variants={heroItemVariants}
-                className="pt-2 flex flex-wrap items-center gap-6 text-xs text-slate-500 dark:text-slate-400"
+                className="pt-2 flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-slate-600 dark:text-slate-300"
               >
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>{t("trust_point_1", "100% Xe chính chủ đã kiểm tra")}</span>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="text-slate-700 dark:text-slate-300 font-medium">{t("trust_point_1", "100% Xe chính chủ đã kiểm tra")}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>{t("trust_point_2", "Giao nhận xe tận nơi linh hoạt")}</span>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="text-slate-700 dark:text-slate-300 font-medium">{t("trust_point_2", "Giao nhận xe tận nơi linh hoạt")}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>{t("trust_point_3", "Giá niêm yết không phụ phí ẩn")}</span>
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="text-slate-700 dark:text-slate-300 font-medium">{t("trust_point_3", "Giá niêm yết không phụ phí ẩn")}</span>
                 </div>
               </motion.div>
             </motion.div>

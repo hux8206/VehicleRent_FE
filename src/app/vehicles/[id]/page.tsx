@@ -635,12 +635,11 @@ export default function VehicleDetailPage() {
 
       {/* Floating Zalo Fast Action */}
       {model?.store?.phoneContact && (
-        <div className="fixed bottom-6 right-6 z-40">
+        <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-40">
           <ZaloChatButton
             phone={model.store.phoneContact}
             label="Chat Zalo nhà xe"
-            variant="pill"
-            size="lg"
+            variant="floating"
             className="shadow-2xl hover:scale-105"
           />
         </div>
