@@ -487,22 +487,22 @@ export default function CustomerBookingsPage() {
             />
           </div>
 
-          <div className="col-span-1 sm:col-span-1 lg:col-span-2">
+          <div className="col-span-1 sm:col-span-1 lg:col-span-2 min-w-0 w-full overflow-hidden">
             <Input
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="text-xs h-10 sm:h-11 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 w-full min-w-0 [color-scheme:light] dark:[color-scheme:dark]"
+              className="text-xs h-10 sm:h-11 rounded-xl bg-slate-50/50 border-slate-200 w-full max-w-full min-w-0 box-border"
               title={t("bookings_from_date", "Từ ngày đặt xe")}
             />
           </div>
 
-          <div className="col-span-1 sm:col-span-1 lg:col-span-2">
+          <div className="col-span-1 sm:col-span-1 lg:col-span-2 min-w-0 w-full overflow-hidden">
             <Input
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="text-xs h-10 sm:h-11 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 w-full min-w-0 [color-scheme:light] dark:[color-scheme:dark]"
+              className="text-xs h-10 sm:h-11 rounded-xl bg-slate-50/50 border-slate-200 w-full max-w-full min-w-0 box-border"
               title={t("bookings_to_date", "Đến ngày")}
             />
           </div>
@@ -703,14 +703,14 @@ export default function CustomerBookingsPage() {
                         {isCompleted && t("bookings_completed_hint", "Chuyến đi đã hoàn thành an toàn. Hãy để lại đánh giá cho nhà xe!")}
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                         {isPending && (
                           <>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleCancelBooking(b.id)}
-                              className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/60 h-8 rounded-lg cursor-pointer"
+                              className="text-xs text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50 h-8 rounded-lg cursor-pointer shrink-0"
                             >
                               {t("cancel_modal_close", "Hủy đơn")}
                             </Button>
@@ -719,7 +719,7 @@ export default function CustomerBookingsPage() {
                               variant="outline"
                               disabled={checkingBookingId === b.id}
                               onClick={() => handleCheckPaymentStatus(b.id)}
-                              className="border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 text-xs h-8 rounded-lg gap-1.5 cursor-pointer font-semibold"
+                              className="border-emerald-300 text-emerald-700 hover:bg-emerald-50 text-xs h-8 rounded-lg gap-1.5 cursor-pointer font-semibold shrink-0"
                             >
                               <RotateCcw className={`h-3.5 w-3.5 ${checkingBookingId === b.id ? "animate-spin" : ""}`} />
                               <span>{checkingBookingId === b.id ? t("bookings_btn_checking", "Đang đối soát...") : t("bookings_btn_check_payment", "Kiểm tra thanh toán")}</span>
@@ -727,7 +727,7 @@ export default function CustomerBookingsPage() {
                             <Button
                               size="sm"
                               onClick={() => handleOpenQr(b)}
-                              className="bg-amber-600 hover:bg-amber-700 text-white text-xs h-8 rounded-lg gap-1.5 cursor-pointer font-bold shadow-xs"
+                              className="bg-amber-600 hover:bg-amber-700 text-white text-xs h-8 rounded-lg gap-1.5 cursor-pointer font-bold shadow-xs shrink-0"
                             >
                               <QrCode className="h-3.5 w-3.5" /> {t("bookings_btn_pay_qr", "Quét VietQR")}
                             </Button>
@@ -737,7 +737,7 @@ export default function CustomerBookingsPage() {
                         {(b.status === 1 || b.status === 2) && (() => {
                           const policy = getRefundPolicyInfo(b);
                           return (
-                            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                               {/* Policy preview pill beside cancel button */}
                               <div
                                 className={`text-[11px] font-semibold border px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs ${policy.badgeColor}`}
@@ -756,7 +756,7 @@ export default function CustomerBookingsPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleOpenCancelModal(b)}
-                                className="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/60 h-8 rounded-lg cursor-pointer font-medium gap-1.5 shrink-0"
+                                className="text-xs text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50 h-8 rounded-lg cursor-pointer font-medium gap-1.5 shrink-0"
                               >
                                 <XCircle className="h-3.5 w-3.5" /> {t("bookings_btn_cancel", "Hủy đơn & Hoàn cọc")}
                               </Button>

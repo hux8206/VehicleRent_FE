@@ -515,7 +515,7 @@ export default function HomePage() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
                 {displayedVehicles.map((v) => {
                   const available = v.availableCount !== undefined ? v.availableCount : 3;
                   const isOutOfStock = available <= 0;
@@ -529,11 +529,11 @@ export default function HomePage() {
                       className="block h-full group outline-none"
                     >
                       <div
-                        className="h-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-card-hover hover:border-blue-500/50 dark:hover:border-blue-400/50 transition-all duration-200 flex flex-col justify-between overflow-hidden cursor-pointer"
+                        className="h-full bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-card-hover hover:border-blue-500/50 transition-all duration-200 flex flex-col justify-between overflow-hidden cursor-pointer"
                       >
                         <div>
                           {/* Vehicle Image Container */}
-                          <div className="relative h-52 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                          <div className="relative h-28 sm:h-48 w-full bg-slate-100 overflow-hidden">
                             <img
                               src={getVehicleCardImageUrl(v.images?.[0])}
                               alt={`Dòng xe ${v.brand ? v.brand + " " : ""}${v.name || "cho thuê tự lái"} tại ${v.store?.storeName || "nhà xe đối tác"}`}
@@ -545,11 +545,11 @@ export default function HomePage() {
                             />
 
                             {/* Category badge */}
-                            <div className="absolute top-3 left-3 flex gap-1.5">
-                              <span className="bg-white/95 text-slate-900 font-bold text-[11px] px-2.5 py-1 rounded-full shadow-xs">
+                            <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 flex gap-1 sm:gap-1.5">
+                              <span className="bg-white/95 text-slate-900 font-bold text-[9px] sm:text-[11px] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-xs">
                                 {typeLabels[v.type] || "Xe máy"}
                               </span>
-                              <span className="bg-slate-900/80 text-white font-semibold text-[11px] px-2.5 py-1 rounded-full">
+                              <span className="bg-slate-900/80 text-white font-semibold text-[9px] sm:text-[11px] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full">
                                 {v.brand}
                               </span>
                             </div>
@@ -563,10 +563,10 @@ export default function HomePage() {
                                 e.stopPropagation();
                                 toggleFavorite(v.id);
                               }}
-                              className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white/90 hover:bg-white text-slate-700 hover:text-red-500 hover:scale-110 active:scale-95 flex items-center justify-center shadow-xs transition-all z-10 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                              className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-white/90 hover:bg-white text-slate-700 hover:text-red-500 hover:scale-110 active:scale-95 flex items-center justify-center shadow-xs transition-all z-10 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                             >
                               <Heart
-                                className={`h-4 w-4 ${isFav ? "fill-red-500 text-red-500" : ""
+                                className={`h-3 w-3 sm:h-4 sm:w-4 ${isFav ? "fill-red-500 text-red-500" : ""
                                   }`}
                               />
                             </button>
@@ -581,74 +581,68 @@ export default function HomePage() {
                                 toggleCompare(v);
                               }}
                               title={isCompared ? "Đang chọn so sánh (bấm để hủy)" : "Thêm vào bảng so sánh"}
-                              className={`absolute top-3 right-12 h-8 w-8 rounded-full flex items-center justify-center shadow-xs transition-all z-10 cursor-pointer hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${isCompared
+                              className={`absolute top-1.5 right-8 sm:top-3 sm:right-12 h-6 w-6 sm:h-8 sm:w-8 rounded-full flex items-center justify-center shadow-xs transition-all z-10 cursor-pointer hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${isCompared
                                 ? "bg-blue-600 text-white font-bold ring-2 ring-blue-300 shadow-xs"
                                 : "bg-white/90 hover:bg-white text-slate-700 hover:text-blue-600"
                                 }`}
                             >
-                              <Scale className="h-4 w-4" />
+                              <Scale className="h-3 w-3 sm:h-4 sm:w-4" />
                             </button>
 
                             {/* Availability Pill */}
-                            <div className="absolute bottom-3 left-3">
+                            <div className="absolute bottom-1.5 left-1.5 sm:bottom-3 sm:left-3">
                               <span
-                                className={`text-[11px] font-bold px-2.5 py-1 rounded-full shadow-sm ${isOutOfStock
+                                className={`text-[9px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-xs ${isOutOfStock
                                   ? "bg-red-500 text-white"
                                   : available <= 1
                                     ? "bg-amber-500 text-white"
                                     : "bg-emerald-600 text-white"
                                   }`}
                               >
-                                {isOutOfStock ? "Đã hết xe" : `Sẵn sàng bàn giao (${available} xe)`}
+                                {isOutOfStock ? "Hết xe" : <><span className="sm:hidden">Còn {available} xe</span><span className="hidden sm:inline">Sẵn sàng bàn giao ({available} xe)</span></>}
                               </span>
                             </div>
                           </div>
 
                           {/* Card Content */}
-                          <div className="p-5 space-y-3">
+                          <div className="p-2.5 sm:p-5 space-y-1 sm:space-y-3">
                             {/* Title & Brand */}
                             <div>
-                              <div className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide">
+                              <div className="text-[10px] sm:text-[11px] font-bold text-blue-600 uppercase tracking-wide truncate">
                                 {v.brand}
                               </div>
-                              <h3 className="font-extrabold text-base text-slate-900 dark:text-white truncate mt-0.5 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                              <h3 className="font-semibold sm:font-extrabold text-xs sm:text-base text-slate-900 line-clamp-2 mt-0.5 group-hover:text-blue-600 transition-colors">
                                 {v.name}
                               </h3>
                             </div>
 
                             {/* Store Info & Province Badge & Rating */}
-                            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                              <div className="flex items-center gap-1.5 truncate pr-2">
-                                <Store className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-                                <span className="truncate font-medium text-slate-700 dark:text-slate-300">
+                            <div className="pt-1.5 sm:pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] sm:text-xs text-slate-500">
+                              <div className="flex items-center gap-1 sm:gap-1.5 truncate pr-1">
+                                <Store className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-slate-400 shrink-0" />
+                                <span className="text-[11px] sm:text-sm truncate font-medium text-slate-700">
                                   {v.store?.storeName || "Nhà xe đối tác"}
                                 </span>
-                                {v.store?.province && (
-                                  <span className="bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-blue-100 dark:border-blue-900 shrink-0">
-                                    {v.store.province}
-                                  </span>
-                                )}
                               </div>
-                              <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-bold shrink-0">
-                                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-500" />
+                              <div className="flex items-center gap-0.5 sm:gap-1 text-slate-700 font-bold shrink-0 text-[10px] sm:text-xs">
+                                <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-amber-400 text-amber-500" />
                                 <span>{v.avgRating || 5.0}</span>
-                                <span className="text-[10px] text-slate-400 font-normal">({v.reviewCount || 0})</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
                         {/* Card Footer: Price & Direct Details Link */}
-                        <div className="p-5 pt-0 flex items-center justify-between gap-3 border-t border-slate-100 dark:border-slate-800 mt-2 pt-4">
+                        <div className="p-2.5 sm:p-5 pt-0 sm:pt-0 flex items-center justify-between gap-1.5 sm:gap-3 border-t border-slate-100 mt-1 sm:mt-2 pt-2 sm:pt-4">
                           <div>
-                            <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">Giá thuê</div>
-                            <div className="text-base font-black text-slate-900 dark:text-white">
+                            <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400">Giá thuê</div>
+                            <div className="text-sm sm:text-lg font-bold sm:font-black text-slate-900">
                               {Number(v.rentPrice).toLocaleString("vi-VN")} đ
-                              <span className="text-xs font-normal text-slate-500 dark:text-slate-400">{t("per_day", "/ngày")}</span>
+                              <span className="text-[10px] sm:text-xs font-normal text-slate-500">{t("per_day", "/ngày")}</span>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-transform">
+                          <div className="hidden sm:inline-flex items-center gap-1 text-xs font-bold text-blue-600 group-hover:translate-x-1 transition-transform">
                             <span>{t("view_detail", "Xem chi tiết xe")}</span>
                             <span className="text-sm font-black">→</span>
                           </div>

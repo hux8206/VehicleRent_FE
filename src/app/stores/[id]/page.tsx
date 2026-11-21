@@ -214,7 +214,7 @@ export default function StoreDetailPage() {
               <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">Cửa hàng hiện chưa cập nhật dòng xe nào.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
               {vehicles.map((v) => {
                 const available = v.availableCount !== undefined ? v.availableCount : 3;
 
@@ -224,9 +224,9 @@ export default function StoreDetailPage() {
                     href={`/vehicles/${v.id}`}
                     className="block h-full group outline-none"
                   >
-                    <div className="h-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-xl hover:border-blue-400/50 transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer">
+                    <div className="h-full bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-xl hover:border-blue-400/50 transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer">
                       <div>
-                        <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                        <div className="relative h-28 sm:h-48 w-full bg-slate-100 overflow-hidden">
                           <img
                             src={getVehicleCardImageUrl(v.images?.[0])}
                             alt={`Dòng xe ${v.brand ? v.brand + " " : ""}${v.name || ""} tại ${store.storeName}`}
@@ -236,36 +236,36 @@ export default function StoreDetailPage() {
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                             loading="lazy"
                           />
-                          <div className="absolute top-3 left-3 flex gap-1.5">
-                            <span className="bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100 font-bold text-[10px] px-2.5 py-1 rounded-full shadow-xs">
+                          <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 flex gap-1 sm:gap-1.5">
+                            <span className="bg-white/95 text-slate-900 font-bold text-[9px] sm:text-[10px] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-xs">
                               {v.type === 1 ? "Tay ga" : v.type === 0 ? "Xe số" : v.type === 2 ? "Côn tay" : v.type === 3 ? "Xe điện" : "Ô tô"}
                             </span>
-                            <span className="bg-slate-900/80 text-white font-semibold text-[10px] px-2.5 py-1 rounded-full">
+                            <span className="bg-slate-900/80 text-white font-semibold text-[9px] sm:text-[10px] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full">
                               {v.brand}
                             </span>
                           </div>
                         </div>
 
-                        <div className="p-5 space-y-2.5">
-                          <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 truncate group-hover:text-blue-600 transition-colors">
+                        <div className="p-2.5 sm:p-5 space-y-1 sm:space-y-2.5">
+                          <h3 className="font-semibold sm:font-extrabold text-xs sm:text-base text-slate-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
                             {v.name}
                           </h3>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed hidden sm:block">
                             {v.specifications || "Xe đời mới, trang bị khóa thông minh Smartkey, cốp rộng chứa đồ, động cơ êm ái."}
                           </p>
                         </div>
                       </div>
 
-                      <div className="p-5 pt-0 flex items-center justify-between gap-3 border-t border-slate-100 dark:border-slate-800 mt-2 pt-4">
+                      <div className="p-2.5 sm:p-5 pt-0 sm:pt-0 flex items-center justify-between gap-1.5 sm:gap-3 border-t border-slate-100 mt-1 sm:mt-2 pt-2 sm:pt-4">
                         <div>
-                          <div className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-400">Đơn giá</div>
-                          <div className="text-base font-black text-slate-900 dark:text-white">
+                          <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400">Đơn giá</div>
+                          <div className="text-sm sm:text-lg font-bold sm:font-black text-slate-900">
                             {Number(v.rentPrice).toLocaleString("vi-VN")} đ
-                            <span className="text-xs font-normal text-slate-500 dark:text-slate-400">/ngày</span>
+                            <span className="text-[10px] sm:text-xs font-normal text-slate-500">/ngày</span>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 group-hover:translate-x-1 transition-transform">
+                        <div className="hidden sm:inline-flex items-center gap-1 text-xs font-bold text-blue-600 group-hover:translate-x-1 transition-transform">
                           <span>Xem chi tiết xe</span>
                           <span className="text-sm font-black">→</span>
                         </div>
