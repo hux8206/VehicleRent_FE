@@ -890,12 +890,12 @@ function PartnerBookingsContent() {
                               <div className="text-[11px] font-semibold shrink-0 flex items-center gap-1.5">
                                 {b.cancelType === 2 && (
                                   <Badge className="bg-amber-600 text-white text-[10px]">
-                                    Khách không đến (No-show)
+                                    Khách không đến
                                   </Badge>
                                 )}
                                 {b.cancelType === 3 && (
                                   <Badge className="bg-rose-700 text-white text-[10px]">
-                                    Cửa hàng tự hủy (Bồi thường 20%)
+                                    Cửa hàng tự hủy
                                   </Badge>
                                 )}
                                 {b.refundStatus === 1 ? (
@@ -978,7 +978,7 @@ function PartnerBookingsContent() {
                           className="border-slate-200 text-slate-700 hover:bg-slate-50 text-xs h-8 rounded-xl gap-1.5 shadow-2xs"
                         >
                           <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
-                          <span>{b.idCardFront ? "Xem CCCD (Đã lưu)" : "Quản lý / Chụp CCCD"}</span>
+                          <span>{b.idCardFront ? "Xem CCCD" : "Chụp CCCD"}</span>
                         </Button>
 
                         {isConfirmed && (
@@ -991,7 +991,7 @@ function PartnerBookingsContent() {
                               className="border-rose-200 text-rose-600 hover:bg-rose-50 text-xs h-8 rounded-xl gap-1.5 shadow-2xs font-semibold"
                             >
                               <XCircle className="h-3.5 w-3.5" />
-                              <span>Hủy đơn / No-show</span>
+                              <span>Hủy đơn</span>
                             </Button>
 
                             <Button
@@ -1521,7 +1521,7 @@ function PartnerBookingsContent() {
               <DialogHeader>
                 <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <XCircle className="h-5 w-5 text-rose-600" />
-                  <span>Xử lý Hủy đơn / Khách không đến</span>
+                  <span>Hủy đơn</span>
                 </DialogTitle>
                 <DialogDescription className="text-xs text-slate-500">
                   Mã đơn: <strong className="font-mono text-slate-900">{cancelModalBooking.bookingCode}</strong> • Khách: <strong>{cancelModalBooking.customer?.fullName || "Khách thuê"}</strong>
@@ -1540,7 +1540,7 @@ function PartnerBookingsContent() {
                         : "text-slate-600 hover:text-slate-900"
                     }`}
                   >
-                    Khách không đến (No-show)
+                    Khách không đến
                   </button>
                   <button
                     type="button"
@@ -1551,7 +1551,7 @@ function PartnerBookingsContent() {
                         : "text-slate-600 hover:text-slate-900"
                     }`}
                   >
-                    Cửa hàng hết xe (Tự hủy)
+                    Cửa hàng hết xe
                   </button>
                 </div>
 
@@ -1666,7 +1666,7 @@ function PartnerBookingsContent() {
                     disabled={isSubmittingCancel || isFullPayment || !isPastStart}
                     className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-xs"
                   >
-                    {isSubmittingCancel ? "Đang xử lý..." : "Xác nhận Khách Không Đến"}
+                    {isSubmittingCancel ? "Đang xử lý..." : "Khách không đến"}
                   </Button>
                 ) : (
                   <Button
@@ -1676,7 +1676,7 @@ function PartnerBookingsContent() {
                     disabled={isSubmittingCancel || !storeCancelReason.trim()}
                     className="bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-xs"
                   >
-                    {isSubmittingCancel ? "Đang hủy..." : "Xác nhận Hủy Đơn & Bồi Thường"}
+                    {isSubmittingCancel ? "Đang hủy..." : "Hủy đơn"}
                   </Button>
                 )}
               </DialogFooter>
@@ -1692,7 +1692,7 @@ function PartnerBookingsContent() {
             <DialogHeader>
               <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-blue-600" />
-                <span>Xác minh & Quản lý CCCD Khách Thuê</span>
+                <span>Ảnh CCCD</span>
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-500">
                 Mã đơn: <strong className="font-mono text-slate-900">{idCardModalBooking.bookingCode}</strong> • Khách: <strong>{idCardModalBooking.customer?.fullName || "Khách thuê"}</strong>
@@ -1823,7 +1823,7 @@ function PartnerBookingsContent() {
                   disabled={isSubmittingIdCard || !idCardFront || !idCardBack}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-xs"
                 >
-                  {isSubmittingIdCard ? "Đang lưu..." : "Lưu Xác Minh CCCD"}
+                  {isSubmittingIdCard ? "Đang lưu..." : "Lưu CCCD"}
                 </Button>
               )}
             </DialogFooter>

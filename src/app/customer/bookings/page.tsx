@@ -792,12 +792,12 @@ export default function CustomerBookingsPage() {
                               {b.disputeStatus === 1 ? (
                                 <div className="text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-2xs">
                                   <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-                                  <span>Đang đối soát: Báo nhà xe không có xe (Bảo lãnh hoàn 100% cọc + bồi thường 20%)</span>
+                                  <span>Đang đối soát sự cố nhà xe</span>
                                 </div>
                               ) : b.disputeStatus === 2 ? (
                                 <div className="text-[11px] font-bold bg-emerald-50 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-2xs">
                                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                                  <span>Admin đã duyệt khiếu nại: Hoàn 100% cọc + bồi thường 20%</span>
+                                  <span>Đã duyệt khiếu nại và hoàn cọc</span>
                                 </div>
                               ) : (
                                 b.status === 1 && (
@@ -806,7 +806,7 @@ export default function CustomerBookingsPage() {
                                     size="sm"
                                     onClick={() => handleOpenReportIssueModal(b)}
                                     disabled={!canReportIssue}
-                                    title={canReportIssue ? "Báo sự cố nhà xe không có xe để được bảo lãnh hoàn 100% cọc + bồi thường 20%" : "Nút chỉ mở khi còn dưới 2 giờ tới giờ nhận xe hoặc đã quá giờ hẹn"}
+                                    title={canReportIssue ? "Báo sự cố nhà xe không có xe để được bảo lãnh hoàn cọc" : "Nút chỉ mở khi còn dưới 2 giờ tới giờ nhận xe hoặc đã quá giờ hẹn"}
                                     className={`text-xs h-8 rounded-lg cursor-pointer font-bold gap-1.5 shrink-0 ${
                                       canReportIssue
                                         ? "bg-rose-600 hover:bg-rose-700 text-white shadow-2xs"
@@ -814,7 +814,7 @@ export default function CustomerBookingsPage() {
                                     }`}
                                   >
                                     <AlertTriangle className="h-3.5 w-3.5" />
-                                    <span>Báo sự cố: Nhà xe không có xe</span>
+                                    <span>Báo sự cố</span>
                                   </Button>
                                 )
                               )}
@@ -839,7 +839,7 @@ export default function CustomerBookingsPage() {
                                 onClick={() => handleOpenCancelModal(b)}
                                 className="text-xs text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50 h-8 rounded-lg cursor-pointer font-medium gap-1.5 shrink-0"
                               >
-                                <XCircle className="h-3.5 w-3.5" /> {t("bookings_btn_cancel", "Hủy đơn & Hoàn cọc")}
+                                <XCircle className="h-3.5 w-3.5" /> {t("bookings_btn_cancel", "Hủy đơn")}
                               </Button>
                             </div>
                           );
@@ -1323,7 +1323,7 @@ export default function CustomerBookingsPage() {
               <DialogHeader>
                 <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-rose-600" />
-                  <span>Báo Cáo Sự Cố: Nhà Xe Không Có Xe Giao</span>
+                  <span>Báo sự cố</span>
                 </DialogTitle>
                 <DialogDescription className="text-xs text-slate-500">
                   Mã đơn: <strong className="font-mono text-slate-900">{reportIssueBooking.bookingCode}</strong> • Nhà xe: <strong>{reportIssueBooking.store?.storeName || "Cửa hàng"}</strong>
@@ -1419,7 +1419,7 @@ export default function CustomerBookingsPage() {
                     disabled={isSubmittingIssue || !issueReason.trim() || !issueAccountNumber.trim()}
                     className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs"
                   >
-                    {isSubmittingIssue ? "Đang gửi..." : "Gửi Báo Cáo Sự Cố"}
+                    {isSubmittingIssue ? "Đang gửi..." : "Báo sự cố"}
                   </Button>
                 </DialogFooter>
               </form>
