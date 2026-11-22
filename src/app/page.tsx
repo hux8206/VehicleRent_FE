@@ -35,6 +35,7 @@ import {
   VehicleCompareModal,
   FloatingCompareBar,
 } from "@/components/customer/vehicle-compare-modal";
+import { StoreReputationBadge } from "@/components/common/store-reputation-badge";
 
 // ─── Default Vehicle Image Fallback ──────────────────────────────────
 const DEFAULT_VEHICLE_IMG = "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80";
@@ -623,6 +624,9 @@ export default function HomePage() {
                                 <span className="text-[11px] sm:text-sm truncate font-medium text-slate-700">
                                   {v.store?.storeName || "Nhà xe đối tác"}
                                 </span>
+                                {v.store?.reputationScore !== undefined && (
+                                  <StoreReputationBadge score={v.store.reputationScore} showText={false} className="shrink-0" />
+                                )}
                               </div>
                               <div className="flex items-center gap-0.5 sm:gap-1 text-slate-700 font-bold shrink-0 text-[10px] sm:text-xs">
                                 <Star className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-amber-400 text-amber-500" />

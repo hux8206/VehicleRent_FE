@@ -202,7 +202,7 @@ export default function TermsOfServicePage() {
               <li><strong>Hủy trước ≥ 24h nhận xe:</strong> Hoàn 100% tiền cọc.</li>
               <li><strong>Hủy từ 6h - 24h nhận xe:</strong> Hoàn 100% cọc nếu đơn vừa đặt dưới 30 phút; sau 30 phút chỉ hoàn 50% cọc (50% chuyển cho Chủ xe).</li>
               <li><strong>Hủy cận giờ &lt; 6h nhận xe:</strong> Hoàn 50% cọc nếu đơn vừa đặt dưới 30 phút; sau 30 phút mất 100% cọc (không hoàn tiền).</li>
-              <li className="text-emerald-700 font-semibold"><strong>Lỗi do Đối tác không đáp ứng được xe:</strong> Khách hàng được bảo lãnh hoàn trả 150% tiền cọc (gồm 100% tiền cọc gốc đã thanh toán + 50% tiền bồi thường hợp đồng do Đối tác chịu trách nhiệm chi trả).</li>
+              <li className="text-emerald-700 font-semibold"><strong>Lỗi do Đối tác không có xe giao:</strong> Khách hàng được bảo lãnh hoàn trả 100% tiền cọc gốc + bồi thường 20% tiền cọc (tối thiểu 50.000đ) do Đối tác chịu trách nhiệm chi trả.</li>
               <li><strong>Đơn tại quầy (Walk-in):</strong> Tiền cọc (nếu có) được giải quyết hoàn trả theo thỏa thuận trực tiếp giữa Khách hàng và Chủ xe.</li>
             </ul>
             <p className="text-xs text-slate-500">
@@ -241,7 +241,7 @@ export default function TermsOfServicePage() {
               <div className="p-3.5 rounded-xl bg-rose-50/70 border border-rose-200 flex gap-2.5 items-start text-rose-950">
                 <span className="font-bold text-rose-600 shrink-0 mt-0.5">8.3.</span>
                 <div>
-                  <strong>Trách nhiệm bàn giao xe & Chế tài bồi hoàn 150% tiền cọc:</strong> Đối tác có nghĩa vụ chuẩn bị phương tiện đúng hẹn, đảm bảo an toàn kỹ thuật theo đúng thỏa thuận đặt xe. Trường hợp Đối tác tự ý hủy đơn, không có xe giao hoặc không đáp ứng được đơn đã cọc thành công, Đối tác có trách nhiệm <strong>bồi hoàn 150% tiền cọc cho khách hàng</strong> (gồm 100% tiền cọc gốc và 50% tiền phạt bồi thường vi phạm hợp đồng giữ xe do hệ thống tự động khấu trừ vào Ví đối tác hoặc truy thu theo quy chế hoạt động của Sàn).
+                  <strong>Trách nhiệm bàn giao xe & Chế tài bồi hoàn khi không có xe giao:</strong> Đối tác có nghĩa vụ chuẩn bị phương tiện đúng hẹn, đảm bảo an toàn kỹ thuật theo đúng thỏa thuận đặt xe. Trường hợp Đối tác tự ý hủy đơn, không có xe giao hoặc không đáp ứng được đơn đã cọc thành công, Đối tác có trách nhiệm <strong>hoàn 100% cọc + bồi thường 20% tiền cọc (tối thiểu 50.000đ) cho khách hàng</strong> và bị trừ điểm uy tín (được xem xét miễn phạt nếu chứng minh được sự cố bất khả kháng với Quản trị viên). Đối với trường hợp khách không đến nhận xe sau giờ hẹn (No-show), Đối tác được quyền giải phóng xe ngay và giữ trọn tiền cọc theo quy định.
                 </div>
               </div>
             </div>

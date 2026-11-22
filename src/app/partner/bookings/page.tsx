@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   Dialog,
@@ -36,6 +37,10 @@ import {
   RotateCcw,
   PlusCircle,
   Car,
+  Camera,
+  Upload,
+  AlertTriangle,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format24hDateTime } from "@/components/common/datetime-24h-picker";
@@ -83,6 +88,121 @@ function PartnerBookingsContent() {
   const [walkInNote, setWalkInNote] = useState("");
   const [walkInHandoverNow, setWalkInHandoverNow] = useState(true);
   const [isSubmittingWalkIn, setIsSubmittingWalkIn] = useState(false);
+
+  // Cancel / No-show modal state
+  const [cancelModalBooking, setCancelModalBooking] = useState<Booking | null>(null);
+  const [cancelActionType, setCancelActionType] = useState<"noshow" | "store_cancel">("noshow");
+  const [storeCancelReason, setStoreCancelReason] = useState("");
+  const [isForceMajeure, setIsForceMajeure] = useState(false);
+  const [forceMajeureProof, setForceMajeureProof] = useState("");
+  const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
+
+  // ID Card modal state (Chuẩn Nghị định 13)
+  const [idCardModalBooking, setIdCardModalBooking] = useState<Booking | null>(null);
+  const [idCardFront, setIdCardFront] = useState("");
+  const [idCardBack, setIdCardBack] = useState("");
+  const [isUploadingIdFront, setIsUploadingIdFront] = useState(false);
+  const [isUploadingIdBack, setIsUploadingIdBack] = useState(false);
+  const [isSubmittingIdCard, setIsSubmittingIdCard] = useState(false);
+  const [idCardDetails, setIdCardDetails] = useState<{ isDeleted?: boolean; message?: string; idCardCapturedAt?: string } | null>(null);
+  const [isLoadingIdCard, setIsLoadingIdCard] = useState(false);
+
+  const handleOpenCancelModal = (b: Booking) => {
+    setCancelModalBooking(b);
+    setCancelActionType("noshow");
+    setStoreCancelReason("");
+    setIsForceMajeure(false);
+    setForceMajeureProof("");
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!cancelModalBooking) return;
+    setIsSubmittingCancel(true);
+    try {
+      if (cancelActionType === "noshow") {
+        await api.partner.noShow(cancelModalBooking.id);
+        toast.success("Đã ghi nhận khách không đến (No-show). Xe đã được giải phóng và cọc được giữ cho cửa hàng.");
+      } else {
+        if (!storeCancelReason.trim()) {
+          toast.error("Vui lòng nhập lý do cửa hàng không có xe giao.");
+          setIsSubmittingCancel(false);
+          return;
+        }
+        await api.partner.cancelByStore(cancelModalBooking.id, {
+          reason: storeCancelReason.trim(),
+          isForceMajeure,
+          forceMajeureProof: forceMajeureProof.trim() || undefined,
+        });
+        toast.success("Đã hủy đơn thành công. Hệ thống đã tiến hành hoàn 100% cọc + bồi thường 20% cho khách hàng.");
+      }
+      setCancelModalBooking(null);
+      await fetchBookings(activeTab, true);
+    } catch (err: any) {
+      toast.error(err.message || "Thao tác thất bại!");
+    } finally {
+      setIsSubmittingCancel(false);
+    }
+  };
+
+  const handleOpenIdCardModal = async (b: Booking) => {
+    setIdCardModalBooking(b);
+    setIdCardFront(b.idCardFront || "");
+    setIdCardBack(b.idCardBack || "");
+    setIdCardDetails(null);
+    setIsLoadingIdCard(true);
+    try {
+      const res = await api.partner.getIdCard(b.id);
+      setIdCardDetails(res);
+      if (res.idCardFront) setIdCardFront(res.idCardFront);
+      if (res.idCardBack) setIdCardBack(res.idCardBack);
+    } catch {
+      // fallback
+    } finally {
+      setIsLoadingIdCard(false);
+    }
+  };
+
+  const handleUploadIdCard = async (e: React.ChangeEvent<HTMLInputElement>, side: "front" | "back") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (side === "front") setIsUploadingIdFront(true);
+    else setIsUploadingIdBack(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "id_cards");
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Tải ảnh thất bại");
+      if (side === "front") setIdCardFront(data.url);
+      else setIdCardBack(data.url);
+      toast.success(`Đã tải lên ảnh CCCD mặt ${side === "front" ? "trước" : "sau"}!`);
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi tải ảnh!");
+    } finally {
+      if (side === "front") setIsUploadingIdFront(false);
+      else setIsUploadingIdBack(false);
+    }
+  };
+
+  const handleSaveIdCard = async () => {
+    if (!idCardModalBooking) return;
+    if (!idCardFront || !idCardBack) {
+      toast.error("Vui lòng tải lên đầy đủ ảnh CCCD cả 2 mặt trước và sau!");
+      return;
+    }
+    setIsSubmittingIdCard(true);
+    try {
+      await api.partner.saveIdCard(idCardModalBooking.id, { idCardFront, idCardBack });
+      toast.success("Đã lưu ảnh CCCD xác minh thành công (Chuẩn Nghị định 13/2023/NĐ-CP)!");
+      setIdCardModalBooking(null);
+      await fetchBookings(activeTab, true);
+    } catch (err: any) {
+      toast.error(err.message || "Lưu ảnh CCCD thất bại!");
+    } finally {
+      setIsSubmittingIdCard(false);
+    }
+  };
 
   const fetchBookings = async (status?: number, silent = false) => {
     if (!silent) setIsLoading(true);
@@ -758,29 +878,60 @@ function PartnerBookingsContent() {
 
                         {/* Cancellation & Refund Details - Tinh gọn 1 hộp súc tích */}
                         {isCancelled && (
-                          <div className="mt-2.5 px-3.5 py-2.5 bg-rose-50/80 border border-rose-200 rounded-xl text-xs flex flex-wrap items-center justify-between gap-2 text-rose-900">
-                            <div className="flex flex-wrap items-center gap-1.5 font-medium">
-                              <XCircle className="h-4 w-4 text-rose-600 shrink-0" />
-                              <span>Lý do hủy: <strong className="font-semibold text-slate-900">{b.cancelReason || "Khách hủy đơn"}</strong></span>
-                              {b.cancelTime && (
-                                <span className="text-slate-500 text-[11px]">({format24hDateTime(b.cancelTime)})</span>
-                              )}
+                          <div className="mt-2.5 px-3.5 py-2.5 bg-rose-50/80 border border-rose-200 rounded-xl text-xs space-y-2 text-rose-900">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex flex-wrap items-center gap-1.5 font-medium">
+                                <XCircle className="h-4 w-4 text-rose-600 shrink-0" />
+                                <span>Lý do hủy: <strong className="font-semibold text-slate-900">{b.cancelReason || "Khách hủy đơn"}</strong></span>
+                                {b.cancelTime && (
+                                  <span className="text-slate-500 text-[11px]">({format24hDateTime(b.cancelTime)})</span>
+                                )}
+                              </div>
+                              <div className="text-[11px] font-semibold shrink-0 flex items-center gap-1.5">
+                                {b.cancelType === 2 && (
+                                  <Badge className="bg-amber-600 text-white text-[10px]">
+                                    Khách không đến (No-show)
+                                  </Badge>
+                                )}
+                                {b.cancelType === 3 && (
+                                  <Badge className="bg-rose-700 text-white text-[10px]">
+                                    Cửa hàng tự hủy (Bồi thường 20%)
+                                  </Badge>
+                                )}
+                                {b.refundStatus === 1 ? (
+                                  <Badge className="bg-emerald-600 text-white gap-1 text-[10px]">
+                                    <CheckCircle2 className="h-3 w-3" /> Đã hoàn cọc ({Number(b.refundAmount || 0).toLocaleString("vi-VN")} đ)
+                                  </Badge>
+                                ) : b.refundStatus === 2 ? (
+                                  <Badge className="bg-rose-700 text-white gap-1 text-[10px]">
+                                    <ShieldCheck className="h-3 w-3" /> Nhà xe giữ cọc ({Number(b.depositAmount || 0).toLocaleString("vi-VN")} đ)
+                                  </Badge>
+                                ) : (
+                                  <Badge className="bg-amber-500 text-white gap-1 text-[10px]">
+                                    <Clock className="h-3 w-3" /> Chờ xử lý hoàn cọc ({Number(b.refundAmount || 0).toLocaleString("vi-VN")} đ)
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
-                            <div className="text-[11px] font-semibold shrink-0">
-                              {b.refundStatus === 1 ? (
-                                <Badge className="bg-emerald-600 text-white gap-1 text-[10px]">
-                                  <CheckCircle2 className="h-3 w-3" /> Đã hoàn cọc ({Number(b.refundAmount || 0).toLocaleString("vi-VN")} đ)
-                                </Badge>
-                              ) : b.refundStatus === 2 ? (
-                                <Badge className="bg-rose-700 text-white gap-1 text-[10px]">
-                                  <ShieldCheck className="h-3 w-3" /> Nhà xe giữ cọc ({Number(b.depositAmount || 0).toLocaleString("vi-VN")} đ)
-                                </Badge>
-                              ) : (
-                                <Badge className="bg-amber-500 text-white gap-1 text-[10px]">
-                                  <Clock className="h-3 w-3" /> Chờ xử lý hoàn cọc
-                                </Badge>
-                              )}
+
+                            {Number(b.compensationAmount) > 0 && (
+                              <div className="text-[11px] font-semibold text-rose-800 bg-white/90 px-2.5 py-1 rounded-lg border border-rose-200 inline-block">
+                                💸 Tiền bồi thường đã trừ ví đối tác: +{Number(b.compensationAmount).toLocaleString("vi-VN")} đ
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Dispute status banner */}
+                        {b.disputeStatus === 1 && (
+                          <div className="mt-2.5 px-3.5 py-2 bg-amber-50 border border-amber-300 rounded-xl text-xs flex items-center justify-between gap-2 text-amber-950">
+                            <div className="flex items-center gap-1.5">
+                              <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                              <span>Khách báo sự cố: <strong>&ldquo;{b.disputeReason || "Không có xe giao"}&rdquo;</strong></span>
                             </div>
+                            <Badge className="bg-amber-600 text-white text-[10px] shrink-0">
+                              Đang chờ Admin đối soát
+                            </Badge>
                           </div>
                         )}
                       </div>
@@ -808,37 +959,62 @@ function PartnerBookingsContent() {
                       </div>
                     </div>
 
-                    {/* Actions Bar - Chỉ hiển thị khi cần thao tác */}
-                    {(isConfirmed || isActive || isWaiting) && (
-                      <div className="border-t pt-3 flex flex-wrap items-center justify-between gap-3">
-                        <div className="text-[11px] text-slate-500">
-                          {isWaiting && "Đơn tự động duyệt khi đối tác nạp đủ tiền bù hoa hồng sàn."}
-                          {isConfirmed && "Sẵn sàng bàn giao xe khi khách tới nhận."}
-                        </div>
+                    {/* Actions Bar - Thao tác bàn giao, hủy, quản lý CCCD */}
+                    <div className="border-t pt-3 flex flex-wrap items-center justify-between gap-3">
+                      <div className="text-[11px] text-slate-500">
+                        {isWaiting && "Đơn tự động duyệt khi đối tác nạp đủ tiền bù hoa hồng sàn."}
+                        {isConfirmed && "Sẵn sàng bàn giao xe hoặc quản lý CCCD khi khách tới."}
+                        {isActive && "Khách đang sử dụng xe."}
+                        {isCompleted && "Đơn đã hoàn tất."}
+                      </div>
 
-                        <div className="flex items-center gap-2">
-                          {isConfirmed && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {/* Nút Quản lý CCCD theo Nghị định 13 */}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenIdCardModal(b)}
+                          className="border-slate-200 text-slate-700 hover:bg-slate-50 text-xs h-8 rounded-xl gap-1.5 shadow-2xs"
+                        >
+                          <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+                          <span>{b.idCardFront ? "Xem CCCD (Đã lưu)" : "Quản lý / Chụp CCCD"}</span>
+                        </Button>
+
+                        {isConfirmed && (
+                          <>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenCancelModal(b)}
+                              className="border-rose-200 text-rose-600 hover:bg-rose-50 text-xs h-8 rounded-xl gap-1.5 shadow-2xs font-semibold"
+                            >
+                              <XCircle className="h-3.5 w-3.5" />
+                              <span>Hủy đơn / No-show</span>
+                            </Button>
+
                             <Button
                               size="sm"
                               onClick={() => handleOpenHandover(b)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 rounded-xl gap-1.5"
+                              className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-8 rounded-xl gap-1.5 font-bold shadow-xs"
                             >
                               <Bike className="h-3.5 w-3.5" /> Bàn giao xe cho khách
                             </Button>
-                          )}
+                          </>
+                        )}
 
-                          {isActive && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleCompleteRental(b.id)}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 rounded-xl gap-1.5"
-                            >
-                              <CheckCircle2 className="h-3.5 w-3.5" /> Xác nhận nhận lại xe
-                            </Button>
-                          )}
-                        </div>
+                        {isActive && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleCompleteRental(b.id)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 rounded-xl gap-1.5 font-bold shadow-xs"
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5" /> Xác nhận nhận lại xe
+                          </Button>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -1329,6 +1505,331 @@ function PartnerBookingsContent() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Modal Hủy Đơn / Khách Không Đến (No-show) */}
+      {cancelModalBooking && (() => {
+        const isFullPayment = Number(cancelModalBooking.depositAmount) >= Number(cancelModalBooking.rentAmount);
+        const now = new Date();
+        const startTime = new Date(cancelModalBooking.startTime);
+        const isPastStart = now >= startTime;
+        const depositAmt = Number(cancelModalBooking.depositAmount);
+        const estCompensation = depositAmt > 0 ? Math.max(50000, Math.round(depositAmt * 0.2)) : 0;
+
+        return (
+          <Dialog open={!!cancelModalBooking} onOpenChange={() => setCancelModalBooking(null)}>
+            <DialogContent className="max-w-md rounded-2xl p-6 bg-white border border-slate-200">
+              <DialogHeader>
+                <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <XCircle className="h-5 w-5 text-rose-600" />
+                  <span>Xử lý Hủy đơn / Khách không đến</span>
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-500">
+                  Mã đơn: <strong className="font-mono text-slate-900">{cancelModalBooking.bookingCode}</strong> • Khách: <strong>{cancelModalBooking.customer?.fullName || "Khách thuê"}</strong>
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-2">
+                {/* 2 Tabs: No-show vs Store Cancel */}
+                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setCancelActionType("noshow")}
+                    className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                      cancelActionType === "noshow"
+                        ? "bg-white text-slate-900 shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Khách không đến (No-show)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCancelActionType("store_cancel")}
+                    className={`py-2 text-xs font-bold rounded-lg transition-all ${
+                      cancelActionType === "store_cancel"
+                        ? "bg-white text-rose-700 shadow-2xs"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Cửa hàng hết xe (Tự hủy)
+                  </button>
+                </div>
+
+                {cancelActionType === "noshow" ? (
+                  <div className="space-y-3 text-xs">
+                    {isFullPayment ? (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 space-y-1">
+                        <div className="font-bold flex items-center gap-1.5 text-red-900">
+                          <AlertCircle className="h-4 w-4 shrink-0" />
+                          <span>Không áp dụng No-show cho đơn trả 100%</span>
+                        </div>
+                        <p className="text-[11px] leading-relaxed">
+                          Đơn này khách đã thanh toán 100% tiền thuê. Theo quy định sàn, bạn bắt buộc phải giữ xe cho khách trong suốt toàn bộ kỳ thuê.
+                        </p>
+                      </div>
+                    ) : !isPastStart ? (
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 space-y-1">
+                        <div className="font-bold flex items-center gap-1.5 text-amber-950">
+                          <Clock className="h-4 w-4 shrink-0 text-amber-600" />
+                          <span>Chưa tới giờ hẹn nhận xe</span>
+                        </div>
+                        <p className="text-[11px] leading-relaxed">
+                          Giờ hẹn nhận xe là <strong>{format24hDateTime(cancelModalBooking.startTime)}</strong>. Bạn chỉ được phép báo No-show sau khi đã quá giờ hẹn nhận xe mà khách không đến.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 space-y-2">
+                        <div className="font-bold flex items-center gap-1.5 text-emerald-950">
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                          <span>Đủ điều kiện ghi nhận No-show</span>
+                        </div>
+                        <ul className="text-[11px] list-disc list-inside space-y-1 text-emerald-800">
+                          <li>Xe vật lý sẽ được <strong>giải phóng ngay về kho</strong> để đón khách vãng lai.</li>
+                          <li>Tiền cọc ({depositAmt.toLocaleString("vi-VN")} đ) được <strong>giữ cho cửa hàng</strong>.</li>
+                          <li>Cửa hàng <strong>không bị trừ điểm uy tín</strong>.</li>
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-3 text-xs">
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 space-y-1.5">
+                      <div className="font-bold flex items-center gap-1.5 text-rose-950">
+                        <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600" />
+                        <span>Chính sách bồi thường khách thuê</span>
+                      </div>
+                      <p className="text-[11px] leading-relaxed">
+                        Cửa hàng tự hủy do không có xe sẽ bị hoàn trả <strong>100% tiền cọc ({depositAmt.toLocaleString("vi-VN")} đ)</strong> + bồi thường <strong>20% tiền cọc ({estCompensation.toLocaleString("vi-VN")} đ)</strong> trừ vào ví đối tác và bị trừ <strong>10 điểm uy tín</strong>.
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-xs font-semibold text-slate-800">
+                        Lý do cửa hàng không có xe giao <span className="text-red-500">*</span>
+                      </Label>
+                      <Textarea
+                        placeholder="Nêu rõ lý do: xe đang bảo dưỡng đột xuất, khách trước chưa trả xe,..."
+                        value={storeCancelReason}
+                        onChange={(e) => setStoreCancelReason(e.target.value)}
+                        className="text-xs rounded-xl"
+                        rows={2}
+                      />
+                    </div>
+
+                    <div className="pt-1">
+                      <label className="flex items-start gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isForceMajeure}
+                          onChange={(e) => setIsForceMajeure(e.target.checked)}
+                          className="mt-0.5 rounded border-slate-300 text-rose-600 focus:ring-rose-500"
+                        />
+                        <span className="text-[11px] text-slate-700">
+                          Đây là <strong>sự cố bất khả kháng</strong> (tai nạn đột xuất, thiên tai, hỏng hóc nghiêm trọng,... đính kèm chứng từ để Admin miễn phạt).
+                        </span>
+                      </label>
+                    </div>
+
+                    {isForceMajeure && (
+                      <div className="space-y-1">
+                        <Label className="text-xs font-semibold text-slate-700">
+                          Giải trình / Link ảnh chứng từ bất khả kháng
+                        </Label>
+                        <Input
+                          placeholder="Link ảnh biên bản va quẹt, giấy sửa chữa xe khẩn cấp..."
+                          value={forceMajeureProof}
+                          onChange={(e) => setForceMajeureProof(e.target.value)}
+                          className="h-9 text-xs rounded-xl"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <DialogFooter className="gap-2 sm:gap-0 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCancelModalBooking(null)}
+                  disabled={isSubmittingCancel}
+                  className="rounded-xl"
+                >
+                  Đóng
+                </Button>
+                {cancelActionType === "noshow" ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleConfirmCancel}
+                    disabled={isSubmittingCancel || isFullPayment || !isPastStart}
+                    className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-xs"
+                  >
+                    {isSubmittingCancel ? "Đang xử lý..." : "Xác nhận Khách Không Đến"}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleConfirmCancel}
+                    disabled={isSubmittingCancel || !storeCancelReason.trim()}
+                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-xs"
+                  >
+                    {isSubmittingCancel ? "Đang hủy..." : "Xác nhận Hủy Đơn & Bồi Thường"}
+                  </Button>
+                )}
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
+
+      {/* Modal Quản Lý / Chụp Ảnh CCCD (Chuẩn Nghị Định 13/2023/NĐ-CP) */}
+      {idCardModalBooking && (
+        <Dialog open={!!idCardModalBooking} onOpenChange={() => setIdCardModalBooking(null)}>
+          <DialogContent className="max-w-lg rounded-2xl p-6 bg-white border border-slate-200">
+            <DialogHeader>
+              <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-blue-600" />
+                <span>Xác minh & Quản lý CCCD Khách Thuê</span>
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-500">
+                Mã đơn: <strong className="font-mono text-slate-900">{idCardModalBooking.bookingCode}</strong> • Khách: <strong>{idCardModalBooking.customer?.fullName || "Khách thuê"}</strong>
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              {/* Nghị định 13 Banner */}
+              <div className="p-3 bg-blue-50/80 border border-blue-200 rounded-xl text-xs space-y-1 text-blue-950">
+                <div className="font-bold flex items-center gap-1.5 text-blue-900">
+                  <ShieldCheck className="h-4 w-4 shrink-0 text-blue-600" />
+                  <span>Tuân thủ Nghị định 13/2023/NĐ-CP về Bảo vệ dữ liệu cá nhân</span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-blue-800">
+                  Ảnh CCCD được mã hóa và lưu trữ an toàn. Chỉ <strong>chủ cửa hàng đơn này</strong> và <strong>Quản trị viên</strong> mới có quyền truy cập. Hệ thống sẽ <strong>tự động xóa vĩnh viễn</strong> sau 30 ngày kể từ khi hoàn tất chuyến đi.
+                </p>
+              </div>
+
+              {idCardDetails?.isDeleted ? (
+                <div className="p-4 bg-slate-100 border border-slate-200 rounded-xl text-center text-xs text-slate-600 space-y-1">
+                  <AlertCircle className="h-6 w-6 text-slate-400 mx-auto" />
+                  <p className="font-bold text-slate-800">Ảnh CCCD đã được tự động xóa</p>
+                  <p className="text-[11px] text-slate-500">{idCardDetails.message}</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* CCCD Mặt Trước */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold text-slate-800 block">
+                      CCCD Mặt trước <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative h-36 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 overflow-hidden flex flex-col items-center justify-center p-2 text-center group">
+                      {idCardFront ? (
+                        <>
+                          <img src={idCardFront} alt="CCCD mặt trước" className="w-full h-full object-cover rounded-lg" />
+                          <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 text-white text-xs font-semibold cursor-pointer transition-opacity">
+                            <Camera className="h-4 w-4" /> Thay ảnh
+                            <input
+                              type="file"
+                              accept="image/*"
+                              capture="environment"
+                              className="hidden"
+                              onChange={(e) => handleUploadIdCard(e, "front")}
+                            />
+                          </label>
+                        </>
+                      ) : (
+                        <label className="cursor-pointer flex flex-col items-center justify-center p-2 w-full h-full">
+                          {isUploadingIdFront ? (
+                            <Loader2 className="h-6 w-6 animate-spin text-blue-600 mb-1" />
+                          ) : (
+                            <Camera className="h-6 w-6 text-slate-400 mb-1" />
+                          )}
+                          <span className="text-xs font-bold text-slate-700">Chụp / Tải mặt trước</span>
+                          <span className="text-[10px] text-slate-400 mt-0.5">JPG, PNG (Tối đa 5MB)</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            onChange={(e) => handleUploadIdCard(e, "front")}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* CCCD Mặt Sau */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold text-slate-800 block">
+                      CCCD Mặt sau <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative h-36 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 overflow-hidden flex flex-col items-center justify-center p-2 text-center group">
+                      {idCardBack ? (
+                        <>
+                          <img src={idCardBack} alt="CCCD mặt sau" className="w-full h-full object-cover rounded-lg" />
+                          <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 text-white text-xs font-semibold cursor-pointer transition-opacity">
+                            <Camera className="h-4 w-4" /> Thay ảnh
+                            <input
+                              type="file"
+                              accept="image/*"
+                              capture="environment"
+                              className="hidden"
+                              onChange={(e) => handleUploadIdCard(e, "back")}
+                            />
+                          </label>
+                        </>
+                      ) : (
+                        <label className="cursor-pointer flex flex-col items-center justify-center p-2 w-full h-full">
+                          {isUploadingIdBack ? (
+                            <Loader2 className="h-6 w-6 animate-spin text-blue-600 mb-1" />
+                          ) : (
+                            <Camera className="h-6 w-6 text-slate-400 mb-1" />
+                          )}
+                          <span className="text-xs font-bold text-slate-700">Chụp / Tải mặt sau</span>
+                          <span className="text-[10px] text-slate-400 mt-0.5">JPG, PNG (Tối đa 5MB)</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            onChange={(e) => handleUploadIdCard(e, "back")}
+                          />
+                        </label>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIdCardModalBooking(null)}
+                disabled={isSubmittingIdCard}
+                className="rounded-xl"
+              >
+                Đóng
+              </Button>
+              {!idCardDetails?.isDeleted && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleSaveIdCard}
+                  disabled={isSubmittingIdCard || !idCardFront || !idCardBack}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-xs"
+                >
+                  {isSubmittingIdCard ? "Đang lưu..." : "Lưu Xác Minh CCCD"}
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

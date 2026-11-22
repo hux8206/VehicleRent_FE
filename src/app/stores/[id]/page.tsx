@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, Store, VehicleModel, Review } from "@/lib/api";
 import { getStoreBannerImageUrl, getVehicleCardImageUrl } from "@/lib/image-optimizer";
+import { StoreReputationBadge } from "@/components/common/store-reputation-badge";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -140,7 +141,10 @@ export default function StoreDetailPage() {
                     Cọc {depositPercent}%
                   </span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-black text-white">{store.storeName}</h1>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h1 className="text-2xl sm:text-3xl font-black text-white">{store.storeName}</h1>
+                  <StoreReputationBadge score={store.reputationScore} />
+                </div>
                 <div className="flex items-center gap-2 text-xs text-slate-300">
                   <MapPin className="h-3.5 w-3.5 text-blue-400 shrink-0" />
                   <span>{store.address}</span>

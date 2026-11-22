@@ -29,6 +29,7 @@ import {
   User,
 } from "lucide-react";
 import { ZaloChatButton } from "@/components/common/zalo-chat-button";
+import { StoreReputationBadge } from "@/components/common/store-reputation-badge";
 
 export default function VehicleDetailPage() {
   const params = useParams();
@@ -260,6 +261,7 @@ export default function VehicleDetailPage() {
                         <Store className="h-3.5 w-3.5 text-blue-600 shrink-0" />
                         <span className="truncate max-w-[200px] sm:max-w-none">{model.store.storeName}</span>
                       </Link>
+                      <StoreReputationBadge score={model.store.reputationScore} />
                     </>
                   )}
                   <span className="text-xs text-slate-300">•</span>
@@ -379,7 +381,7 @@ export default function VehicleDetailPage() {
                   </div>
                   <div className="flex items-center gap-2 font-semibold text-emerald-700">
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                    <span>Bảo lãnh hoàn 150% cọc nếu chủ xe không đáp ứng đơn</span>
+                    <span>Bảo lãnh hoàn 100% cọc + Bồi thường 20% (min 50.000đ) nếu nhà xe không giao</span>
                   </div>
                 </div>
 
@@ -528,6 +530,7 @@ export default function VehicleDetailPage() {
                           ({model.store?.reviewCount || 0})
                         </span>
                       </span>
+                      <StoreReputationBadge score={model.store?.reputationScore} />
                     </div>
                   </div>
                   <div className="space-y-1">

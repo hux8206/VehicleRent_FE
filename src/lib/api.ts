@@ -121,6 +121,7 @@ export interface Store {
   vehicleModels?: VehicleModel[];
   avgRating?: number;
   reviewCount?: number;
+  reputationScore?: number;
   reviews?: Review[];
   _count?: {
     vehicleModels: number;
@@ -175,6 +176,7 @@ export interface VehicleModel {
   vehicleItems?: VehicleItem[];
   avgRating?: number;
   reviewCount?: number;
+  reputationScore?: number;
   reviews?: Review[];
 }
 
@@ -204,6 +206,17 @@ export interface Booking {
   status: number; // 0: PendingPayment, 1: Confirmed, 2: WaitingQueue, 3: ActiveRental, 4: Completed, 5: Cancelled
   cancelReason?: string | null;
   cancelTime?: string | null;
+  cancelType?: number | null; // 1: Khách tự hủy, 2: No-show, 3: Cửa hàng tự hủy
+  compensationAmount?: number | string | null;
+  isForceMajeure?: boolean | null;
+  forceMajeureProof?: string | null;
+  disputeStatus?: number | null; // 0: None, 1: Chờ Admin đối soát, 2: Resolved_Refunded, 3: Resolved_Exempt
+  disputeReason?: string | null;
+  disputeCreatedAt?: string | null;
+  idCardFront?: string | null;
+  idCardBack?: string | null;
+  idCardCapturedAt?: string | null;
+  idCardDeletedAt?: string | null;
   refundStatus?: number | null; // 0: Chờ hoàn cọc, 1: Đã hoàn cọc, 2: Từ chối hoàn cọc
   refundBankName?: string | null;
   refundAccountNumber?: string | null;
@@ -941,6 +954,21 @@ export const api = {
         body: JSON.stringify(dto),
       });
     },
+
+    reportIssue: async (
+      bookingId: number,
+      payload: {
+        reason: string;
+        bankName?: string;
+        bankAccountNumber?: string;
+        bankAccountName?: string;
+      }
+    ) => {
+      return await request(`/customer/bookings/${bookingId}/report-issue`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+    },
   },
 
   partner: {
@@ -1325,6 +1353,47 @@ export const api = {
       } catch {
         return { status: 4 };
       }
+    },
+
+    noShow: async (bookingId: number) => {
+      return await request<Booking>(`/partner/bookings/${bookingId}/no-show`, {
+        method: "POST",
+      });
+    },
+
+    cancelByStore: async (
+      bookingId: number,
+      payload: {
+        reason: string;
+        isForceMajeure?: boolean;
+        forceMajeureProof?: string;
+      }
+    ) => {
+      return await request<Booking>(`/partner/bookings/${bookingId}/cancel-by-store`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+    },
+
+    saveIdCard: async (
+      bookingId: number,
+      payload: { idCardFront: string; idCardBack: string }
+    ) => {
+      return await request(`/partner/bookings/${bookingId}/id-card`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+    },
+
+    getIdCard: async (bookingId: number) => {
+      return await request<{
+        isDeleted?: boolean;
+        message?: string;
+        idCardFront?: string;
+        idCardBack?: string;
+        idCardCapturedAt?: string;
+        deletedAt?: string;
+      }>(`/partner/bookings/${bookingId}/id-card`);
     },
 
     getWallet: async () => {

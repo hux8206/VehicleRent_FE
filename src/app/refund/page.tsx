@@ -52,7 +52,7 @@ export default function RefundPolicyPage() {
             <span>Tiêu chuẩn: <strong>Hệ thống VietQR tự động & Khấu trừ ví đối tác</strong></span>
             <span>•</span>
             <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-              ✓ Bảo lãnh: Hoàn 150% tiền cọc nếu đối tác không đáp ứng được đơn đặt
+              ✓ Bảo lãnh: Hoàn 100% cọc + Bồi thường 20% (tối thiểu 50.000đ) nếu đối tác không có xe giao
             </span>
             <span>•</span>
             <span>Thời gian xử lý hoàn cọc: <strong>24h - 48h làm việc</strong></span>
@@ -184,7 +184,7 @@ export default function RefundPolicyPage() {
           <section className="space-y-3">
             <div className="flex items-center gap-2.5 text-slate-900 font-bold text-lg md:text-xl">
               <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold">3</span>
-              <h2>Trường hợp Hủy do Lỗi từ Cửa hàng (Hoàn 150% Cọc) hoặc Bất khả kháng (Hoàn 100%)</h2>
+              <h2>Trường hợp Hủy do Lỗi từ Cửa hàng (Hoàn 100% Cọc + Bồi thường 20%) hoặc Bất khả kháng (Hoàn 100%)</h2>
             </div>
             <p>
               Nhằm bảo vệ tối đa quyền lợi của Khách thuê xe và nâng cao tính cam kết trách nhiệm giữ chữ tín của Đối tác:
@@ -193,10 +193,10 @@ export default function RefundPolicyPage() {
               <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-emerald-950 space-y-1.5">
                 <strong className="text-emerald-900 block font-bold text-base flex items-center gap-2">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                  Bảo lãnh Hoàn trả 150% Tiền Cọc khi Lỗi từ Cửa hàng:
+                  Bảo lãnh Hoàn trả 100% Tiền Cọc + Bồi Thường 20% khi Lỗi từ Cửa hàng:
                 </strong>
                 <p className="text-xs md:text-sm text-emerald-900/90 leading-relaxed">
-                  Nếu đến giờ hẹn nhận xe mà Cửa hàng không có xe giao, tự ý hủy đơn, xe bị sự cố kỹ thuật nghiêm trọng không thể vận hành và cửa hàng không cung cấp được dòng xe tương đương hoặc tốt hơn thay thế, hoặc xe thực tế sai lệch nghiêm trọng so với mô tả: <strong>Khách hàng được hoàn trả ngay lập tức 150% tiền cọc</strong> (bao gồm <strong>100% tiền cọc gốc</strong> đã thanh toán + <strong>50% tiền phạt bồi thường vi phạm hợp đồng</strong> do Đối tác chi trả thông qua cơ chế tự động khấu trừ ví sàn).
+                  Nếu đến giờ hẹn nhận xe mà Cửa hàng không có xe giao, tự ý hủy đơn, hoặc xe bị sự cố không thể giao: <strong>Khách hàng được hoàn trả 100% tiền cọc gốc + bồi thường 20% tiền cọc (tối thiểu 50.000đ)</strong> do Đối tác chi trả thông qua cơ chế tự động khấu trừ ví sàn. Đồng thời, Cửa hàng sẽ bị trừ điểm uy tín (được miễn phạt nếu chứng minh được lý do bất khả kháng với Admin).
                 </p>
               </div>
 

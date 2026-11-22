@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { api, Store } from "@/lib/api";
 import { getStoreCardImageUrl } from "@/lib/image-optimizer";
+import { StoreReputationBadge } from "@/components/common/store-reputation-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProvinceCombobox } from "@/components/common/province-combobox";
@@ -215,6 +216,7 @@ export default function StoresPage() {
                           <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
                             {store.storeName}
                           </h3>
+                          <StoreReputationBadge score={store.reputationScore} />
                         </div>
 
                         <div className="flex items-start gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1">

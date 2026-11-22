@@ -37,6 +37,7 @@ import {
   ShieldAlert,
   Info,
   HelpCircle,
+  AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format24hDateTime } from "@/components/common/datetime-24h-picker";
@@ -165,6 +166,50 @@ export default function CustomerBookingsPage() {
   const [refundAccountNumber, setRefundAccountNumber] = useState<string>("");
   const [refundAccountName, setRefundAccountName] = useState<string>("");
   const [isSubmittingCancel, setIsSubmittingCancel] = useState<boolean>(false);
+
+  // Report issue modal state (Nhà xe không có xe)
+  const [reportIssueBooking, setReportIssueBooking] = useState<Booking | null>(null);
+  const [issueReason, setIssueReason] = useState<string>("");
+  const [issueBankName, setIssueBankName] = useState<string>("");
+  const [issueAccountNumber, setIssueAccountNumber] = useState<string>("");
+  const [issueAccountName, setIssueAccountName] = useState<string>("");
+  const [isSubmittingIssue, setIsSubmittingIssue] = useState<boolean>(false);
+
+  const handleOpenReportIssueModal = (b: Booking) => {
+    setReportIssueBooking(b);
+    setIssueReason("Đến nhận xe nhưng cửa hàng đóng cửa / báo hết xe không giao");
+    setIssueBankName(b.refundBankName || user?.bankName || "Vietcombank (VCB)");
+    setIssueAccountNumber(b.refundAccountNumber || user?.bankAccountNum || "");
+    setIssueAccountName(b.refundAccountName || user?.fullName?.toUpperCase() || "");
+  };
+
+  const handleConfirmReportIssue = async () => {
+    if (!reportIssueBooking) return;
+    if (!issueReason.trim()) {
+      toast.error("Vui lòng nêu rõ sự cố gặp phải với nhà xe!");
+      return;
+    }
+    if (!issueBankName.trim() || !issueAccountNumber.trim() || !issueAccountName.trim()) {
+      toast.error("Vui lòng nhập đầy đủ thông tin tài khoản ngân hàng để nhận tiền bảo lãnh hoàn cọc!");
+      return;
+    }
+    setIsSubmittingIssue(true);
+    try {
+      await api.customer.reportIssue(reportIssueBooking.id, {
+        reason: issueReason.trim(),
+        bankName: issueBankName.trim(),
+        bankAccountNumber: issueAccountNumber.trim(),
+        bankAccountName: issueAccountName.trim().toUpperCase(),
+      });
+      toast.success("Đã gửi báo cáo sự cố thành công! Admin sẽ tiến hành đối soát và hoàn cọc 100% + bồi thường 20% cho bạn.");
+      setReportIssueBooking(null);
+      fetchBookings();
+    } catch (err: any) {
+      toast.error(err.message || "Gửi báo cáo sự cố thất bại!");
+    } finally {
+      setIsSubmittingIssue(false);
+    }
+  };
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -736,8 +781,44 @@ export default function CustomerBookingsPage() {
 
                         {(b.status === 1 || b.status === 2) && (() => {
                           const policy = getRefundPolicyInfo(b);
+                          const nowMs = Date.now();
+                          const startMs = new Date(b.startTime).getTime();
+                          const hoursToStart = (startMs - nowMs) / (1000 * 60 * 60);
+                          const canReportIssue = hoursToStart <= 2; // Sát giờ nhận (dưới 2h) hoặc đã tới/quá giờ nhận
+
                           return (
                             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                              {/* Dispute / Issue status banner */}
+                              {b.disputeStatus === 1 ? (
+                                <div className="text-[11px] font-bold bg-amber-50 text-amber-900 border border-amber-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-2xs">
+                                  <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                                  <span>Đang đối soát: Báo nhà xe không có xe (Bảo lãnh hoàn 100% cọc + bồi thường 20%)</span>
+                                </div>
+                              ) : b.disputeStatus === 2 ? (
+                                <div className="text-[11px] font-bold bg-emerald-50 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-2xs">
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                                  <span>Admin đã duyệt khiếu nại: Hoàn 100% cọc + bồi thường 20%</span>
+                                </div>
+                              ) : (
+                                b.status === 1 && (
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() => handleOpenReportIssueModal(b)}
+                                    disabled={!canReportIssue}
+                                    title={canReportIssue ? "Báo sự cố nhà xe không có xe để được bảo lãnh hoàn 100% cọc + bồi thường 20%" : "Nút chỉ mở khi còn dưới 2 giờ tới giờ nhận xe hoặc đã quá giờ hẹn"}
+                                    className={`text-xs h-8 rounded-lg cursor-pointer font-bold gap-1.5 shrink-0 ${
+                                      canReportIssue
+                                        ? "bg-rose-600 hover:bg-rose-700 text-white shadow-2xs"
+                                        : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-70"
+                                    }`}
+                                  >
+                                    <AlertTriangle className="h-3.5 w-3.5" />
+                                    <span>Báo sự cố: Nhà xe không có xe</span>
+                                  </Button>
+                                )
+                              )}
+
                               {/* Policy preview pill beside cancel button */}
                               <div
                                 className={`text-[11px] font-semibold border px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-2xs ${policy.badgeColor}`}
@@ -1229,6 +1310,123 @@ export default function CustomerBookingsPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Modal Báo Sự Cố: Nhà Xe Không Có Xe Giao */}
+      {reportIssueBooking && (() => {
+        const depositAmt = Number(reportIssueBooking.depositAmount);
+        const compensation = depositAmt > 0 ? Math.max(50000, Math.round(depositAmt * 0.2)) : 0;
+        const totalGuaranteed = depositAmt + compensation;
+
+        return (
+          <Dialog open={!!reportIssueBooking} onOpenChange={() => setReportIssueBooking(null)}>
+            <DialogContent className="max-w-md rounded-2xl p-6 border-slate-200 bg-white">
+              <DialogHeader>
+                <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-rose-600" />
+                  <span>Báo Cáo Sự Cố: Nhà Xe Không Có Xe Giao</span>
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-500">
+                  Mã đơn: <strong className="font-mono text-slate-900">{reportIssueBooking.bookingCode}</strong> • Nhà xe: <strong>{reportIssueBooking.store?.storeName || "Cửa hàng"}</strong>
+                </DialogDescription>
+              </DialogHeader>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleConfirmReportIssue();
+                }}
+                className="space-y-4 py-2"
+              >
+                {/* Bảo lãnh sàn banner */}
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs space-y-1.5 text-emerald-950">
+                  <div className="font-bold flex items-center gap-1.5 text-emerald-900">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                    <span>Chính sách Bảo Lãnh Khách Thuê của Sàn</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-emerald-800">
+                    Nếu xác nhận đúng lỗi từ nhà xe (hết xe, đóng cửa, không liên lạc được,...), sàn sẽ lập tức <strong>hoàn 100% tiền cọc ({depositAmt.toLocaleString("vi-VN")} đ)</strong> + <strong>bồi thường 20% tiền cọc ({compensation.toLocaleString("vi-VN")} đ)</strong> về tài khoản ngân hàng của bạn (Tổng nhận: <strong className="text-emerald-900 font-bold">{totalGuaranteed.toLocaleString("vi-VN")} đ</strong>) và hỗ trợ đổi xe thay thế gần nhất.
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <Label className="text-xs font-semibold text-slate-800">
+                    Chi tiết sự cố gặp phải <span className="text-red-500">*</span>
+                  </Label>
+                  <Textarea
+                    placeholder="Mô tả sự cố: Đến cửa hàng nhưng đóng cửa gọi điện không nghe, hoặc nhà xe báo hết xe không giao,..."
+                    value={issueReason}
+                    onChange={(e) => setIssueReason(e.target.value)}
+                    className="text-xs rounded-xl"
+                    rows={3}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2 pt-1 border-t border-slate-100">
+                  <Label className="text-xs font-bold text-slate-900">
+                    Thông tin tài khoản nhận tiền bảo lãnh & bồi thường
+                  </Label>
+
+                  <div className="space-y-1">
+                    <Label className="text-xs text-slate-600">Ngân hàng</Label>
+                    <Input
+                      placeholder="VD: Vietcombank, MB Bank, Techcombank..."
+                      value={issueBankName}
+                      onChange={(e) => setIssueBankName(e.target.value)}
+                      className="text-xs h-9 rounded-xl"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-slate-600">Số tài khoản</Label>
+                      <Input
+                        placeholder="Số tài khoản..."
+                        value={issueAccountNumber}
+                        onChange={(e) => setIssueAccountNumber(e.target.value.replace(/\D/g, ""))}
+                        className="text-xs h-9 font-mono font-bold rounded-xl"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-slate-600">Tên chủ tài khoản</Label>
+                      <Input
+                        placeholder="NGUYEN VAN A"
+                        value={issueAccountName}
+                        onChange={(e) => setIssueAccountName(e.target.value.toUpperCase())}
+                        className="text-xs h-9 font-bold uppercase rounded-xl"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <DialogFooter className="gap-2 sm:gap-0 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setReportIssueBooking(null)}
+                    disabled={isSubmittingIssue}
+                    className="rounded-xl text-xs"
+                  >
+                    Đóng
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={isSubmittingIssue || !issueReason.trim() || !issueAccountNumber.trim()}
+                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs"
+                  >
+                    {isSubmittingIssue ? "Đang gửi..." : "Gửi Báo Cáo Sự Cố"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
     </div>
   );
 }

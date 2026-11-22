@@ -414,10 +414,10 @@ export function BookingModal({
                 </div>
               </div>
 
-              {/* Trust Guarantee Badge: 150% deposit refund if store fails to deliver */}
+              {/* Trust Guarantee Badge: 100% deposit refund + 20% compensation if store fails to deliver */}
               <div className="flex items-center gap-2 p-2.5 px-3.5 rounded-2xl bg-emerald-50/90 dark:bg-emerald-950/40 border border-emerald-200/90 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 text-xs font-semibold shadow-2xs">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Bảo lãnh sàn VehicleRent: <strong>Hoàn 150% tiền cọc</strong> nếu chủ thuê không đáp ứng được đơn đặt!</span>
+                <span>Bảo lãnh sàn VehicleRent: <strong>Hoàn 100% cọc + Bồi thường 20%</strong> (tối thiểu 50.000đ) nếu chủ thuê không có xe giao!</span>
               </div>
 
               {/* Vehicle Quantity Selector */}
@@ -828,7 +828,7 @@ export function BookingModal({
                   <p>• <strong>Hủy trước ≥ 24h:</strong> Hoàn 100% tiền cọc.</p>
                   <p>• <strong>Hủy 6h - 24h:</strong> Hoàn 100% (nếu đặt ≤30p) hoặc Hoàn 50% (quá 30p).</p>
                   <p>• <strong>Hủy &lt; 6h:</strong> Hoàn 50% (nếu đặt ≤30p) hoặc Mất cọc 100% (quá 30p).</p>
-                  <p className="text-emerald-700 dark:text-emerald-400 font-bold">• <strong>Chủ xe không đáp ứng đơn:</strong> Hoàn 150% tiền cọc (100% cọc + 50% bồi thường vi phạm).</p>
+                  <p className="text-emerald-700 dark:text-emerald-400 font-bold">• <strong>Chủ xe không có xe giao:</strong> Hoàn 100% tiền cọc + Bồi thường 20% (tối thiểu 50.000đ).</p>
                 </div>
               </div>
             </form>
@@ -1157,11 +1157,11 @@ export function BookingModal({
 
               <div className="p-2.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/60 dark:bg-blue-950/30">
                 <div className="flex justify-between items-center font-bold text-blue-900 dark:text-blue-300">
-                  <span>4. Lỗi từ Chủ xe / Không đáp ứng được đơn</span>
-                  <Badge className="bg-blue-600 text-white text-[10px]">Hoàn 150% cọc</Badge>
+                  <span>4. Lỗi từ Chủ xe / Không có xe giao</span>
+                  <Badge className="bg-blue-600 text-white text-[10px]">Hoàn cọc + Bồi thường 20%</Badge>
                 </div>
                 <p className="text-[11px] text-blue-800 dark:text-blue-400 mt-0.5 leading-relaxed">
-                  Trường hợp Chủ xe không có xe hoặc không đáp ứng được đơn đã cọc, khách hàng được <strong>hoàn trả 150% tiền cọc</strong> (100% tiền cọc gốc + 50% tiền bồi thường vi phạm thỏa thuận do nhà xe chi trả).
+                  Trường hợp Chủ xe không có xe hoặc không đáp ứng được đơn đã cọc, khách hàng được <strong>hoàn trả 100% tiền cọc gốc + 20% bồi thường vi phạm (tối thiểu 50.000đ)</strong> do nhà xe chi trả qua hệ thống sàn.
                 </p>
               </div>
             </div>
