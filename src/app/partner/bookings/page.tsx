@@ -1389,19 +1389,18 @@ function PartnerBookingsContent() {
               {/* Hàng 2: Đơn giá thuê / ngày và Tổng tiền dự kiến */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
                 <div className="space-y-1">
-                  <Label className="text-xs font-semibold text-slate-700">
-                    Đơn giá thuê / ngày (VNĐ)
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-semibold text-slate-700">
+                      Đơn giá thuê niêm yết
+                    </Label>
+                    <span className="text-[10px] text-slate-400 font-medium">Cố định theo dòng xe</span>
+                  </div>
                   <Input
-                    type="number"
-                    min={0}
-                    value={walkInRentPrice}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      setWalkInRentPrice(val);
-                      recalcWalkInPrices(walkInStartTime, walkInEndTime, val, walkInQuantity);
-                    }}
-                    className="h-9.5 text-xs rounded-xl bg-white font-mono font-semibold"
+                    type="text"
+                    readOnly
+                    disabled
+                    value={`${Number(walkInRentPrice || 0).toLocaleString("vi-VN")} đ/ngày`}
+                    className="h-9.5 text-xs rounded-xl bg-slate-100/80 border-slate-200 text-slate-700 font-mono font-bold cursor-not-allowed select-none"
                   />
                 </div>
 

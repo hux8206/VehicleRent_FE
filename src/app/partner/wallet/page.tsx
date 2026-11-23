@@ -413,11 +413,11 @@ function PartnerWalletContent() {
               )}
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              {isBranchStaffMode ? "Quan Sát Số Dư & Lịch Sử Giao Dịch" : "Quản Lý Ví & Lịch Sử Giao Dịch"}
+              {isBranchStaffMode ? "Lịch Sử Biến Động Số Dư" : "Quản Lý Ví & Lịch Sử Giao Dịch"}
             </h1>
             <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
               {isBranchStaffMode
-                ? "Nhân viên theo dõi số dư bảo lãnh và tra cứu toàn bộ biến động sổ cái các giao dịch đặt cọc, hoàn tiền và khấu trừ hoa hồng của cơ sở."
+                ? "Nhân viên tra cứu toàn bộ biến động sổ cái các giao dịch đặt cọc, hoàn tiền và khấu trừ hoa hồng của cơ sở."
                 : "Theo dõi biến động số dư, nạp tiền mở khóa các đơn hàng chờ FIFO và đối soát toàn bộ lịch sử thu cọc, hoàn tiền và hoa hồng sàn."}
             </p>
           </div>
@@ -455,7 +455,7 @@ function PartnerWalletContent() {
         </div>
 
         {/* Banner Ưu Đãi Đối Tác Mới */}
-        {wallet && Number((wallet as any).freeCommissionRemaining || 0) > 0 && (
+        {!isBranchStaffMode && wallet && Number((wallet as any).freeCommissionRemaining || 0) > 0 && (
           <div className="p-4 bg-linear-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/5 rounded-2xl border border-emerald-200/80 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-xs">
@@ -480,55 +480,57 @@ function PartnerWalletContent() {
         )}
 
         {/* Overview Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Balance Card */}
-          <Card className="rounded-2xl border-slate-200 shadow-xs bg-white p-6 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500">Số dư ví khả dụng</span>
-              <div className="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <Wallet className="h-4 w-4" />
+        {!isBranchStaffMode && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Balance Card */}
+            <Card className="rounded-2xl border-slate-200 shadow-xs bg-white p-6 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">Số dư ví khả dụng</span>
+                <div className="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <Wallet className="h-4 w-4" />
+                </div>
               </div>
-            </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900">
-              {balance.toLocaleString("vi-VN")} <span className="text-sm font-semibold text-slate-500">VNĐ</span>
-            </div>
-            <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3" /> Ví đang hoạt động bình thường
-            </div>
-          </Card>
+              <div className="text-2xl sm:text-3xl font-black text-slate-900">
+                {balance.toLocaleString("vi-VN")} <span className="text-sm font-semibold text-slate-500">VNĐ</span>
+              </div>
+              <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" /> Ví đang hoạt động bình thường
+              </div>
+            </Card>
 
-          {/* Credit Limit Card */}
-          <Card className="rounded-2xl border-slate-200 shadow-xs bg-white p-6 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500">Hạn mức nợ cho phép</span>
-              <div className="h-8 w-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                <CreditCard className="h-4 w-4" />
+            {/* Credit Limit Card */}
+            <Card className="rounded-2xl border-slate-200 shadow-xs bg-white p-6 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">Hạn mức nợ cho phép</span>
+                <div className="h-8 w-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <CreditCard className="h-4 w-4" />
+                </div>
               </div>
-            </div>
-            <div className="text-2xl sm:text-3xl font-black text-blue-700">
-              -{creditLimit.toLocaleString("vi-VN")} <span className="text-sm font-semibold text-slate-500">VNĐ</span>
-            </div>
-            <div className="text-[11px] text-slate-500">
-              Cho phép nhận đơn đến khi số dư đạt mức âm này
-            </div>
-          </Card>
+              <div className="text-2xl sm:text-3xl font-black text-blue-700">
+                -{creditLimit.toLocaleString("vi-VN")} <span className="text-sm font-semibold text-slate-500">VNĐ</span>
+              </div>
+              <div className="text-[11px] text-slate-500">
+                Cho phép nhận đơn đến khi số dư đạt mức âm này
+              </div>
+            </Card>
 
-          {/* Policy summary */}
-          <Card className="rounded-2xl border-slate-200 shadow-xs bg-white p-6 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500">Cơ chế hàng chờ FIFO</span>
-              <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <Clock className="h-4 w-4" />
+            {/* Policy summary */}
+            <Card className="rounded-2xl border-slate-200 shadow-xs bg-white p-6 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500">Cơ chế hàng chờ FIFO</span>
+                <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <Clock className="h-4 w-4" />
+                </div>
               </div>
-            </div>
-            <div className="text-sm font-bold text-slate-800 leading-tight">
-              Tự động khớp đơn đặt trước
-            </div>
-            <div className="text-[11px] text-slate-500 leading-relaxed">
-              Khi nạp tiền bù số dư, hệ thống tự động quét đơn từ cũ đến mới (createdAt ASC) để trừ hoa hồng.
-            </div>
-          </Card>
-        </div>
+              <div className="text-sm font-bold text-slate-800 leading-tight">
+                Tự động khớp đơn đặt trước
+              </div>
+              <div className="text-[11px] text-slate-500 leading-relaxed">
+                Khi nạp tiền bù số dư, hệ thống tự động quét đơn từ cũ đến mới (createdAt ASC) để trừ hoa hồng.
+              </div>
+            </Card>
+          </div>
+        )}
 
         {/* Transaction History Table */}
         <Card className="rounded-2xl border-slate-200 shadow-sm bg-white overflow-hidden">
