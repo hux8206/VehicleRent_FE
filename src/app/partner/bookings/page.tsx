@@ -89,12 +89,8 @@ function PartnerBookingsContent() {
   const [walkInHandoverNow, setWalkInHandoverNow] = useState(true);
   const [isSubmittingWalkIn, setIsSubmittingWalkIn] = useState(false);
 
-  // Cancel / No-show modal state
+  // Khách không đến modal state
   const [cancelModalBooking, setCancelModalBooking] = useState<Booking | null>(null);
-  const [cancelActionType, setCancelActionType] = useState<"noshow" | "store_cancel">("noshow");
-  const [storeCancelReason, setStoreCancelReason] = useState("");
-  const [isForceMajeure, setIsForceMajeure] = useState(false);
-  const [forceMajeureProof, setForceMajeureProof] = useState("");
   const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
 
   // ID Card modal state (Chuẩn Nghị định 13)
@@ -109,32 +105,14 @@ function PartnerBookingsContent() {
 
   const handleOpenCancelModal = (b: Booking) => {
     setCancelModalBooking(b);
-    setCancelActionType("noshow");
-    setStoreCancelReason("");
-    setIsForceMajeure(false);
-    setForceMajeureProof("");
   };
 
   const handleConfirmCancel = async () => {
     if (!cancelModalBooking) return;
     setIsSubmittingCancel(true);
     try {
-      if (cancelActionType === "noshow") {
-        await api.partner.noShow(cancelModalBooking.id);
-        toast.success("Đã ghi nhận khách không đến (No-show). Xe đã được giải phóng và cọc được giữ cho cửa hàng.");
-      } else {
-        if (!storeCancelReason.trim()) {
-          toast.error("Vui lòng nhập lý do cửa hàng không có xe giao.");
-          setIsSubmittingCancel(false);
-          return;
-        }
-        await api.partner.cancelByStore(cancelModalBooking.id, {
-          reason: storeCancelReason.trim(),
-          isForceMajeure,
-          forceMajeureProof: forceMajeureProof.trim() || undefined,
-        });
-        toast.success("Đã hủy đơn thành công. Hệ thống đã tiến hành hoàn 100% cọc + bồi thường 20% cho khách hàng.");
-      }
+      await api.partner.noShow(cancelModalBooking.id);
+      toast.success("Đã ghi nhận khách không đến nhận xe. Xe đã được giải phóng về kho và tiền cọc được giữ lại cho cửa hàng.");
       setCancelModalBooking(null);
       await fetchBookings(activeTab, true);
     } catch (err: any) {
@@ -988,10 +966,10 @@ function PartnerBookingsContent() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleOpenCancelModal(b)}
-                              className="border-rose-200 text-rose-600 hover:bg-rose-50 text-xs h-8 rounded-xl gap-1.5 shadow-2xs font-semibold"
+                              className="border-amber-300 text-amber-800 hover:bg-amber-50 text-xs h-8 rounded-xl gap-1.5 shadow-2xs font-semibold"
                             >
-                              <XCircle className="h-3.5 w-3.5" />
-                              <span>Hủy đơn</span>
+                              <XCircle className="h-3.5 w-3.5 text-amber-600" />
+                              <span>Khách không đến</span>
                             </Button>
 
                             <Button
@@ -1506,22 +1484,35 @@ function PartnerBookingsContent() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal Hủy Đơn / Khách Không Đến (No-show) */}
+      {/* Modal Hủy Đơn Khi Khách Không Đến */}
       {cancelModalBooking && (() => {
         const isFullPayment = Number(cancelModalBooking.depositAmount) >= Number(cancelModalBooking.rentAmount);
         const now = new Date();
         const startTime = new Date(cancelModalBooking.startTime);
-        const isPastStart = now >= startTime;
+
+        // Tính thời điểm kết thúc ngày hẹn nhận xe (23:59:59.999 của ngày startTime)
+        const endOfPickupDate = new Date(
+          startTime.getFullYear(),
+          startTime.getMonth(),
+          startTime.getDate(),
+          23,
+          59,
+          59,
+          999,
+        );
+        const isPastPickupDate = now.getTime() > endOfPickupDate.getTime();
         const depositAmt = Number(cancelModalBooking.depositAmount);
-        const estCompensation = depositAmt > 0 ? Math.max(50000, Math.round(depositAmt * 0.2)) : 0;
+
+        const pad = (n: number) => String(n).padStart(2, "0");
+        const formattedPickupDate = `${pad(startTime.getDate())}/${pad(startTime.getMonth() + 1)}/${startTime.getFullYear()}`;
 
         return (
           <Dialog open={!!cancelModalBooking} onOpenChange={() => setCancelModalBooking(null)}>
             <DialogContent className="max-w-md rounded-2xl p-6 bg-white border border-slate-200">
               <DialogHeader>
                 <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
-                  <XCircle className="h-5 w-5 text-rose-600" />
-                  <span>Hủy đơn</span>
+                  <XCircle className="h-5 w-5 text-amber-600" />
+                  <span>Khách không đến nhận xe</span>
                 </DialogTitle>
                 <DialogDescription className="text-xs text-slate-500">
                   Mã đơn: <strong className="font-mono text-slate-900">{cancelModalBooking.bookingCode}</strong> • Khách: <strong>{cancelModalBooking.customer?.fullName || "Khách thuê"}</strong>
@@ -1529,122 +1520,45 @@ function PartnerBookingsContent() {
               </DialogHeader>
 
               <div className="space-y-4 py-2">
-                {/* 2 Tabs: No-show vs Store Cancel */}
-                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
-                  <button
-                    type="button"
-                    onClick={() => setCancelActionType("noshow")}
-                    className={`py-2 text-xs font-bold rounded-lg transition-all ${
-                      cancelActionType === "noshow"
-                        ? "bg-white text-slate-900 shadow-2xs"
-                        : "text-slate-600 hover:text-slate-900"
-                    }`}
-                  >
-                    Khách không đến
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCancelActionType("store_cancel")}
-                    className={`py-2 text-xs font-bold rounded-lg transition-all ${
-                      cancelActionType === "store_cancel"
-                        ? "bg-white text-rose-700 shadow-2xs"
-                        : "text-slate-600 hover:text-slate-900"
-                    }`}
-                  >
-                    Cửa hàng hết xe
-                  </button>
-                </div>
-
-                {cancelActionType === "noshow" ? (
-                  <div className="space-y-3 text-xs">
-                    {isFullPayment ? (
-                      <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 space-y-1">
-                        <div className="font-bold flex items-center gap-1.5 text-red-900">
-                          <AlertCircle className="h-4 w-4 shrink-0" />
-                          <span>Không áp dụng No-show cho đơn trả 100%</span>
-                        </div>
-                        <p className="text-[11px] leading-relaxed">
-                          Đơn này khách đã thanh toán 100% tiền thuê. Theo quy định sàn, bạn bắt buộc phải giữ xe cho khách trong suốt toàn bộ kỳ thuê.
-                        </p>
-                      </div>
-                    ) : !isPastStart ? (
-                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 space-y-1">
-                        <div className="font-bold flex items-center gap-1.5 text-amber-950">
-                          <Clock className="h-4 w-4 shrink-0 text-amber-600" />
-                          <span>Chưa tới giờ hẹn nhận xe</span>
-                        </div>
-                        <p className="text-[11px] leading-relaxed">
-                          Giờ hẹn nhận xe là <strong>{format24hDateTime(cancelModalBooking.startTime)}</strong>. Bạn chỉ được phép báo No-show sau khi đã quá giờ hẹn nhận xe mà khách không đến.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 space-y-2">
-                        <div className="font-bold flex items-center gap-1.5 text-emerald-950">
-                          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
-                          <span>Đủ điều kiện ghi nhận No-show</span>
-                        </div>
-                        <ul className="text-[11px] list-disc list-inside space-y-1 text-emerald-800">
-                          <li>Xe vật lý sẽ được <strong>giải phóng ngay về kho</strong> để đón khách vãng lai.</li>
-                          <li>Tiền cọc ({depositAmt.toLocaleString("vi-VN")} đ) được <strong>giữ cho cửa hàng</strong>.</li>
-                          <li>Cửa hàng <strong>không bị trừ điểm uy tín</strong>.</li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-3 text-xs">
-                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 space-y-1.5">
-                      <div className="font-bold flex items-center gap-1.5 text-rose-950">
-                        <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600" />
-                        <span>Chính sách bồi thường khách thuê</span>
+                <div className="space-y-3 text-xs">
+                  {isFullPayment ? (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 space-y-1">
+                      <div className="font-bold flex items-center gap-1.5 text-red-900">
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        <span>Không thể hủy đơn đã thanh toán 100%</span>
                       </div>
                       <p className="text-[11px] leading-relaxed">
-                        Cửa hàng tự hủy do không có xe sẽ bị hoàn trả <strong>100% tiền cọc ({depositAmt.toLocaleString("vi-VN")} đ)</strong> + bồi thường <strong>20% tiền cọc ({estCompensation.toLocaleString("vi-VN")} đ)</strong> trừ vào ví đối tác và bị trừ <strong>10 điểm uy tín</strong>.
+                        Đơn này khách đã thanh toán toàn bộ 100% tiền thuê xe. Theo quy định của sàn, nhà xe bắt buộc phải giữ xe cho khách trong suốt toàn bộ thời gian thuê.
                       </p>
                     </div>
-
-                    <div className="space-y-1">
-                      <Label className="text-xs font-semibold text-slate-800">
-                        Lý do cửa hàng không có xe giao <span className="text-red-500">*</span>
-                      </Label>
-                      <Textarea
-                        placeholder="Nêu rõ lý do: xe đang bảo dưỡng đột xuất, khách trước chưa trả xe,..."
-                        value={storeCancelReason}
-                        onChange={(e) => setStoreCancelReason(e.target.value)}
-                        className="text-xs rounded-xl"
-                        rows={2}
-                      />
-                    </div>
-
-                    <div className="pt-1">
-                      <label className="flex items-start gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={isForceMajeure}
-                          onChange={(e) => setIsForceMajeure(e.target.checked)}
-                          className="mt-0.5 rounded border-slate-300 text-rose-600 focus:ring-rose-500"
-                        />
-                        <span className="text-[11px] text-slate-700">
-                          Đây là <strong>sự cố bất khả kháng</strong> (tai nạn đột xuất, thiên tai, hỏng hóc nghiêm trọng,... đính kèm chứng từ để Admin miễn phạt).
-                        </span>
-                      </label>
-                    </div>
-
-                    {isForceMajeure && (
-                      <div className="space-y-1">
-                        <Label className="text-xs font-semibold text-slate-700">
-                          Giải trình / Link ảnh chứng từ bất khả kháng
-                        </Label>
-                        <Input
-                          placeholder="Link ảnh biên bản va quẹt, giấy sửa chữa xe khẩn cấp..."
-                          value={forceMajeureProof}
-                          onChange={(e) => setForceMajeureProof(e.target.value)}
-                          className="h-9 text-xs rounded-xl"
-                        />
+                  ) : !isPastPickupDate ? (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 space-y-1.5">
+                      <div className="font-bold flex items-center gap-1.5 text-amber-950">
+                        <Clock className="h-4 w-4 shrink-0 text-amber-600" />
+                        <span>Chưa hết ngày hẹn nhận xe</span>
                       </div>
-                    )}
-                  </div>
-                )}
+                      <p className="text-[11px] leading-relaxed">
+                        Ngày hẹn nhận xe là <strong>{formattedPickupDate}</strong> (giờ hẹn: {format24hDateTime(cancelModalBooking.startTime)}).
+                      </p>
+                      <p className="text-[11px] leading-relaxed text-amber-800 font-medium">
+                        Cửa hàng chỉ được phép hủy đơn khi đã hết ngày hẹn nhận xe mà khách vẫn không đến nhận xe.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 space-y-2">
+                      <div className="font-bold flex items-center gap-1.5 text-emerald-950">
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                        <span>Đủ điều kiện hủy do khách không đến</span>
+                      </div>
+                      <ul className="text-[11px] list-disc list-inside space-y-1 text-emerald-800">
+                        <li>Đã kết thúc ngày hẹn nhận xe ({formattedPickupDate}).</li>
+                        <li>Xe vật lý sẽ được <strong>giải phóng ngay về kho</strong> để cho khách khác thuê.</li>
+                        <li>Tiền cọc ({depositAmt.toLocaleString("vi-VN")} đ) được <strong>giữ lại cho cửa hàng</strong>.</li>
+                        <li>Cửa hàng <strong>không bị trừ điểm uy tín</strong>.</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <DialogFooter className="gap-2 sm:gap-0 pt-2">
@@ -1658,27 +1572,15 @@ function PartnerBookingsContent() {
                 >
                   Đóng
                 </Button>
-                {cancelActionType === "noshow" ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={handleConfirmCancel}
-                    disabled={isSubmittingCancel || isFullPayment || !isPastStart}
-                    className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-xs"
-                  >
-                    {isSubmittingCancel ? "Đang xử lý..." : "Khách không đến"}
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={handleConfirmCancel}
-                    disabled={isSubmittingCancel || !storeCancelReason.trim()}
-                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-xs"
-                  >
-                    {isSubmittingCancel ? "Đang hủy..." : "Hủy đơn"}
-                  </Button>
-                )}
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleConfirmCancel}
+                  disabled={isSubmittingCancel || isFullPayment || !isPastPickupDate}
+                  className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-xs"
+                >
+                  {isSubmittingCancel ? "Đang xử lý..." : "Khách không đến"}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

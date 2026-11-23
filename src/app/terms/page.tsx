@@ -241,7 +241,7 @@ export default function TermsOfServicePage() {
               <div className="p-3.5 rounded-xl bg-rose-50/70 border border-rose-200 flex gap-2.5 items-start text-rose-950">
                 <span className="font-bold text-rose-600 shrink-0 mt-0.5">8.3.</span>
                 <div>
-                  <strong>Trách nhiệm bàn giao xe & Chế tài bồi hoàn khi không có xe giao:</strong> Đối tác có nghĩa vụ chuẩn bị phương tiện đúng hẹn, đảm bảo an toàn kỹ thuật theo đúng thỏa thuận đặt xe. Trường hợp Đối tác tự ý hủy đơn, không có xe giao hoặc không đáp ứng được đơn đã cọc thành công, Đối tác có trách nhiệm <strong>hoàn 100% cọc + bồi thường 20% tiền cọc (tối thiểu 50.000đ) cho khách hàng</strong> và bị trừ điểm uy tín (được xem xét miễn phạt nếu chứng minh được sự cố bất khả kháng với Quản trị viên). Đối với trường hợp khách không đến nhận xe sau giờ hẹn (No-show), Đối tác được quyền giải phóng xe ngay và giữ trọn tiền cọc theo quy định.
+                  <strong>Trách nhiệm bàn giao xe & Chế tài bồi hoàn khi không có xe giao:</strong> Đối tác có nghĩa vụ chuẩn bị phương tiện đúng hẹn, đảm bảo an toàn kỹ thuật theo đúng thỏa thuận đặt xe. Trường hợp Đối tác tự ý hủy đơn, không có xe giao hoặc không đáp ứng được đơn đã cọc thành công, Đối tác có trách nhiệm <strong>hoàn 100% cọc + bồi thường 20% tiền cọc (tối thiểu 50.000đ) cho khách hàng</strong> và bị trừ điểm uy tín (được xem xét miễn phạt nếu chứng minh được sự cố bất khả kháng với Quản trị viên). Đối với trường hợp khách không đến nhận xe sau khi kết thúc ngày hẹn nhận xe, Đối tác được quyền giải phóng xe về kho và giữ trọn tiền cọc theo quy định.
                 </div>
               </div>
             </div>

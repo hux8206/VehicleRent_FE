@@ -206,7 +206,7 @@ export interface Booking {
   status: number; // 0: PendingPayment, 1: Confirmed, 2: WaitingQueue, 3: ActiveRental, 4: Completed, 5: Cancelled
   cancelReason?: string | null;
   cancelTime?: string | null;
-  cancelType?: number | null; // 1: Khách tự hủy, 2: No-show, 3: Cửa hàng tự hủy
+  cancelType?: number | null; // 1: Khách tự hủy, 2: Khách không đến, 3: Cửa hàng tự hủy
   compensationAmount?: number | string | null;
   isForceMajeure?: boolean | null;
   forceMajeureProof?: string | null;
