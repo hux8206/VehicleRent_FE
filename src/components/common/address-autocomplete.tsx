@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { MapPin, LocateFixed, Loader2, X, Check } from "lucide-react";
+import { MapPin, LocateFixed, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 
 export interface LocationSelectData {
@@ -288,14 +288,6 @@ export function AddressAutocomplete({
           </button>
         </div>
       </div>
-
-      {/* Tọa độ hiện tại nếu có */}
-      {latitude != null && longitude != null && (
-        <div className="mt-1 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-mono">
-          <Check className="w-3.5 h-3.5" />
-          <span>Tọa độ đã lưu: [{latitude.toFixed(4)}, {longitude.toFixed(4)}]</span>
-        </div>
-      )}
 
       {/* Dropdown gợi ý địa chỉ */}
       {isOpen && (
