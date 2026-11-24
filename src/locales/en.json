@@ -554,5 +554,17 @@
   "footer_refund": "Cancellation & Refund",
   "footer_cookies": "Cookie Policy",
   "footer_feedback": "Feedback & Complaints",
-  "footer_rights": "© 2026 VehicleRent. E-commerce platform for motorbike & self-drive car rentals."
+  "footer_rights": "© 2026 VehicleRent. E-commerce platform for motorbike & self-drive car rentals.",
+  "near_me": "Near Me",
+  "near_me_active": "Near You",
+  "near_me_tooltip": "Find vehicles at stores near your location",
+  "clear_near_me": "Clear near me",
+  "distance_from_you": "Away from you",
+  "locating": "Locating...",
+  "geo_not_supported": "Your browser does not support GPS geolocation.",
+  "geo_permission_denied": "Please allow location access in your browser to find stores near you.",
+  "geo_error": "Unable to determine your current location.",
+  "geo_located_success": "Found locations near your position!",
+  "stores_near_me": "Near Me",
+  "stores_near_me_active": "Showing stores near you"
 }

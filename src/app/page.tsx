@@ -22,6 +22,8 @@ import {
   Compass,
   Scale,
   Ticket,
+  LocateFixed,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ProvinceCombobox } from "@/components/common/province-combobox";
@@ -163,6 +165,8 @@ export default function HomePage() {
   const [endTime, setEndTime] = useState<string>(defaultEnd);
   const [vehicleType, setVehicleType] = useState<number | undefined>(undefined);
   const [brandQuery, setBrandQuery] = useState<string>("");
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
 
   // Khi chọn thời gian nhận: hệ thống tự tính toán đủ 24h cho 1 ngày và cập nhật thời gian trả tương ứng.
   const handleStartTimeChange = (newStart: string) => {
@@ -232,15 +236,21 @@ export default function HomePage() {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
-  const fetchVehicles = async (overrideProvince?: string) => {
+  const fetchVehicles = async (
+    overrideProvince?: string,
+    overrideCoords?: { lat: number; lng: number } | null
+  ) => {
     setIsLoading(true);
     try {
       const activeProvince = overrideProvince !== undefined ? overrideProvince : selectedProvince;
+      const activeCoords = overrideCoords !== undefined ? overrideCoords : userCoords;
       const res = await api.customer.searchVehicles({
         startTime: new Date(startTime).toISOString(),
         endTime: new Date(endTime).toISOString(),
         brand: brandQuery || undefined,
         province: activeProvince && activeProvince !== "all" ? activeProvince : undefined,
+        lat: activeCoords ? activeCoords.lat : undefined,
+        lng: activeCoords ? activeCoords.lng : undefined,
       });
       if (res && Array.isArray(res.data)) {
         setBaseVehicles(res.data);
@@ -252,6 +262,37 @@ export default function HomePage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLocateNearMe = () => {
+    if (!navigator.geolocation) {
+      toast.error(t("geo_not_supported", "Trình duyệt của bạn không hỗ trợ định vị GPS."));
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const coords = {
+          lat: Number(pos.coords.latitude.toFixed(6)),
+          lng: Number(pos.coords.longitude.toFixed(6)),
+        };
+        setUserCoords(coords);
+        setSelectedProvince("all");
+        await fetchVehicles("all", coords);
+        setIsLocating(false);
+        toast.success(t("geo_located_success", "Đã tìm thấy các xe gần vị trí của bạn!"));
+      },
+      (err) => {
+        setIsLocating(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error(t("geo_permission_denied", "Vui lòng cho phép truy cập vị trí trên trình duyệt để tìm xe gần bạn."));
+        } else {
+          toast.error(t("geo_error", "Không thể xác định vị trí hiện tại của bạn."));
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
   };
 
   useEffect(() => {
@@ -355,19 +396,61 @@ export default function HomePage() {
                 >
                   {/* Location field (Full-width top row) */}
                   <div className="px-3.5 py-2 rounded-xl bg-slate-50/70 dark:bg-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-600/50 transition-colors">
-                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
-                      {t("search_pickup_location", "Địa điểm nhận xe")}
-                    </span>
-                    <ProvinceCombobox
-                      value={selectedProvince}
-                      onChange={(val) => {
-                        setSelectedProvince(val);
-                        fetchVehicles(val);
-                      }}
-                      includeAllOption={true}
-                      allOptionLabel={t("search_all_provinces", "Toàn quốc")}
-                      placeholder={t("search_pickup_location", "Chọn tỉnh / thành phố...")}
-                    />
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        {t("search_pickup_location", "Địa điểm nhận xe")}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleLocateNearMe}
+                        disabled={isLocating}
+                        className={`flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-lg transition-all border ${
+                          userCoords
+                            ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                            : "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/60"
+                        }`}
+                        title={t("near_me_tooltip", "Tìm xe tại các cửa hàng gần vị trí của bạn")}
+                      >
+                        {isLocating ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>{t("locating", "Đang định vị...")}</span>
+                          </>
+                        ) : (
+                          <>
+                            <LocateFixed className="w-3.5 h-3.5" />
+                            <span>{userCoords ? t("near_me_active", "Đang lọc gần bạn") : t("near_me", "Gần tôi")}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <ProvinceCombobox
+                          value={selectedProvince}
+                          onChange={(val) => {
+                            setSelectedProvince(val);
+                            fetchVehicles(val);
+                          }}
+                          includeAllOption={true}
+                          allOptionLabel={t("search_all_provinces", "Toàn quốc")}
+                          placeholder={t("search_pickup_location", "Chọn tỉnh / thành phố...")}
+                        />
+                      </div>
+                      {userCoords && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUserCoords(null);
+                            fetchVehicles(selectedProvince, null);
+                          }}
+                          className="px-2 py-1 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer"
+                          title={t("clear_near_me", "Bỏ lọc gần tôi")}
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Pickup & Return date fields (Side-by-side row) */}
@@ -603,6 +686,16 @@ export default function HomePage() {
                                 {isOutOfStock ? "Hết xe" : <><span className="sm:hidden">Còn {available} xe</span><span className="hidden sm:inline">Sẵn sàng bàn giao ({available} xe)</span></>}
                               </span>
                             </div>
+
+                            {/* Distance Badge on Image */}
+                            {(v.distanceKm != null || v.store?.distanceKm != null) && (
+                              <div className="absolute bottom-1.5 right-1.5 sm:bottom-3 sm:right-3">
+                                <span className="bg-slate-900/85 backdrop-blur-xs text-white font-bold text-[9px] sm:text-[10px] px-2 py-0.5 sm:py-1 rounded-full shadow-xs flex items-center gap-1 border border-white/20">
+                                  <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-blue-300" />
+                                  <span>{t("distance_from_you", "Cách bạn")} {v.distanceKm ?? v.store?.distanceKm} km</span>
+                                </span>
+                              </div>
+                            )}
                           </div>
 
                           {/* Card Content */}
@@ -633,6 +726,14 @@ export default function HomePage() {
                                 <span>{v.avgRating || 5.0}</span>
                               </div>
                             </div>
+
+                            {/* Distance indicator */}
+                            {(v.distanceKm != null || v.store?.distanceKm != null) && (
+                              <div className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 mt-1">
+                                <MapPin className="h-3 w-3 text-blue-600" />
+                                <span>{t("distance_from_you", "Cách bạn")} {v.distanceKm ?? v.store?.distanceKm} km</span>
+                              </div>
+                            )}
                           </div>
                         </div>
 

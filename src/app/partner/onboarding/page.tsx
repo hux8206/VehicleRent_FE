@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ProvinceCombobox } from "@/components/common/province-combobox";
+import { AddressAutocomplete } from "@/components/common/address-autocomplete";
 import { PartnerGuideBanner } from "@/components/common/partner-guide-modal";
 
 function PartnerOnboardingContent() {
@@ -49,6 +50,8 @@ function PartnerOnboardingContent() {
   const [storeName, setStoreName] = useState("");
   const [province, setProvince] = useState("");
   const [address, setAddress] = useState("");
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = useState<number | undefined>(undefined);
   const [phoneContact, setPhoneContact] = useState(user?.phone || "");
   const [description, setDescription] = useState("");
   const [storeImage, setStoreImage] = useState(
@@ -108,6 +111,8 @@ function PartnerOnboardingContent() {
     setStoreName(s.storeName);
     setProvince(s.province || "");
     setAddress(s.address);
+    setLatitude(s.latitude);
+    setLongitude(s.longitude);
     setPhoneContact(s.phoneContact);
     setDescription(s.description || "");
     setOpenTime(s.openTime || "07:00");
@@ -208,6 +213,8 @@ function PartnerOnboardingContent() {
         const isBankNameChanged = (bankName || "").trim() !== (user?.bankName || "").trim();
         const isOpenTimeChanged = (openTime || "").trim() !== (store.openTime || "").trim();
         const isCloseTimeChanged = (closeTime || "").trim() !== (store.closeTime || "").trim();
+        const isLatChanged = latitude !== undefined && latitude !== store.latitude;
+        const isLngChanged = longitude !== undefined && longitude !== store.longitude;
 
         const hasAnyChange =
           isStoreNameChanged ||
@@ -221,7 +228,9 @@ function PartnerOnboardingContent() {
           isBankNumChanged ||
           isBankNameChanged ||
           isOpenTimeChanged ||
-          isCloseTimeChanged;
+          isCloseTimeChanged ||
+          isLatChanged ||
+          isLngChanged;
 
         if (!hasAnyChange) {
           toast.info("Thông tin chi nhánh không có gì thay đổi so với hiện tại, không cần gửi yêu cầu cập nhật!");
@@ -235,6 +244,8 @@ function PartnerOnboardingContent() {
           storeName,
           province: province.trim() || undefined,
           address,
+          latitude,
+          longitude,
           phoneContact,
           description,
           storeImage,
@@ -255,6 +266,8 @@ function PartnerOnboardingContent() {
             storeName,
             province: province.trim() || undefined,
             address,
+            latitude,
+            longitude,
             phoneContact,
             description,
             storeImage,
@@ -279,6 +292,8 @@ function PartnerOnboardingContent() {
           storeName,
           province: province.trim() || undefined,
           address,
+          latitude,
+          longitude,
           phoneContact,
           description,
           storeImage,
@@ -463,10 +478,20 @@ function PartnerOnboardingContent() {
 
                   <div className="space-y-1.5 sm:col-span-2">
                     <Label className="text-xs font-semibold">Địa chỉ chi tiết (để khách đến lấy xe) <span className="text-red-500">*</span></Label>
-                    <Input
-                      placeholder="Số nhà, tên đường, phường/xã, quận/huyện..."
+                    <AddressAutocomplete
                       value={address}
-                      onChange={(e) => setAddress(e.target.value)}
+                      latitude={latitude}
+                      longitude={longitude}
+                      province={province}
+                      onChange={(val) => setAddress(val)}
+                      onSelectLocation={(loc) => {
+                        setAddress(loc.address);
+                        setLatitude(loc.latitude);
+                        setLongitude(loc.longitude);
+                        if (loc.province && (!province || province === "")) {
+                          setProvince(loc.province);
+                        }
+                      }}
                       required
                     />
                   </div>

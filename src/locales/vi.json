@@ -528,5 +528,17 @@
   "footer_refund": "Hủy & hoàn cọc",
   "footer_cookies": "Cookie",
   "footer_feedback": "Góp ý & khiếu nại",
-  "footer_rights": "© 2026 VehicleRent. Sàn thương mại điện tử cho thuê xe máy & ô tô tự lái."
+  "footer_rights": "© 2026 VehicleRent. Sàn thương mại điện tử cho thuê xe máy & ô tô tự lái.",
+  "near_me": "Gần tôi",
+  "near_me_active": "Đang lọc gần bạn",
+  "near_me_tooltip": "Tìm xe tại các cửa hàng gần vị trí của bạn",
+  "clear_near_me": "Bỏ lọc gần tôi",
+  "distance_from_you": "Cách bạn",
+  "locating": "Đang định vị...",
+  "geo_not_supported": "Trình duyệt của bạn không hỗ trợ định vị GPS.",
+  "geo_permission_denied": "Vui lòng cho phép truy cập vị trí trên trình duyệt để tìm cửa hàng gần bạn.",
+  "geo_error": "Không thể xác định vị trí hiện tại của bạn.",
+  "geo_located_success": "Đã tìm thấy các địa điểm gần vị trí của bạn!",
+  "stores_near_me": "Gần tôi",
+  "stores_near_me_active": "Đang hiển thị nhà xe gần bạn"
 }

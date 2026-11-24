@@ -9,6 +9,7 @@ import { api, Store, VehicleModel, PartnerWallet, Booking, StoreUpdateRequest, W
 import { getOptimizedImageUrl, getStoreCardImageUrl } from "@/lib/image-optimizer";
 import { VIETNAMESE_BANKS } from "@/lib/constants";
 import { ProvinceCombobox } from "@/components/common/province-combobox";
+import { AddressAutocomplete } from "@/components/common/address-autocomplete";
 import { PartnerGuideBanner } from "@/components/common/partner-guide-modal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -188,6 +189,8 @@ function PartnerDashboardContent() {
   const [newBranchName, setNewBranchName] = useState("");
   const [newBranchProvince, setNewBranchProvince] = useState("");
   const [newBranchAddress, setNewBranchAddress] = useState("");
+  const [newBranchLat, setNewBranchLat] = useState<number | undefined>(undefined);
+  const [newBranchLng, setNewBranchLng] = useState<number | undefined>(undefined);
   const [newBranchPhone, setNewBranchPhone] = useState(user?.phone || "");
   const [newBranchDeposit, setNewBranchDeposit] = useState<number>(15);
   const [newBranchDesc, setNewBranchDesc] = useState("");
@@ -201,6 +204,8 @@ function PartnerDashboardContent() {
   const [updateStoreName, setUpdateStoreName] = useState("");
   const [updateProvince, setUpdateProvince] = useState("");
   const [updateAddress, setUpdateAddress] = useState("");
+  const [updateLat, setUpdateLat] = useState<number | undefined>(undefined);
+  const [updateLng, setUpdateLng] = useState<number | undefined>(undefined);
   const [updatePhone, setUpdatePhone] = useState("");
   const [updateDeposit, setUpdateDeposit] = useState<number>(15);
   const [updateDesc, setUpdateDesc] = useState("");
@@ -625,6 +630,8 @@ function PartnerDashboardContent() {
         storeName: newBranchName.trim(),
         province: newBranchProvince.trim() || undefined,
         address: newBranchAddress.trim(),
+        latitude: newBranchLat,
+        longitude: newBranchLng,
         phoneContact: newBranchPhone.trim(),
         description: newBranchDesc.trim() || undefined,
         storeImage: newBranchImage || undefined,
@@ -642,6 +649,8 @@ function PartnerDashboardContent() {
       setNewBranchName("");
       setNewBranchProvince("");
       setNewBranchAddress("");
+      setNewBranchLat(undefined);
+      setNewBranchLng(undefined);
       setNewBranchDesc("");
       setNewBranchImage("");
       setNewBranchOpenTime("07:00");
@@ -661,6 +670,8 @@ function PartnerDashboardContent() {
     setUpdateStoreName(selectedBranch.storeName);
     setUpdateProvince(selectedBranch.province || "");
     setUpdateAddress(selectedBranch.address);
+    setUpdateLat(selectedBranch.latitude);
+    setUpdateLng(selectedBranch.longitude);
     setUpdatePhone(selectedBranch.phoneContact);
     setUpdateDeposit(
       selectedBranch.rentalPolicy?.depositPercent
@@ -721,6 +732,8 @@ function PartnerDashboardContent() {
     const isBankNameChanged = (updateBankName || "").trim() !== (user?.bankName || "").trim();
     const isOpenTimeChanged = (updateOpenTime || "").trim() !== (selectedBranch.openTime || "").trim();
     const isCloseTimeChanged = (updateCloseTime || "").trim() !== (selectedBranch.closeTime || "").trim();
+    const isLatChanged = updateLat !== undefined && updateLat !== selectedBranch.latitude;
+    const isLngChanged = updateLng !== undefined && updateLng !== selectedBranch.longitude;
 
     const hasAnyChange =
       isStoreNameChanged ||
@@ -734,7 +747,9 @@ function PartnerDashboardContent() {
       isBankNumChanged ||
       isBankNameChanged ||
       isOpenTimeChanged ||
-      isCloseTimeChanged;
+      isCloseTimeChanged ||
+      isLatChanged ||
+      isLngChanged;
 
     if (!hasAnyChange) {
       toast.info("Thông tin chi nhánh không có gì thay đổi so với hiện tại, không cần gửi yêu cầu cập nhật!");
@@ -747,6 +762,8 @@ function PartnerDashboardContent() {
         storeName: updateStoreName.trim(),
         province: updateProvince.trim() || undefined,
         address: updateAddress.trim(),
+        latitude: updateLat,
+        longitude: updateLng,
         phoneContact: updatePhone.trim(),
         depositPercent: updateDeposit,
         description: updateDesc.trim() || undefined,
@@ -2930,11 +2947,21 @@ function PartnerDashboardContent() {
 
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">{t("partner_add_branch_address_label", "Địa chỉ chi nhánh *")}</Label>
-              <Input
-                placeholder="VD: 123 Xuân Thủy, Phường Dịch Vọng Hậu, Cầu Giấy..."
+              <AddressAutocomplete
                 value={newBranchAddress}
-                onChange={(e) => setNewBranchAddress(e.target.value)}
-                className="text-xs h-10 rounded-xl"
+                latitude={newBranchLat}
+                longitude={newBranchLng}
+                province={newBranchProvince}
+                onChange={(val) => setNewBranchAddress(val)}
+                onSelectLocation={(loc) => {
+                  setNewBranchAddress(loc.address);
+                  setNewBranchLat(loc.latitude);
+                  setNewBranchLng(loc.longitude);
+                  if (loc.province && (!newBranchProvince || newBranchProvince === "")) {
+                    setNewBranchProvince(loc.province);
+                  }
+                }}
+                placeholder="VD: 123 Xuân Thủy, Phường Dịch Vọng Hậu, Cầu Giấy..."
                 required
               />
             </div>
@@ -3103,10 +3130,20 @@ function PartnerDashboardContent() {
 
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">Địa chỉ mới *</Label>
-              <Input
+              <AddressAutocomplete
                 value={updateAddress}
-                onChange={(e) => setUpdateAddress(e.target.value)}
-                className="text-xs h-10 rounded-xl"
+                latitude={updateLat}
+                longitude={updateLng}
+                province={updateProvince}
+                onChange={(val) => setUpdateAddress(val)}
+                onSelectLocation={(loc) => {
+                  setUpdateAddress(loc.address);
+                  setUpdateLat(loc.latitude);
+                  setUpdateLng(loc.longitude);
+                  if (loc.province && (!updateProvince || updateProvince === "")) {
+                    setUpdateProvince(loc.province);
+                  }
+                }}
                 required
               />
             </div>

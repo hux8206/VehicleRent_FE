@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProvinceCombobox } from "@/components/common/province-combobox";
 import { useLanguage } from "@/context/language-context";
+import { toast } from "sonner";
 import {
   Store as StoreIcon,
   MapPin,
@@ -19,6 +20,8 @@ import {
   Star,
   SlidersHorizontal,
   Clock,
+  LocateFixed,
+  Loader2,
 } from "lucide-react";
 
 export default function StoresPage() {
@@ -27,21 +30,56 @@ export default function StoresPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProvince, setSelectedProvince] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
+
+  async function loadStores(coords?: { lat: number; lng: number } | null) {
+    setIsLoading(true);
+    try {
+      const activeCoords = coords !== undefined ? coords : userCoords;
+      const data = await api.customer.getStores(activeCoords || undefined);
+      setStores(data);
+    } catch {
+      // fallback
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function loadStores() {
-      setIsLoading(true);
-      try {
-        const data = await api.customer.getStores();
-        setStores(data);
-      } catch {
-        // fallback
-      } finally {
-        setIsLoading(false);
-      }
-    }
     loadStores();
   }, []);
+
+  const handleLocateNearMe = () => {
+    if (!navigator.geolocation) {
+      toast.error(t("geo_not_supported", "Trình duyệt của bạn không hỗ trợ định vị GPS."));
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const coords = {
+          lat: Number(pos.coords.latitude.toFixed(6)),
+          lng: Number(pos.coords.longitude.toFixed(6)),
+        };
+        setUserCoords(coords);
+        setSelectedProvince("all");
+        await loadStores(coords);
+        setIsLocating(false);
+        toast.success(t("geo_located_success", "Đã tìm thấy các địa điểm gần vị trí của bạn!"));
+      },
+      (err) => {
+        setIsLocating(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error(t("geo_permission_denied", "Vui lòng cho phép truy cập vị trí trên trình duyệt để tìm cửa hàng gần bạn."));
+        } else {
+          toast.error(t("geo_error", "Không thể xác định vị trí hiện tại của bạn."));
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  };
 
   const cleanSelected = selectedProvince.toLowerCase().replace(/^tp\.\s*/i, "").trim();
 
@@ -80,11 +118,38 @@ export default function StoresPage() {
 
           {/* Filters Bar */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+            {/* Locate Near Me Button */}
+            <button
+              type="button"
+              onClick={handleLocateNearMe}
+              disabled={isLocating}
+              className={`flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-2xl transition-all border shrink-0 ${
+                userCoords
+                  ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                  : "bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-300 border-slate-200 dark:border-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/50 shadow-xs"
+              }`}
+              title={t("near_me_tooltip", "Tìm xe tại các cửa hàng gần vị trí của bạn")}
+            >
+              {isLocating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600 dark:text-blue-400" />
+                  <span>{t("locating", "Đang định vị...")}</span>
+                </>
+              ) : (
+                <>
+                  <LocateFixed className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <span>{userCoords ? t("near_me_active", "Đang lọc gần bạn") : t("near_me", "Gần tôi")}</span>
+                </>
+              )}
+            </button>
+
             {/* Province Combobox Filter */}
             <div className="w-full sm:w-60 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs rounded-2xl px-3 py-1">
               <ProvinceCombobox
                 value={selectedProvince}
-                onChange={(val) => setSelectedProvince(val)}
+                onChange={(val) => {
+                  setSelectedProvince(val);
+                }}
                 includeAllOption={true}
                 allOptionLabel={t("stores_filter_province", "Toàn quốc (34 tỉnh/thành)")}
                 placeholder={t("stores_filter_ph", "Lọc theo tỉnh/thành...")}
@@ -108,6 +173,22 @@ export default function StoresPage() {
         <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
           <div>
             {t("admin_tx_display_count", "Hiển thị")} <span className="font-bold text-slate-900 dark:text-slate-100">{filteredStores.length}</span> {t("stores_partner_stores_label", "nhà xe đối tác")}
+            {userCoords && (
+              <span className="ml-2 inline-flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 font-semibold text-[11px]">
+                <LocateFixed className="h-3 w-3" /> {t("stores_near_me_active", "Đang hiển thị nhà xe gần bạn")}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUserCoords(null);
+                    loadStores(null);
+                  }}
+                  className="ml-1 hover:text-emerald-900 dark:hover:text-emerald-200 font-bold cursor-pointer"
+                  title={t("stores_clear_filter", "Bỏ lọc")}
+                >
+                  ×
+                </button>
+              </span>
+            )}
             {selectedProvince !== "all" && selectedProvince && (
               <span className="ml-2 inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-800 font-semibold text-[11px]">
                 <MapPin className="h-3 w-3" /> {selectedProvince}
@@ -176,10 +257,15 @@ export default function StoresPage() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
                       />
-                      <div className="absolute top-3 left-3">
+                      <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
                         <span className="bg-emerald-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3" /> {t("stores_verified_badge", "Đã kiểm định")}
                         </span>
+                        {store.distanceKm != null && (
+                          <span className="bg-blue-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-full shadow-xs flex items-center gap-1">
+                            <MapPin className="h-3 w-3" /> {t("distance_from_you", "Cách bạn")} {store.distanceKm} km
+                          </span>
+                        )}
                       </div>
 
                       {/* Store Star Rating Badge */}
@@ -223,6 +309,12 @@ export default function StoresPage() {
                           <MapPin className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                           <span className="line-clamp-2">{store.address}</span>
                         </div>
+                        {store.distanceKm != null && (
+                          <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-md border border-blue-200 dark:border-blue-800 mt-1.5">
+                            <MapPin className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                            <span>{t("distance_from_you", "Cách bạn")} {store.distanceKm} km</span>
+                          </div>
+                        )}
                       </div>
 
                       <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">

@@ -109,6 +109,9 @@ export interface Store {
   storeName: string;
   province?: string;
   address: string;
+  latitude?: number;
+  longitude?: number;
+  distanceKm?: number;
   phoneContact: string;
   description?: string;
   storeImage?: string;
@@ -143,6 +146,8 @@ export interface StoreUpdateRequest {
   storeName: string;
   province?: string;
   address: string;
+  latitude?: number;
+  longitude?: number;
   phoneContact: string;
   description?: string;
   storeImage?: string;
@@ -178,6 +183,7 @@ export interface VehicleModel {
   reviewCount?: number;
   reputationScore?: number;
   reviews?: Review[];
+  distanceKm?: number;
 }
 
 export interface VehicleItem {
@@ -729,6 +735,8 @@ export const api = {
       brand?: string;
       province?: string;
       storeId?: number;
+      lat?: number;
+      lng?: number;
     }) => {
       try {
         const q = new URLSearchParams();
@@ -738,6 +746,8 @@ export const api = {
         if (params.brand) q.set("brand", params.brand);
         if (params.province) q.set("province", params.province);
         if (params.storeId) q.set("storeId", String(params.storeId));
+        if (params.lat !== undefined) q.set("lat", String(params.lat));
+        if (params.lng !== undefined) q.set("lng", String(params.lng));
 
         return await request<{
           data: VehicleModel[];
@@ -936,9 +946,13 @@ export const api = {
       );
     },
 
-    getStores: async () => {
+    getStores: async (params?: { lat?: number; lng?: number }) => {
       try {
-        return await request<Store[]>("/customer/stores");
+        const query = new URLSearchParams();
+        if (params?.lat !== undefined) query.set("lat", String(params.lat));
+        if (params?.lng !== undefined) query.set("lng", String(params.lng));
+        const qs = query.toString() ? `?${query.toString()}` : "";
+        return await request<Store[]>(`/customer/stores${qs}`);
       } catch {
         return [];
       }
@@ -1003,6 +1017,8 @@ export const api = {
       storeName: string;
       province?: string;
       address: string;
+      latitude?: number;
+      longitude?: number;
       phoneContact: string;
       description?: string;
       storeImage?: string;
@@ -1516,6 +1532,8 @@ export const api = {
         storeName: string;
         province?: string;
         address: string;
+        latitude?: number;
+        longitude?: number;
         phoneContact: string;
         description?: string;
         storeImage?: string;
