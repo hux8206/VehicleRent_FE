@@ -34,6 +34,7 @@ import {
   MessageSquare,
   TrendingUp,
   Building2,
+  PlayCircle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -45,6 +46,7 @@ import {
 import { useLanguage } from "@/context/language-context";
 import { LanguageSelector } from "@/components/layout/language-selector";
 import { BrandLogo } from "@/components/layout/brand-logo";
+import { PartnerGuideModal } from "@/components/common/partner-guide-modal";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -53,6 +55,7 @@ export function Navbar() {
   const { user, role, logout } = useAuth();
   const { t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   const isCustomer = role === 2;
   const isPartner = role === 1;
@@ -399,18 +402,41 @@ export function Navbar() {
 
         {/* Right Section: Role Actions + Controls + Auth State */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-          {/* Partner Onboarding CTA Button (Only shown to Guests or Customer) */}
+          {/* Unauthenticated Guide & Onboarding CTAs */}
           {!user && (
-            <Link href="/register?type=partner" className="hidden xl:inline-block">
+            <>
+              {/* Nút bấm nổi bật "Hướng dẫn sử dụng" khi chưa đăng nhập */}
               <Button
-                variant="outline"
+                type="button"
+                onClick={() => setIsGuideOpen(true)}
                 size="sm"
-                className="gap-2 border-2 border-blue-600/30 text-blue-700 dark:text-blue-400 bg-blue-50/40 dark:bg-blue-950/40 hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-600 dark:hover:text-white transition-all font-bold text-xs h-9.5 px-3.5 rounded-xl shadow-2xs cursor-pointer"
+                className="hidden sm:inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs h-8.5 sm:h-9 px-3 rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer whitespace-nowrap"
               >
-                <Store className="h-4 w-4" />
-                <span>{t("become_partner", "Trở thành Đối tác chủ xe")}</span>
+                <PlayCircle className="h-4 w-4 shrink-0 text-white animate-pulse" />
+                <span>{t("nav_guide_video", "Hướng dẫn sử dụng")}</span>
               </Button>
-            </Link>
+
+              <button
+                type="button"
+                onClick={() => setIsGuideOpen(true)}
+                className="sm:hidden inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[11px] font-bold"
+                title="Hướng dẫn sử dụng (Video)"
+              >
+                <PlayCircle className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                <span>Hướng dẫn</span>
+              </button>
+
+              <Link href="/register?type=partner" className="hidden xl:inline-block">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-2 border-blue-600/30 text-blue-700 dark:text-blue-400 bg-blue-50/40 dark:bg-blue-950/40 hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-600 dark:hover:text-white transition-all font-bold text-xs h-9.5 px-3.5 rounded-xl shadow-2xs cursor-pointer"
+                >
+                  <Store className="h-4 w-4" />
+                  <span>{t("become_partner", "Trở thành Đối tác chủ xe")}</span>
+                </Button>
+              </Link>
+            </>
           )}
 
           {/* Language Selector (Visible on sm+ screens; on mobile it is inside mobile drawer) */}
@@ -710,14 +736,31 @@ export function Navbar() {
 
             {/* Mobile Partner Onboarding Link for unauthenticated users */}
             {!user && (
-              <Link
-                href="/register?type=partner"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-blue-700 dark:text-blue-400 bg-blue-50/80 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800"
-              >
-                <Store className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <span>{t("become_partner", "Trở thành Đối tác chủ xe")}</span>
-              </Link>
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsGuideOpen(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-sm font-bold text-amber-900 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 transition-colors text-left"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <PlayCircle className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <span>Hướng dẫn sử dụng (Video)</span>
+                  </div>
+                  <Badge className="bg-amber-600 text-white text-[10px] py-0.5 px-2">2 phút</Badge>
+                </button>
+
+                <Link
+                  href="/register?type=partner"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-blue-700 dark:text-blue-400 bg-blue-50/80 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800"
+                >
+                  <Store className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <span>{t("become_partner", "Trở thành Đối tác chủ xe")}</span>
+                </Link>
+              </>
             )}
 
             {user && (
@@ -784,6 +827,8 @@ export function Navbar() {
           </div>
         </div>
       )}
+      {/* Video Hướng Dẫn Sử Dụng Modal */}
+      <PartnerGuideModal open={isGuideOpen} onOpenChange={setIsGuideOpen} />
     </header>
   );
 }

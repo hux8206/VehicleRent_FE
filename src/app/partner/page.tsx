@@ -9,6 +9,7 @@ import { api, Store, VehicleModel, PartnerWallet, Booking, StoreUpdateRequest, W
 import { getOptimizedImageUrl, getStoreCardImageUrl } from "@/lib/image-optimizer";
 import { VIETNAMESE_BANKS } from "@/lib/constants";
 import { ProvinceCombobox } from "@/components/common/province-combobox";
+import { PartnerGuideBanner } from "@/components/common/partner-guide-modal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -1131,6 +1132,9 @@ function PartnerDashboardContent() {
               </p>
             </div>
 
+            {/* Thẻ banner video hướng dẫn đối tác */}
+            <PartnerGuideBanner />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
               {/* Option 1: Master Owner HQ */}
               <div
@@ -1352,6 +1356,9 @@ function PartnerDashboardContent() {
                 </Button>
               </div>
             </div>
+
+            {/* Thẻ banner video hướng dẫn đối tác */}
+            <PartnerGuideBanner />
 
             {/* Wallet & Financial Management Section */}
             <Card className="rounded-2xl border-2 border-amber-200/80 bg-gradient-to-br from-amber-50/40 via-white to-white shadow-sm overflow-hidden p-6 sm:p-7 space-y-6">

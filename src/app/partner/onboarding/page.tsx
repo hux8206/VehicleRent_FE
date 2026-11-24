@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { ProvinceCombobox } from "@/components/common/province-combobox";
+import { PartnerGuideBanner } from "@/components/common/partner-guide-modal";
 
 function PartnerOnboardingContent() {
   const router = useRouter();
@@ -354,6 +355,9 @@ function PartnerOnboardingContent() {
             Khai báo và cập nhật thông tin cơ sở, ảnh mặt tiền, giờ hoạt động, chính sách cọc và thông tin tài khoản ngân hàng để nhận thanh toán.
           </p>
         </div>
+
+        {/* Thẻ banner video hướng dẫn đối tác */}
+        <PartnerGuideBanner />
 
         {/* Branch Selector if partner has multiple stores */}
         {stores.length > 1 && (
