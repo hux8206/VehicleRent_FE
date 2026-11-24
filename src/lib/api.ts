@@ -165,6 +165,46 @@ export interface StoreUpdateRequest {
   partner?: Partial<User>;
 }
 
+export interface PricingTier {
+  minDays: number;
+  maxDays: number | null;
+  pricePerDay: number;
+}
+
+export function getTieredPricePerDay(
+  baseRentPrice: number | string,
+  pricingTiers?: PricingTier[] | null,
+  dayRent: number = 1
+): {
+  pricePerDay: number;
+  isDiscounted: boolean;
+  matchedTier?: PricingTier;
+} {
+  const base = Number(baseRentPrice) || 0;
+  if (!pricingTiers || !Array.isArray(pricingTiers) || pricingTiers.length === 0) {
+    return { pricePerDay: base, isDiscounted: false };
+  }
+  for (const tier of pricingTiers) {
+    const minDays = Number(tier.minDays);
+    const maxDays =
+      tier.maxDays !== null && tier.maxDays !== undefined && tier.maxDays !== ('' as any)
+        ? Number(tier.maxDays)
+        : null;
+    const price = Number(tier.pricePerDay);
+
+    if (minDays <= dayRent && (maxDays === null || dayRent <= maxDays)) {
+      if (price > 0) {
+        return {
+          pricePerDay: price,
+          isDiscounted: price < base,
+          matchedTier: tier,
+        };
+      }
+    }
+  }
+  return { pricePerDay: base, isDiscounted: false };
+}
+
 export interface VehicleModel {
   id: number;
   storeId: number;
@@ -172,6 +212,7 @@ export interface VehicleModel {
   brand: string;
   type: number; // 0: Xe số, 1: Xe tay ga, 2: Xe tay côn, 3: Xe điện, 4: Ô tô, 5: Ô tô điện
   rentPrice: number | string;
+  pricingTiers?: PricingTier[] | null;
   specifications?: string;
   images?: string[];
   store?: Partial<Store>;

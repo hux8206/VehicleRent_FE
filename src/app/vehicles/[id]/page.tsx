@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { api, VehicleModel } from "@/lib/api";
+import { api, VehicleModel, getTieredPricePerDay } from "@/lib/api";
 import { getVehicleDetailImageUrl, getVehicleThumbnailUrl } from "@/lib/image-optimizer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,8 @@ import {
   AlertCircle,
   Star,
   User,
+  Tag,
+  Sparkles,
 } from "lucide-react";
 import { ZaloChatButton } from "@/components/common/zalo-chat-button";
 import { StoreReputationBadge } from "@/components/common/store-reputation-badge";
@@ -119,7 +121,10 @@ export default function VehicleDetailPage() {
     ? (end.getTime() - start.getTime()) / (1000 * 60 * 60)
     : 0;
   const dayRent = isTimeValid ? Math.ceil(diffHours / 24) : 0;
-  const pricePerDay = Number(model.rentPrice);
+  const basePricePerDay = Number(model.rentPrice);
+  const tieredCalc = getTieredPricePerDay(basePricePerDay, model.pricingTiers, dayRent || 1);
+  const pricePerDay = tieredCalc.pricePerDay;
+  const isTierDiscounted = tieredCalc.isDiscounted;
   const rentAmount = dayRent * pricePerDay;
   const rawDepositPercent = model.store?.rentalPolicy?.depositPercent !== undefined
     ? Number(model.store.rentalPolicy.depositPercent)
@@ -263,9 +268,51 @@ export default function VehicleDetailPage() {
                   )}
                   <span className="text-xs text-slate-300">•</span>
                   <p className="text-xs text-slate-500">
-                    Đơn giá niêm yết: <span className="font-bold text-blue-600 text-sm">{pricePerDay.toLocaleString("vi-VN")} đ</span>/ngày 24h
+                    Đơn giá niêm yết: <span className="font-bold text-blue-600 text-sm">{basePricePerDay.toLocaleString("vi-VN")} đ</span>/ngày 24h
                   </p>
                 </div>
+
+                {/* Bảng giá ưu đãi bậc thang theo số ngày thuê */}
+                {model.pricingTiers && model.pricingTiers.length > 0 && (
+                  <div className="mt-3.5 pt-3 border-t border-slate-100">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Tag className="h-3.5 w-3.5 text-blue-600" />
+                      <span className="text-xs font-bold text-slate-800">
+                        Bảng giá ưu đãi theo số ngày thuê:
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {model.pricingTiers.map((tier, idx) => {
+                        const isCurrentActive =
+                          dayRent > 0 &&
+                          dayRent >= tier.minDays &&
+                          (tier.maxDays === null || dayRent <= tier.maxDays);
+                        return (
+                          <div
+                            key={idx}
+                            className={`px-3 py-1.5 rounded-xl border text-xs transition-all ${
+                              isCurrentActive
+                                ? "bg-blue-50 border-blue-400 text-blue-900 ring-2 ring-blue-500/30 shadow-2xs font-semibold"
+                                : "bg-slate-50 border-slate-200 text-slate-700"
+                            }`}
+                          >
+                            <span className="text-slate-500 font-normal">
+                              Thuê {tier.maxDays ? `${tier.minDays}–${tier.maxDays}` : `từ ${tier.minDays}`} ngày:{" "}
+                            </span>
+                            <span className="font-bold text-blue-700">
+                              {Number(tier.pricePerDay).toLocaleString("vi-VN")} đ/ngày
+                            </span>
+                            {isCurrentActive && (
+                              <span className="ml-1.5 text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-md">
+                                Đang chọn
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </CardHeader>
             </Card>
           </div>
@@ -278,9 +325,16 @@ export default function VehicleDetailPage() {
                   Tính tiền & Đặt chỗ tức thì
                 </span>
                 <div className="flex items-baseline justify-between mt-1">
-                  <span className="text-2xl font-black text-blue-700">
-                    {pricePerDay.toLocaleString("vi-VN")} đ
-                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-black text-blue-700">
+                      {pricePerDay.toLocaleString("vi-VN")} đ
+                    </span>
+                    {isTierDiscounted && (
+                      <span className="text-xs text-slate-400 line-through">
+                        {basePricePerDay.toLocaleString("vi-VN")} đ
+                      </span>
+                    )}
+                  </div>
                   <span className="text-xs text-slate-500">/ 24 giờ thuê</span>
                 </div>
               </CardHeader>
@@ -354,8 +408,21 @@ export default function VehicleDetailPage() {
                   </div>
                   <div className="flex justify-between text-slate-600">
                     <span>Đơn giá ngày:</span>
-                    <span>{pricePerDay.toLocaleString("vi-VN")} đ</span>
+                    <div className="text-right">
+                      <span className="font-semibold text-slate-800">{pricePerDay.toLocaleString("vi-VN")} đ</span>
+                      {isTierDiscounted && (
+                        <span className="ml-1.5 text-[11px] text-slate-400 line-through">
+                          {basePricePerDay.toLocaleString("vi-VN")} đ
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  {isTierDiscounted && (
+                    <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] font-semibold flex items-center gap-1.5 animate-in fade-in duration-200">
+                      <Sparkles className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                      <span>Đang áp dụng giá ưu đãi thuê dài ngày ({dayRent} ngày)!</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-bold text-slate-800 border-t pt-2">
                     <span>Tổng tiền thuê xe:</span>
                     <span>{isTimeValid ? `${rentAmount.toLocaleString("vi-VN")} đ` : "0 đ"}</span>

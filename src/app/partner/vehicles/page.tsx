@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { api, VehicleModel, VehicleItem, Store, INITIAL_VEHICLE_MODELS } from "@/lib/api";
+import { api, VehicleModel, VehicleItem, Store, INITIAL_VEHICLE_MODELS, PricingTier } from "@/lib/api";
 import { getOptimizedImageUrl, getVehicleThumbnailUrl } from "@/lib/image-optimizer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -68,6 +68,7 @@ function PartnerVehiclesContent() {
   const [modelBrand, setModelBrand] = useState("Honda");
   const [modelType, setModelType] = useState<number>(1);
   const [modelPrice, setModelPrice] = useState<number>(150000);
+  const [modelPricingTiers, setModelPricingTiers] = useState<PricingTier[]>([]);
   const [modelSpecs, setModelSpecs] = useState("");
   const [modelImage, setModelImage] = useState("");
   const [isUploadingModelImage, setIsUploadingModelImage] = useState(false);
@@ -80,10 +81,25 @@ function PartnerVehiclesContent() {
   const [editModelBrand, setEditModelBrand] = useState("Honda");
   const [editModelType, setEditModelType] = useState<number>(1);
   const [editModelPrice, setEditModelPrice] = useState<number>(150000);
+  const [editModelPricingTiers, setEditModelPricingTiers] = useState<PricingTier[]>([]);
   const [editModelSpecs, setEditModelSpecs] = useState("");
   const [editModelImage, setEditModelImage] = useState("");
   const [isUploadingEditModelImage, setIsUploadingEditModelImage] = useState(false);
   const editModelImageInputRef = useRef<HTMLInputElement>(null);
+
+  const cleanPricingTiers = (tiers: PricingTier[]): PricingTier[] => {
+    return tiers
+      .filter((t) => t.minDays && Number(t.pricePerDay) > 0)
+      .map((t) => ({
+        minDays: Number(t.minDays),
+        maxDays:
+          t.maxDays !== null && t.maxDays !== undefined && (t.maxDays as any) !== ""
+            ? Number(t.maxDays)
+            : null,
+        pricePerDay: Number(t.pricePerDay),
+      }))
+      .sort((a, b) => a.minDays - b.minDays);
+  };
 
   // ── Modal Add Item (Biển số) ─────────────────────────────────────────────────
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
@@ -287,12 +303,14 @@ function PartnerVehiclesContent() {
     const storeId = selectedStore.id;
 
     try {
+      const sanitizedTiers = cleanPricingTiers(modelPricingTiers);
       const created = await api.partner.createModel({
         storeId,
         name: modelName,
         brand: modelBrand,
         type: modelType,
         rentPrice: modelPrice,
+        pricingTiers: sanitizedTiers.length > 0 ? sanitizedTiers : undefined,
         specifications: modelSpecs,
         images: modelImage ? [modelImage] : undefined,
       });
@@ -315,12 +333,13 @@ function PartnerVehiclesContent() {
       setModelName("");
       setModelBrand("Honda");
       setModelPrice(150000);
+      setModelPricingTiers([]);
       setModelSpecs("");
       setModelImage("");
 
       toast.success("Đã thêm dòng xe mới thành công!");
-    } catch {
-      toast.error("Không thể thêm dòng xe.");
+    } catch (err: any) {
+      toast.error(err.message || "Không thể thêm dòng xe.");
     }
   };
 
@@ -330,6 +349,11 @@ function PartnerVehiclesContent() {
     setEditModelBrand(m.brand);
     setEditModelType(m.type);
     setEditModelPrice(Number(m.rentPrice));
+    setEditModelPricingTiers(
+      m.pricingTiers && Array.isArray(m.pricingTiers)
+        ? JSON.parse(JSON.stringify(m.pricingTiers))
+        : []
+    );
     setEditModelSpecs(m.specifications || "");
     setEditModelImage(m.images?.[0] || "");
     setIsEditModelModalOpen(true);
@@ -340,11 +364,13 @@ function PartnerVehiclesContent() {
     if (!editingModel || !editModelName || !editModelBrand) return;
 
     try {
+      const sanitizedTiers = cleanPricingTiers(editModelPricingTiers);
       const updated = await api.partner.updateModel(editingModel.id, {
         name: editModelName,
         brand: editModelBrand,
         type: editModelType,
         rentPrice: editModelPrice,
+        pricingTiers: sanitizedTiers.length > 0 ? sanitizedTiers : null,
         specifications: editModelSpecs,
         images: editModelImage ? [editModelImage] : undefined,
       });
@@ -352,14 +378,14 @@ function PartnerVehiclesContent() {
       setModels((prev) =>
         prev.map((m) =>
           m.id === editingModel.id
-            ? { ...m, ...updated, images: editModelImage ? [editModelImage] : m.images }
+            ? { ...m, ...updated, pricingTiers: sanitizedTiers.length > 0 ? sanitizedTiers : null, images: editModelImage ? [editModelImage] : m.images }
             : m
         )
       );
 
       if (selectedModel?.id === editingModel.id) {
         setSelectedModel((prev) =>
-          prev ? { ...prev, ...updated, images: editModelImage ? [editModelImage] : prev.images } : null
+          prev ? { ...prev, ...updated, pricingTiers: sanitizedTiers.length > 0 ? sanitizedTiers : null, images: editModelImage ? [editModelImage] : prev.images } : null
         );
       }
 
@@ -990,7 +1016,7 @@ function PartnerVehiclesContent() {
 
       {/* ── Modal Add Model ─────────────────────────────────────────────────── */}
       <Dialog open={isModelModalOpen} onOpenChange={setIsModelModalOpen}>
-        <DialogContent className="max-w-md rounded-2xl p-6">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl p-6">
           <DialogHeader>
             <DialogTitle className="text-base font-bold">Thêm dòng xe mới (VehicleModel)</DialogTitle>
             <DialogDescription className="text-xs">
@@ -1046,6 +1072,115 @@ function PartnerVehiclesContent() {
                 onChange={(e) => setModelPrice(Number(e.target.value))}
                 required
               />
+            </div>
+
+            {/* Bảng giá ưu đãi theo số ngày thuê (Tùy chọn) */}
+            <div className="space-y-2 p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <Label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <span>Bảng giá ưu đãi theo số ngày thuê (Tùy chọn)</span>
+                  </Label>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Khách thuê dài ngày tự động nhận đơn giá ưu đãi theo mốc bạn cài đặt.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs font-semibold text-blue-600 border-blue-200 hover:bg-blue-50 cursor-pointer shrink-0"
+                  onClick={() => {
+                    const last = modelPricingTiers[modelPricingTiers.length - 1];
+                    const nextMin = last
+                      ? (last.maxDays ? Number(last.maxDays) + 1 : Number(last.minDays) + 3)
+                      : 4;
+                    setModelPricingTiers([
+                      ...modelPricingTiers,
+                      { minDays: nextMin, maxDays: null, pricePerDay: Math.max(10000, modelPrice - 20000) },
+                    ]);
+                  }}
+                >
+                  <Plus className="h-3 w-3 mr-1" /> Thêm mốc giá
+                </Button>
+              </div>
+
+              {modelPricingTiers.length === 0 ? (
+                <div className="text-[11px] text-slate-400 italic bg-white p-2.5 rounded-lg border border-dashed text-center">
+                  Chưa cài đặt mốc giá dài ngày. Giá thuê sẽ cố định {modelPrice.toLocaleString("vi-VN")} đ/ngày cho mọi khoảng thời gian.
+                  <div className="mt-1 text-slate-500 not-italic font-medium">
+                    (Ví dụ gợi ý: 1–3 ngày: {modelPrice.toLocaleString("vi-VN")}đ | 4–7 ngày: {(Math.max(10000, modelPrice - 20000)).toLocaleString("vi-VN")}đ | 8 ngày trở lên: {(Math.max(10000, modelPrice - 40000)).toLocaleString("vi-VN")}đ)
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {modelPricingTiers.map((tier, idx) => (
+                    <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 text-xs shadow-2xs">
+                      <div className="flex items-center gap-1 min-w-0 flex-1">
+                        <span className="text-[11px] text-slate-500 whitespace-nowrap">Từ</span>
+                        <Input
+                          type="number"
+                          min={1}
+                          className="h-8 w-14 text-center text-xs p-1"
+                          value={tier.minDays}
+                          onChange={(e) => {
+                            const next = [...modelPricingTiers];
+                            next[idx].minDays = Math.max(1, Number(e.target.value));
+                            setModelPricingTiers(next);
+                          }}
+                        />
+                        <span className="text-[11px] text-slate-500 whitespace-nowrap">đến</span>
+                        <Input
+                          type="number"
+                          min={tier.minDays}
+                          placeholder="trở lên"
+                          className="h-8 w-16 text-center text-xs p-1"
+                          value={tier.maxDays === null || tier.maxDays === undefined ? "" : tier.maxDays}
+                          onChange={(e) => {
+                            const next = [...modelPricingTiers];
+                            const val = e.target.value.trim();
+                            next[idx].maxDays = val === "" ? null : Number(val);
+                            setModelPricingTiers(next);
+                          }}
+                        />
+                        <span className="text-[11px] text-slate-500 whitespace-nowrap">ngày :</span>
+                      </div>
+
+                      <div className="flex items-center gap-1 flex-1">
+                        <Input
+                          type="number"
+                          step="5000"
+                          min={0}
+                          placeholder="Đơn giá/ngày"
+                          className="h-8 text-xs font-semibold text-blue-700"
+                          value={tier.pricePerDay || ""}
+                          onChange={(e) => {
+                            const next = [...modelPricingTiers];
+                            next[idx].pricePerDay = Number(e.target.value);
+                            setModelPricingTiers(next);
+                          }}
+                        />
+                        <span className="text-[11px] text-slate-400 font-medium">đ</span>
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 shrink-0 cursor-pointer"
+                        onClick={() => {
+                          setModelPricingTiers(modelPricingTiers.filter((_, i) => i !== idx));
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ))}
+                  <div className="text-[10px] text-slate-500 italic">
+                    * Để trống ô "đến ngày" nếu mốc giá áp dụng cho từ ngày đó trở lên.
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -1120,7 +1255,7 @@ function PartnerVehiclesContent() {
 
       {/* ── Modal Edit Model ─────────────────────────────────────────────────── */}
       <Dialog open={isEditModelModalOpen} onOpenChange={setIsEditModelModalOpen}>
-        <DialogContent className="max-w-md rounded-2xl p-6">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl p-6">
           <DialogHeader>
             <DialogTitle className="text-base font-bold">Chỉnh sửa dòng xe (VehicleModel)</DialogTitle>
             <DialogDescription className="text-xs">
@@ -1176,6 +1311,115 @@ function PartnerVehiclesContent() {
                 onChange={(e) => setEditModelPrice(Number(e.target.value))}
                 required
               />
+            </div>
+
+            {/* Bảng giá ưu đãi theo số ngày thuê (Tùy chọn) */}
+            <div className="space-y-2 p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <Label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <span>Bảng giá ưu đãi theo số ngày thuê (Tùy chọn)</span>
+                  </Label>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Khách thuê dài ngày tự động nhận đơn giá ưu đãi theo mốc bạn cài đặt.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs font-semibold text-blue-600 border-blue-200 hover:bg-blue-50 cursor-pointer shrink-0"
+                  onClick={() => {
+                    const last = editModelPricingTiers[editModelPricingTiers.length - 1];
+                    const nextMin = last
+                      ? (last.maxDays ? Number(last.maxDays) + 1 : Number(last.minDays) + 3)
+                      : 4;
+                    setEditModelPricingTiers([
+                      ...editModelPricingTiers,
+                      { minDays: nextMin, maxDays: null, pricePerDay: Math.max(10000, editModelPrice - 20000) },
+                    ]);
+                  }}
+                >
+                  <Plus className="h-3 w-3 mr-1" /> Thêm mốc giá
+                </Button>
+              </div>
+
+              {editModelPricingTiers.length === 0 ? (
+                <div className="text-[11px] text-slate-400 italic bg-white p-2.5 rounded-lg border border-dashed text-center">
+                  Chưa cài đặt mốc giá dài ngày. Giá thuê sẽ cố định {editModelPrice.toLocaleString("vi-VN")} đ/ngày cho mọi khoảng thời gian.
+                  <div className="mt-1 text-slate-500 not-italic font-medium">
+                    (Ví dụ gợi ý: 1–3 ngày: {editModelPrice.toLocaleString("vi-VN")}đ | 4–7 ngày: {(Math.max(10000, editModelPrice - 20000)).toLocaleString("vi-VN")}đ | 8 ngày trở lên: {(Math.max(10000, editModelPrice - 40000)).toLocaleString("vi-VN")}đ)
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {editModelPricingTiers.map((tier, idx) => (
+                    <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 text-xs shadow-2xs">
+                      <div className="flex items-center gap-1 min-w-0 flex-1">
+                        <span className="text-[11px] text-slate-500 whitespace-nowrap">Từ</span>
+                        <Input
+                          type="number"
+                          min={1}
+                          className="h-8 w-14 text-center text-xs p-1"
+                          value={tier.minDays}
+                          onChange={(e) => {
+                            const next = [...editModelPricingTiers];
+                            next[idx].minDays = Math.max(1, Number(e.target.value));
+                            setEditModelPricingTiers(next);
+                          }}
+                        />
+                        <span className="text-[11px] text-slate-500 whitespace-nowrap">đến</span>
+                        <Input
+                          type="number"
+                          min={tier.minDays}
+                          placeholder="trở lên"
+                          className="h-8 w-16 text-center text-xs p-1"
+                          value={tier.maxDays === null || tier.maxDays === undefined ? "" : tier.maxDays}
+                          onChange={(e) => {
+                            const next = [...editModelPricingTiers];
+                            const val = e.target.value.trim();
+                            next[idx].maxDays = val === "" ? null : Number(val);
+                            setEditModelPricingTiers(next);
+                          }}
+                        />
+                        <span className="text-[11px] text-slate-500 whitespace-nowrap">ngày :</span>
+                      </div>
+
+                      <div className="flex items-center gap-1 flex-1">
+                        <Input
+                          type="number"
+                          step="5000"
+                          min={0}
+                          placeholder="Đơn giá/ngày"
+                          className="h-8 text-xs font-semibold text-blue-700"
+                          value={tier.pricePerDay || ""}
+                          onChange={(e) => {
+                            const next = [...editModelPricingTiers];
+                            next[idx].pricePerDay = Number(e.target.value);
+                            setEditModelPricingTiers(next);
+                          }}
+                        />
+                        <span className="text-[11px] text-slate-400 font-medium">đ</span>
+                      </div>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 shrink-0 cursor-pointer"
+                        onClick={() => {
+                          setEditModelPricingTiers(editModelPricingTiers.filter((_, i) => i !== idx));
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ))}
+                  <div className="text-[10px] text-slate-500 italic">
+                    * Để trống ô "đến ngày" nếu mốc giá áp dụng cho từ ngày đó trở lên.
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-1.5">

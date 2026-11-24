@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { VehicleModel, Promotion, api } from "@/lib/api";
+import { VehicleModel, Promotion, api, getTieredPricePerDay } from "@/lib/api";
 import { useAuth } from "@/context/auth-context";
 import { useLanguage } from "@/context/language-context";
 import {
@@ -43,6 +43,7 @@ import {
   Percent,
   Plus,
   Minus,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format24hDateTime } from "@/components/common/datetime-24h-picker";
@@ -117,7 +118,10 @@ export function BookingModal({
     ? (end.getTime() - start.getTime()) / (1000 * 60 * 60)
     : 0;
   const dayRent = isTimeValid ? Math.ceil(diffHours / 24) : 0;
-  const unitPrice = Number(model.rentPrice);
+  const basePricePerDay = Number(model.rentPrice);
+  const tieredCalc = getTieredPricePerDay(basePricePerDay, model.pricingTiers, dayRent || 1);
+  const unitPrice = tieredCalc.pricePerDay;
+  const isTierDiscounted = tieredCalc.isDiscounted;
   const maxAvailable = Math.max(1, model.availableCount ?? 1);
   const rentAmount = dayRent * unitPrice * quantity;
   const rawDepositPercent = model.store?.rentalPolicy?.depositPercent !== undefined
@@ -752,9 +756,15 @@ export function BookingModal({
 
                 {/* Price Breakdown Summary */}
                 <div className="rounded-xl bg-white dark:bg-slate-900 p-3 border border-slate-200 dark:border-slate-800 text-xs space-y-1.5 shadow-2xs">
+                  {isTierDiscounted && (
+                    <div className="p-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg text-emerald-800 dark:text-emerald-300 text-[11px] font-bold flex items-center gap-1.5 mb-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                      <span>Đang áp dụng giá ưu đãi thuê dài ngày ({dayRent} ngày: {unitPrice.toLocaleString("vi-VN")} đ/ngày)!</span>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center text-slate-600 dark:text-slate-400">
                     <span>
-                      {t("booking_base_rent", "Giá thuê gốc")} ({dayRent} {t("booking_days", "ngày")}{quantity > 1 ? ` × ${quantity} xe` : ""}):
+                      {t("booking_base_rent", "Giá thuê")} ({dayRent} {t("booking_days", "ngày")}{quantity > 1 ? ` × ${quantity} xe` : ""}):
                     </span>
                     <span className="font-semibold text-slate-800 dark:text-slate-200">{rentAmount.toLocaleString("vi-VN")} đ</span>
                   </div>
