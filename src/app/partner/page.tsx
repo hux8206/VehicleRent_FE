@@ -1132,9 +1132,6 @@ function PartnerDashboardContent() {
               </p>
             </div>
 
-            {/* Thẻ banner video hướng dẫn đối tác */}
-            <PartnerGuideBanner />
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
               {/* Option 1: Master Owner HQ */}
               <div
