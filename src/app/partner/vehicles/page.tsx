@@ -1016,7 +1016,7 @@ function PartnerVehiclesContent() {
 
       {/* ── Modal Add Model ─────────────────────────────────────────────────── */}
       <Dialog open={isModelModalOpen} onOpenChange={setIsModelModalOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl p-6">
+        <DialogContent className="max-w-lg sm:max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl p-6">
           <DialogHeader>
             <DialogTitle className="text-base font-bold">Thêm dòng xe mới (VehicleModel)</DialogTitle>
             <DialogDescription className="text-xs">
@@ -1115,13 +1115,14 @@ function PartnerVehiclesContent() {
               ) : (
                 <div className="space-y-2">
                   {modelPricingTiers.map((tier, idx) => (
-                    <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 text-xs shadow-2xs">
-                      <div className="flex items-center gap-1 min-w-0 flex-1">
-                        <span className="text-[11px] text-slate-500 whitespace-nowrap">Từ</span>
+                    <div key={idx} className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-slate-200/90 text-xs shadow-2xs">
+                      {/* Khoảng ngày */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[11px] text-slate-500 font-medium whitespace-nowrap">Từ</span>
                         <Input
                           type="number"
                           min={1}
-                          className="h-8 w-14 text-center text-xs p-1"
+                          className="h-8 w-12 text-center text-xs font-bold p-0.5 bg-slate-50 border-slate-300"
                           value={tier.minDays}
                           onChange={(e) => {
                             const next = [...modelPricingTiers];
@@ -1129,12 +1130,12 @@ function PartnerVehiclesContent() {
                             setModelPricingTiers(next);
                           }}
                         />
-                        <span className="text-[11px] text-slate-500 whitespace-nowrap">đến</span>
+                        <span className="text-[11px] text-slate-500 font-medium whitespace-nowrap">đến</span>
                         <Input
                           type="number"
                           min={tier.minDays}
                           placeholder="trở lên"
-                          className="h-8 w-16 text-center text-xs p-1"
+                          className="h-8 w-16 text-center text-[11px] p-0.5 bg-slate-50 border-slate-300 placeholder:text-slate-400"
                           value={tier.maxDays === null || tier.maxDays === undefined ? "" : tier.maxDays}
                           onChange={(e) => {
                             const next = [...modelPricingTiers];
@@ -1143,16 +1144,19 @@ function PartnerVehiclesContent() {
                             setModelPricingTiers(next);
                           }}
                         />
-                        <span className="text-[11px] text-slate-500 whitespace-nowrap">ngày :</span>
+                        <span className="text-[11px] text-slate-500 font-medium whitespace-nowrap">ngày</span>
                       </div>
 
-                      <div className="flex items-center gap-1 flex-1">
+                      <span className="text-slate-300 font-bold shrink-0">•</span>
+
+                      {/* Đơn giá */}
+                      <div className="relative flex-1 min-w-[110px]">
                         <Input
                           type="number"
                           step="5000"
                           min={0}
-                          placeholder="Đơn giá/ngày"
-                          className="h-8 text-xs font-semibold text-blue-700"
+                          placeholder="Đơn giá"
+                          className="h-8 text-xs font-bold text-blue-700 pr-12 bg-white border-slate-300"
                           value={tier.pricePerDay || ""}
                           onChange={(e) => {
                             const next = [...modelPricingTiers];
@@ -1160,19 +1164,22 @@ function PartnerVehiclesContent() {
                             setModelPricingTiers(next);
                           }}
                         />
-                        <span className="text-[11px] text-slate-400 font-medium">đ</span>
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-semibold pointer-events-none whitespace-nowrap">
+                          đ/ngày
+                        </span>
                       </div>
 
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 shrink-0 cursor-pointer"
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg shrink-0 cursor-pointer"
                         onClick={() => {
                           setModelPricingTiers(modelPricingTiers.filter((_, i) => i !== idx));
                         }}
+                        title="Xóa mốc giá này"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   ))}
@@ -1255,7 +1262,7 @@ function PartnerVehiclesContent() {
 
       {/* ── Modal Edit Model ─────────────────────────────────────────────────── */}
       <Dialog open={isEditModelModalOpen} onOpenChange={setIsEditModelModalOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl p-6">
+        <DialogContent className="max-w-lg sm:max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl p-6">
           <DialogHeader>
             <DialogTitle className="text-base font-bold">Chỉnh sửa dòng xe (VehicleModel)</DialogTitle>
             <DialogDescription className="text-xs">
@@ -1354,13 +1361,14 @@ function PartnerVehiclesContent() {
               ) : (
                 <div className="space-y-2">
                   {editModelPricingTiers.map((tier, idx) => (
-                    <div key={idx} className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-200 text-xs shadow-2xs">
-                      <div className="flex items-center gap-1 min-w-0 flex-1">
-                        <span className="text-[11px] text-slate-500 whitespace-nowrap">Từ</span>
+                    <div key={idx} className="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-slate-200/90 text-xs shadow-2xs">
+                      {/* Khoảng ngày */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[11px] text-slate-500 font-medium whitespace-nowrap">Từ</span>
                         <Input
                           type="number"
                           min={1}
-                          className="h-8 w-14 text-center text-xs p-1"
+                          className="h-8 w-12 text-center text-xs font-bold p-0.5 bg-slate-50 border-slate-300"
                           value={tier.minDays}
                           onChange={(e) => {
                             const next = [...editModelPricingTiers];
@@ -1368,12 +1376,12 @@ function PartnerVehiclesContent() {
                             setEditModelPricingTiers(next);
                           }}
                         />
-                        <span className="text-[11px] text-slate-500 whitespace-nowrap">đến</span>
+                        <span className="text-[11px] text-slate-500 font-medium whitespace-nowrap">đến</span>
                         <Input
                           type="number"
                           min={tier.minDays}
                           placeholder="trở lên"
-                          className="h-8 w-16 text-center text-xs p-1"
+                          className="h-8 w-16 text-center text-[11px] p-0.5 bg-slate-50 border-slate-300 placeholder:text-slate-400"
                           value={tier.maxDays === null || tier.maxDays === undefined ? "" : tier.maxDays}
                           onChange={(e) => {
                             const next = [...editModelPricingTiers];
@@ -1382,16 +1390,19 @@ function PartnerVehiclesContent() {
                             setEditModelPricingTiers(next);
                           }}
                         />
-                        <span className="text-[11px] text-slate-500 whitespace-nowrap">ngày :</span>
+                        <span className="text-[11px] text-slate-500 font-medium whitespace-nowrap">ngày</span>
                       </div>
 
-                      <div className="flex items-center gap-1 flex-1">
+                      <span className="text-slate-300 font-bold shrink-0">•</span>
+
+                      {/* Đơn giá */}
+                      <div className="relative flex-1 min-w-[110px]">
                         <Input
                           type="number"
                           step="5000"
                           min={0}
-                          placeholder="Đơn giá/ngày"
-                          className="h-8 text-xs font-semibold text-blue-700"
+                          placeholder="Đơn giá"
+                          className="h-8 text-xs font-bold text-blue-700 pr-12 bg-white border-slate-300"
                           value={tier.pricePerDay || ""}
                           onChange={(e) => {
                             const next = [...editModelPricingTiers];
@@ -1399,19 +1410,22 @@ function PartnerVehiclesContent() {
                             setEditModelPricingTiers(next);
                           }}
                         />
-                        <span className="text-[11px] text-slate-400 font-medium">đ</span>
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-semibold pointer-events-none whitespace-nowrap">
+                          đ/ngày
+                        </span>
                       </div>
 
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 shrink-0 cursor-pointer"
+                        className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg shrink-0 cursor-pointer"
                         onClick={() => {
                           setEditModelPricingTiers(editModelPricingTiers.filter((_, i) => i !== idx));
                         }}
+                        title="Xóa mốc giá này"
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   ))}
