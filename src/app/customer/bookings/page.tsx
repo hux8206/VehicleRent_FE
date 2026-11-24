@@ -241,7 +241,7 @@ export default function CustomerBookingsPage() {
     try {
       const res = await api.customer.checkPaymentStatus(bookingId);
       if (res.paid) {
-        toast.success(t("booking_paid_success", "🎉 Đã nhận thanh toán cọc thành công! Đơn xe đã được xác nhận (Confirmed)."), {
+        toast.success(t("booking_paid_success", "Đã nhận thanh toán cọc thành công! Đơn xe đã được xác nhận (Confirmed)."), {
           duration: 5000,
         });
         if (qrModalBooking?.id === bookingId) {
@@ -272,7 +272,7 @@ export default function CustomerBookingsPage() {
           setQrModalBooking(null);
           setQrData(null);
           toast.success(
-            t("booking_paid_success", "🎉 Đã nhận thanh toán cọc thành công! Đơn xe đã được xác nhận (Confirmed)."),
+            t("booking_paid_success", "Đã nhận thanh toán cọc thành công! Đơn xe đã được xác nhận (Confirmed)."),
             { duration: 5000 }
           );
           fetchBookings();
@@ -376,7 +376,7 @@ export default function CustomerBookingsPage() {
 
       toast.success(
         cancelModalBooking.status === 1 || cancelModalBooking.status === 2
-          ? t("cancel_success_refund_msg", "🎉 Đã gửi yêu cầu hủy đơn & hoàn cọc thành công! Hệ thống đã ghi nhận thông tin hoàn tiền cọc của bạn.")
+          ? t("cancel_success_refund_msg", "Đã gửi yêu cầu hủy đơn & hoàn cọc thành công! Hệ thống đã ghi nhận thông tin hoàn tiền cọc của bạn.")
           : t("bookings_cancel_success", "Đã hủy đơn thành công.")
       );
       setCancelModalBooking(null);
@@ -865,8 +865,9 @@ export default function CustomerBookingsPage() {
                                   {b.review.rateStar}/5 {t("review_stars_label", "sao")}
                                 </span>
                               </div>
-                              <span className="text-[10px] text-emerald-800 dark:text-emerald-300 font-bold bg-emerald-100/80 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-800">
-                                ✓ {t("bookings_reviewed", "Đã đánh giá")}
+                              <span className="text-[10px] text-emerald-800 dark:text-emerald-300 font-bold bg-emerald-100/80 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-800 inline-flex items-center gap-1">
+                                <CheckCircle2 className="h-3 w-3" />
+                                <span>{t("bookings_reviewed", "Đã đánh giá")}</span>
                               </span>
                               {b.review.comment && (
                                 <span className="text-[11px] text-slate-600 dark:text-slate-400 italic truncate max-w-[200px]">
@@ -1099,8 +1100,8 @@ export default function CustomerBookingsPage() {
                         >
                           <div className="text-[10px] uppercase font-bold tracking-wider">Trước ≥ 24h (hoặc ≤30p)</div>
                           <div className="text-base font-black text-emerald-700 dark:text-emerald-400 mt-0.5">Hoàn 100%</div>
-                          <div className="text-[10px] mt-0.5">
-                            {policy.percent === 100 ? "Đang áp dụng ✓" : "Hoàn toàn bộ"}
+                          <div className="text-[10px] mt-0.5 font-semibold">
+                            {policy.percent === 100 ? "Đang áp dụng" : "Hoàn toàn bộ"}
                           </div>
                         </div>
 
@@ -1114,8 +1115,8 @@ export default function CustomerBookingsPage() {
                         >
                           <div className="text-[10px] uppercase font-bold tracking-wider">6h-24h / &lt;6h (≤30p)</div>
                           <div className="text-base font-black text-amber-700 dark:text-amber-400 mt-0.5">Hoàn 50%</div>
-                          <div className="text-[10px] mt-0.5">
-                            {policy.percent === 50 ? "Đang áp dụng ✓" : "Bù 50% nhà xe"}
+                          <div className="text-[10px] mt-0.5 font-semibold">
+                            {policy.percent === 50 ? "Đang áp dụng" : "Bù 50% nhà xe"}
                           </div>
                         </div>
 
@@ -1129,8 +1130,8 @@ export default function CustomerBookingsPage() {
                         >
                           <div className="text-[10px] uppercase font-bold tracking-wider">Dưới &lt; 6h (&gt;30p)</div>
                           <div className="text-base font-black text-rose-700 dark:text-rose-400 mt-0.5">Hoàn 0%</div>
-                          <div className="text-[10px] mt-0.5">
-                            {policy.percent === 0 ? "Đang áp dụng ✓" : "Không hoàn cọc"}
+                          <div className="text-[10px] mt-0.5 font-semibold">
+                            {policy.percent === 0 ? "Đang áp dụng" : "Không hoàn cọc"}
                           </div>
                         </div>
                       </div>

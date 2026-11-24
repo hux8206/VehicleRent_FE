@@ -35,6 +35,7 @@ import {
   Lock,
   ExternalLink,
   Loader2,
+  MapPin,
   Search,
   RotateCcw,
   Calendar,
@@ -193,7 +194,7 @@ function PartnerWalletContent() {
           setIsDepositOpen(false);
           setDepositQrInfo(null);
           toast.success(
-            `🎉 Nạp tiền thành công! Số dư ví mới: ${Number(latestWallet.balance).toLocaleString("vi-VN")} đ.`,
+            `Nạp tiền thành công! Số dư ví mới: ${Number(latestWallet.balance).toLocaleString("vi-VN")} đ.`,
             { duration: 5000 }
           );
         }
@@ -400,15 +401,15 @@ function PartnerWalletContent() {
               </Badge>
               {isBranchStaffMode ? (
                 <Badge className="bg-amber-50 text-amber-800 border-amber-200 text-[10px]">
-                  👁️ Chế độ Nhân viên (Chỉ quan sát số dư & xem sổ cái)
+                  Chế độ Nhân viên
                 </Badge>
               ) : isUnlocked ? (
-                <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">
-                  ✓ Quyền Chủ Xe: Mở Khóa Rút Tiền
+                <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px] gap-1">
+                  <CheckCircle2 className="h-3 w-3" /> Quyền Chủ Xe: Đã mở khóa
                 </Badge>
               ) : (
-                <Badge className="bg-slate-100 text-slate-700 border-slate-200 text-[10px]">
-                  🔒 Chế độ Chủ Cửa Hàng (Cần mở khóa để rút tiền)
+                <Badge className="bg-slate-100 text-slate-700 border-slate-200 text-[10px] gap-1">
+                  <Lock className="h-3 w-3" /> Chế độ Chủ Cửa Hàng
                 </Badge>
               )}
             </div>
@@ -551,13 +552,13 @@ function PartnerWalletContent() {
           {/* History Filters Bar */}
           <div className="p-4 sm:p-5 border-b bg-slate-50/40 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
             <div className="lg:col-span-5 relative">
-              <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <Input
                 type="text"
                 placeholder="Tìm theo nội dung, mã đơn, số tiền..."
                 value={historySearch}
                 onChange={(e) => setHistorySearch(e.target.value)}
-                className="pl-9.5 text-xs h-9 rounded-xl bg-white"
+                className="pl-10 text-xs h-9 rounded-xl bg-white"
               />
             </div>
 
@@ -673,8 +674,9 @@ function PartnerWalletContent() {
                               </span>
                             )}
                             {h.booking?.store?.storeName && (
-                              <span className="text-[10px] bg-slate-100 text-slate-600 font-medium px-1.5 py-0.5 rounded border border-slate-200">
-                                📍 {h.booking.store.storeName}
+                              <span className="text-[10px] bg-slate-100 text-slate-600 font-medium px-1.5 py-0.5 rounded border border-slate-200 inline-flex items-center gap-1">
+                                <MapPin className="h-2.5 w-2.5 text-slate-400" />
+                                <span>{h.booking.store.storeName}</span>
                               </span>
                             )}
                           </div>
@@ -947,8 +949,9 @@ function PartnerWalletContent() {
               />
             </div>
 
-            <div className="text-[11px] text-slate-500 bg-amber-50/70 p-2.5 rounded-xl border border-amber-200">
-              ⚠️ Yêu cầu rút tiền tối thiểu là <strong>50.000 VNĐ</strong>. Ban Quản Trị Sàn sẽ xử lý và chuyển khoản cho bạn trong vòng 24 giờ làm việc.
+            <div className="text-[11px] text-slate-500 bg-amber-50/70 p-2.5 rounded-xl border border-amber-200 flex items-start gap-1.5">
+              <AlertCircle className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
+              <span>Yêu cầu rút tiền tối thiểu là <strong>50.000 VNĐ</strong>. Ban Quản Trị Sàn sẽ xử lý và chuyển khoản cho bạn trong vòng 24 giờ làm việc.</span>
             </div>
 
             <DialogFooter className="gap-2">

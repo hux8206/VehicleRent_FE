@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Bike,
+  Check,
   CheckCircle2,
   Clock,
   AlertCircle,
@@ -675,13 +676,13 @@ function PartnerBookingsContent() {
         {/* Search & Date Range Filters Bar */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
           <div className="lg:col-span-5 relative">
-            <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
               type="text"
               placeholder="Tìm theo mã đơn BK-..., tên khách, SĐT, dòng xe, biển số..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9.5 text-xs h-9.5 rounded-xl bg-slate-50/50"
+              className="pl-10 text-xs h-9.5 rounded-xl bg-slate-50/50"
             />
           </div>
 
@@ -894,7 +895,7 @@ function PartnerBookingsContent() {
 
                             {Number(b.compensationAmount) > 0 && (
                               <div className="text-[11px] font-semibold text-rose-800 bg-white/90 px-2.5 py-1 rounded-lg border border-rose-200 inline-block">
-                                💸 Tiền bồi thường đã trừ ví đối tác: +{Number(b.compensationAmount).toLocaleString("vi-VN")} đ
+                                Tiền bồi thường đã trừ ví đối tác: +{Number(b.compensationAmount).toLocaleString("vi-VN")} đ
                               </div>
                             )}
                           </div>
@@ -927,7 +928,7 @@ function PartnerBookingsContent() {
                         )}
                         {Number(b.commissionAmount) === 0 ? (
                           <div className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-bold text-[11px] inline-flex items-center gap-1">
-                            <span>🎁 Miễn 100% hoa hồng (Ưu đãi 5 đơn đầu)</span>
+                            <span>Miễn 100% hoa hồng (Ưu đãi 5 đơn đầu)</span>
                           </div>
                         ) : (
                           <div className="text-amber-700 font-semibold text-[11px]">
@@ -1089,7 +1090,7 @@ function PartnerBookingsContent() {
                                     : "border-slate-300 bg-white"
                                 }`}
                               >
-                                {isSelected ? "✓" : ""}
+                                {isSelected && <Check className="h-3 w-3 text-white" />}
                               </div>
                               <span className="font-mono text-sm">{plate.licensePlate}</span>
                               {isPreAssigned && (

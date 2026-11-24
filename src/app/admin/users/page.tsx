@@ -250,12 +250,12 @@ export default function AdminUsersPage() {
         {/* Filter Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="relative w-full md:w-80">
-            <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-3" />
+            <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
               placeholder="Tìm theo tên, email, SĐT, GPLX, STK..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 text-xs h-10 rounded-xl"
+              className="pl-10 text-xs h-10 rounded-xl"
             />
           </div>
 
@@ -785,12 +785,12 @@ export default function AdminUsersPage() {
                         </div>
 
                         <div className="relative w-full sm:w-64">
-                          <Search className="h-3.5 w-3.5 text-slate-400 absolute left-3 top-2.5" />
+                          <Search className="h-3.5 w-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                           <Input
                             placeholder="Tìm tên dòng xe, hãng..."
                             value={modelSearchQuery}
                             onChange={(e) => setModelSearchQuery(e.target.value)}
-                            className="pl-9 h-9 text-xs rounded-xl bg-white border-slate-200"
+                            className="pl-10 h-9 text-xs rounded-xl bg-white border-slate-200"
                           />
                         </div>
                       </div>
@@ -917,12 +917,12 @@ export default function AdminUsersPage() {
                         </div>
 
                         <div className="relative w-full sm:w-72">
-                          <Search className="h-3.5 w-3.5 text-slate-400 absolute left-3 top-2.5" />
+                          <Search className="h-3.5 w-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                           <Input
                             placeholder="Tìm mã đơn, tên khách, SĐT..."
                             value={bookingSearchQuery}
                             onChange={(e) => setBookingSearchQuery(e.target.value)}
-                            className="pl-9 h-9 text-xs rounded-xl bg-white border-slate-200"
+                            className="pl-10 h-9 text-xs rounded-xl bg-white border-slate-200"
                           />
                         </div>
                       </div>

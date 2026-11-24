@@ -26,7 +26,6 @@ import {
   Camera,
   CheckCircle2,
   AlertCircle,
-  ShieldAlert,
   Copy,
   ExternalLink,
   MapPin,
@@ -269,7 +268,7 @@ export function BookingModal({
         if (statusRes.paid || statusRes.bookingStatus === 1 || statusRes.bookingStatus === 4) {
           clearInterval(pollInterval);
           toast.success(
-            "🎉 Thanh toán thành công! Đơn xe của bạn đã được xác nhận (Confirmed).",
+            "Thanh toán thành công! Đơn xe của bạn đã được xác nhận (Confirmed).",
             { duration: 5000 }
           );
           onClose();
@@ -808,29 +807,6 @@ export function BookingModal({
                   </button>
                 </div>
               </div>
-
-              {/* Refund Policy Summary Callout */}
-              <div className="p-3.5 bg-amber-50/80 dark:bg-amber-950/40 rounded-2xl border border-amber-200/90 dark:border-amber-800 text-xs space-y-1.5">
-                <div className="flex items-center justify-between font-bold text-amber-950 dark:text-amber-200">
-                  <span className="flex items-center gap-1.5 text-xs">
-                    <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
-                    Chính sách hoàn cọc quy định
-                  </span>
-                  <Link
-                    href="/refund"
-                    target="_blank"
-                    className="text-blue-600 dark:text-blue-400 underline text-[11px] font-medium hover:text-blue-800 inline-flex items-center gap-0.5"
-                  >
-                    Xem chi tiết <ExternalLink className="w-3 h-3" />
-                  </Link>
-                </div>
-                <div className="text-[11px] text-amber-900/90 dark:text-amber-300 space-y-0.5 leading-relaxed">
-                  <p>• <strong>Hủy trước ≥ 24h:</strong> Hoàn 100% tiền cọc.</p>
-                  <p>• <strong>Hủy 6h - 24h:</strong> Hoàn 100% (nếu đặt ≤30p) hoặc Hoàn 50% (quá 30p).</p>
-                  <p>• <strong>Hủy &lt; 6h:</strong> Hoàn 50% (nếu đặt ≤30p) hoặc Mất cọc 100% (quá 30p).</p>
-                  <p className="text-emerald-700 dark:text-emerald-400 font-bold">• <strong>Chủ xe không có xe giao:</strong> Hoàn 100% tiền cọc + Bồi thường 20% (tối thiểu 50.000đ).</p>
-                </div>
-              </div>
             </form>
           ) : (
             /* Step 2: Payment with VietQR & 10-Minute Countdown */
@@ -915,7 +891,7 @@ export function BookingModal({
                   </div>
 
                   <div className="mt-2.5 text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 p-2 rounded-xl text-center leading-normal max-w-[220px] border border-slate-100 dark:border-slate-700">
-                    💡 <strong>{t("booking_mobile_tip_title", "Mẹo điện thoại:")}</strong> {t("booking_mobile_tip_body", "Tải QR về máy, sau đó mở App ngân hàng chọn Quét QR từ Thư viện ảnh để thanh toán siêu nhanh!")}
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">{t("booking_mobile_tip_title", "Mẹo:")}</span> {t("booking_mobile_tip_body", "Tải QR về máy, sau đó mở App ngân hàng chọn Quét QR từ Thư viện ảnh để thanh toán siêu nhanh!")}
                   </div>
                 </div>
 
@@ -1060,7 +1036,7 @@ export function BookingModal({
                   try {
                     const res = await api.customer.checkPaymentStatus(bookingResult.booking.id);
                     if (res.paid) {
-                      toast.success(t("booking_paid_success", "🎉 Đã nhận thanh toán cọc thành công!"));
+                      toast.success(t("booking_paid_success", "Đã nhận thanh toán cọc thành công!"));
                       onClose();
                       router.push("/customer/bookings");
                     } else {

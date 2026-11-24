@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookingModal } from "@/components/customer/booking-modal";
-import { DigitalHandoverModal } from "@/components/customer/digital-handover-modal";
 import {
   DateTime24hPicker,
   formatLocalIsoString,
@@ -24,7 +23,6 @@ import {
   Store,
   Bike,
   AlertCircle,
-  FileCheck2,
   Star,
   User,
 } from "lucide-react";
@@ -51,7 +49,6 @@ export default function VehicleDetailPage() {
   const [model, setModel] = useState<VehicleModel | null>(null);
   const [selectedImg, setSelectedImg] = useState<string>("");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [isHandoverOpen, setIsHandoverOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [minDeposit, setMinDeposit] = useState<number>(0);
 
@@ -457,59 +454,6 @@ export default function VehicleDetailPage() {
               </CardContent>
             </Card>
 
-            {/* 6-Point Safety Inspection & Digital Handover Seal */}
-            <Card className="rounded-2xl border border-slate-200/90 bg-white text-slate-900 shadow-xs overflow-hidden">
-              <CardContent className="p-6 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
-                      <FileCheck2 className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold">
-                        <CheckCircle2 className="h-3 w-3" /> Kiểm định 6 điểm kỹ thuật số
-                      </div>
-                      <h3 className="text-base font-black text-slate-900 mt-0.5">
-                        Biên Bản Bàn Giao & Kiểm Tra 6 Điểm Kỹ Thuật Số
-                      </h3>
-                    </div>
-                  </div>
-
-                  <Button
-                    type="button"
-                    onClick={() => setIsHandoverOpen(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl h-9 px-4 gap-1.5 shadow-xs"
-                  >
-                    <span>Xem biên bản bàn giao xe</span>
-                    <FileCheck2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Trước khi nhận xe, cửa hàng cùng bạn kiểm tra phanh, lốp, đèn, gương, vạch xăng và chụp ảnh 4 góc lưu trữ điện tử. Cam kết <strong className="text-slate-900 font-bold">Không phạt vạ trầy xước hao mòn</strong> và <strong className="text-slate-900 font-bold">Cứu hộ khẩn cấp 24/7</strong> mọi cung đường.
-                </p>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
-                    <div className="text-[11px] font-bold text-slate-700">Phanh & Tay Lái</div>
-                    <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ Đã kiểm tra</div>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
-                    <div className="text-[11px] font-bold text-slate-700">Đèn & Xi-Nhan</div>
-                    <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ Đạt chuẩn đêm</div>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
-                    <div className="text-[11px] font-bold text-slate-700">Lốp & Áp Suất</div>
-                    <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">✓ Gai sâu an toàn</div>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-center">
-                    <div className="text-[11px] font-bold text-slate-700">Hợp Đồng & Ảnh</div>
-                    <div className="text-[10px] text-blue-600 font-semibold mt-0.5">✓ Ký số minh bạch</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Store & Rental Policy Card */}
             <Card className="rounded-2xl border-slate-200/80 shadow-xs bg-white">
               <CardHeader className="p-6 pb-3 border-b">
@@ -681,15 +625,6 @@ export default function VehicleDetailPage() {
           model={model}
           startTime={startTime}
           endTime={endTime}
-        />
-      )}
-
-      {/* Digital Handover & 6-Point Inspection Modal */}
-      {model && (
-        <DigitalHandoverModal
-          isOpen={isHandoverOpen}
-          onClose={() => setIsHandoverOpen(false)}
-          vehicle={model}
         />
       )}
     </div>

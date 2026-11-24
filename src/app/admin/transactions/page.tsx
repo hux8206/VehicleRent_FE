@@ -662,7 +662,7 @@ export default function AdminTransactionsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 pt-1">
             {/* Search Input */}
             <div className="lg:col-span-5 relative">
-              <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <Input
                 type="text"
                 placeholder={
@@ -676,7 +676,7 @@ export default function AdminTransactionsPage() {
                 }
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9.5 text-xs h-10 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
+                className="pl-10 text-xs h-10 rounded-xl bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
               />
             </div>
 

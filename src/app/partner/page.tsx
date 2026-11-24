@@ -1128,7 +1128,7 @@ function PartnerDashboardContent() {
                 {t("partner_welcome", "Chào mừng")}, {user?.fullName || t("partner_default_host", "Chủ nhà xe đối tác")}!
               </h1>
               <p className="text-sm text-slate-500 max-w-xl mx-auto">
-                {t("partner_portal_desc", "Hệ thống chia làm 2 phân hệ độc lập nhằm tối ưu phân quyền giữa chủ sở hữu doanh nghiệp và nhân viên phụ trách vận hành chi nhánh.")}
+                {t("partner_portal_desc", "Hệ thống phân quyền độc lập giữa chủ sở hữu doanh nghiệp và nhân viên phụ trách vận hành chi nhánh.")}
               </p>
             </div>
 
@@ -1159,8 +1159,8 @@ function PartnerDashboardContent() {
                     <h3 className="text-xl font-black text-slate-900 group-hover:text-amber-700 transition-colors">
                       {t("partner_owner_portal_title", "1. Quản lý riêng của chủ cửa hàng")}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                      {t("partner_owner_portal_desc", "Dành riêng cho chủ sở hữu: kiểm soát toàn diện doanh thu các cơ sở, quản trị ví, nạp/rút tiền và đăng ký chi nhánh mới.")}
+                    <p className="text-xs text-slate-500 mt-1">
+                      {t("partner_owner_portal_desc", "Kiểm soát toàn diện doanh thu, quản trị ví và đăng ký chi nhánh mới.")}
                     </p>
                   </div>
 
@@ -1221,8 +1221,8 @@ function PartnerDashboardContent() {
                     <h3 className="text-xl font-black text-slate-900 group-hover:text-blue-600 transition-colors">
                       {t("partner_branch_portal_title", "2. Quản lý vận hành chi nhánh")}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                      {t("partner_branch_portal_desc", "Dành cho quản lý chi nhánh hoặc nhân viên trực quầy: chọn cơ sở làm việc, bàn giao xe cho khách, quản lý biển số xe thực tế.")}
+                    <p className="text-xs text-slate-500 mt-1">
+                      {t("partner_branch_portal_desc", "Tiếp nhận đơn thuê, bàn giao xe cho khách và quản lý kho biển số thực tế.")}
                     </p>
                   </div>
 
@@ -1274,7 +1274,7 @@ function PartnerDashboardContent() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Badge className="bg-amber-400 text-amber-950 font-black text-[10px] uppercase tracking-wider">
-                    {t("partner_owner_badge", "👑 Phân hệ chủ sở hữu (Master HQ)")}
+                    {t("partner_owner_badge", "Phân hệ chủ sở hữu (Master HQ)")}
                   </Badge>
                   <span className="text-xs text-amber-200">{t("partner_owner_unlocked_hint", "• Đang mở khóa bảo mật")}</span>
                 </div>
@@ -1785,7 +1785,7 @@ function PartnerDashboardContent() {
                       </Button>
                       <span className="text-slate-300">|</span>
                       <Badge className="bg-blue-600 text-white text-[10px] uppercase font-bold">
-                        {t("partner_branch_ops_badge", "🏪 Phân hệ vận hành chi nhánh")}
+                        {t("partner_branch_ops_badge", "Phân hệ vận hành chi nhánh")}
                       </Badge>
                     </div>
                     <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
@@ -1955,7 +1955,7 @@ function PartnerDashboardContent() {
                       </Button>
                       <span className="text-slate-300">|</span>
                       <Badge className="bg-emerald-600 text-white text-[10px] uppercase font-bold">
-                        🏪 Cơ Sở: {selectedBranch.storeName}
+                        Cơ Sở: {selectedBranch.storeName}
                       </Badge>
                       {selectedBranch.status === 1 && (
                         <Badge className="bg-emerald-600 text-white text-[10px] gap-1">
@@ -2192,7 +2192,7 @@ function PartnerDashboardContent() {
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-emerald-800">
-                            Số dư ví đối tác (chế độ quan sát - dành cho nhân viên)
+                            Số dư ví đối tác
                           </span>
                           {Number(wallet?.balance || 0) < 0 && (
                             <Badge className="bg-orange-600 text-white text-[10px] animate-pulse">
@@ -2209,13 +2209,21 @@ function PartnerDashboardContent() {
                             Hạn mức tín dụng bảo lãnh: -{Number(wallet?.creditLimit || 500000).toLocaleString("vi-VN")} đ
                           </span>
                         </div>
-                        <p className="text-xs text-slate-600 mt-1 max-w-xl">
-                          {Number(wallet?.balance || 0) > 0
-                            ? "✅ Số dư ví đang an toàn! Các đơn đặt xe mới của khách sẽ tự động được hệ thống phê duyệt ngay."
-                            : Number(wallet?.balance || 0) > -(Number(wallet?.creditLimit || 500000))
-                            ? "⚠️ Số dư ví đang âm nhưng vẫn trong hạn mức bảo lãnh. Hãy báo Chủ cửa hàng nạp thêm để tránh đơn bị hoãn."
-                            : "🚨 Cảnh báo: Ví đã chạm trần nợ tối đa! Các đơn mới sẽ bị chuyển vào Hàng chờ FIFO đến khi Chủ cửa hàng nạp bù ví."}
-                        </p>
+                        <div className="text-xs font-medium mt-1">
+                          {Number(wallet?.balance || 0) > 0 ? (
+                            <span className="text-emerald-700 flex items-center gap-1">
+                              <CheckCircle2 className="h-3.5 w-3.5" /> Số dư ví an toàn, tự động duyệt đơn mới
+                            </span>
+                          ) : Number(wallet?.balance || 0) > -(Number(wallet?.creditLimit || 500000)) ? (
+                            <span className="text-amber-700 flex items-center gap-1">
+                              <AlertCircle className="h-3.5 w-3.5" /> Đang dùng hạn mức bảo lãnh (-{Number(wallet?.creditLimit || 500000).toLocaleString("vi-VN")} đ)
+                            </span>
+                          ) : (
+                            <span className="text-rose-600 font-bold flex items-center gap-1">
+                              <AlertCircle className="h-3.5 w-3.5" /> Đã chạm trần nợ, đơn mới chuyển vào hàng chờ
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
@@ -2523,13 +2531,13 @@ function PartnerDashboardContent() {
                   {/* Search & Date Filters */}
                   <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
                     <div className="lg:col-span-5 relative">
-                      <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <Search className="h-4 w-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                       <Input
                         type="text"
                         placeholder="Tìm theo mã đơn BK-..., nội dung chuyển tiền..."
                         value={branchTxSearch}
                         onChange={(e) => setBranchTxSearch(e.target.value)}
-                        className="pl-9.5 text-xs h-9.5 rounded-xl bg-white"
+                        className="pl-10 text-xs h-9.5 rounded-xl bg-white"
                       />
                     </div>
 
@@ -3471,11 +3479,11 @@ function PartnerDashboardContent() {
               </div>
               <div className="space-y-0.5 flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_active_title", "🟢 Đang hoạt động")}</span>
+                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_active_title", "Đang hoạt động")}</span>
                   <Badge className="bg-emerald-600 text-white text-[10px] shrink-0 whitespace-nowrap">{t("partner_status_active_badge", "Hiển thị")}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">
-                  {t("partner_status_active_desc", "Chi nhánh mở cửa đón khách. Xe của chi nhánh được hiển thị công khai trên website để khách hàng tìm kiếm và đặt thuê.")}
+                  {t("partner_status_active_desc", "Chi nhánh mở cửa đón khách và hiển thị xe trên website.")}
                 </p>
               </div>
             </div>
@@ -3498,11 +3506,11 @@ function PartnerDashboardContent() {
               </div>
               <div className="space-y-0.5 flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_paused_title", "⏸️ Tạm ngừng hoạt động")}</span>
+                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_paused_title", "Tạm ngừng hoạt động")}</span>
                   <Badge className="bg-amber-500 text-white text-[10px] shrink-0 whitespace-nowrap">{t("partner_status_paused_badge", "Tạm ẩn")}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">
-                  {t("partner_status_paused_desc", "Tạm dừng nhận khách mới (nghỉ phép, nghỉ lễ, đóng cửa tạm thời). Khách hàng sẽ không tìm thấy chi nhánh và các dòng xe này.")}
+                  {t("partner_status_paused_desc", "Tạm dừng đón khách mới và tạm ẩn các dòng xe trên sàn.")}
                 </p>
               </div>
             </div>
@@ -3525,11 +3533,11 @@ function PartnerDashboardContent() {
               </div>
               <div className="space-y-0.5 flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_maint_title", "🔧 Đang sửa chữa / bảo trì")}</span>
+                  <span className="font-extrabold text-sm text-slate-900">{t("partner_status_maint_title", "Đang sửa chữa / bảo trì")}</span>
                   <Badge className="bg-indigo-600 text-white text-[10px] shrink-0 whitespace-nowrap">{t("partner_status_maint_badge", "Bảo trì")}</Badge>
                 </div>
                 <p className="text-xs text-slate-500">
-                  {t("partner_status_maint_desc", "Cơ sở đang sửa chữa mặt bằng, bảo dưỡng thiết bị hoặc kiểm kê lại kho xe. Khách hàng sẽ không thể đặt xe trong thời gian này.")}
+                  {t("partner_status_maint_desc", "Cơ sở bảo dưỡng mặt bằng hoặc kiểm kê lại kho xe.")}
                 </p>
               </div>
             </div>
