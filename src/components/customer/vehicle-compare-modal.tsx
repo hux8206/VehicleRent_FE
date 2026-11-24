@@ -43,11 +43,12 @@ export function VehicleCompareModal({
 }: VehicleCompareModalProps) {
   const { t } = useLanguage();
   const typeLabels: Record<number, string> = {
-    0: t("vehicle_type_scooter_manual", "Xe số"),
-    1: t("vehicle_type_scooter_auto", "Tay ga"),
-    2: t("vehicle_type_clutch", "Côn tay"),
-    3: t("vehicle_type_electric", "Xe điện"),
-    4: t("vehicle_type_car", "Ô tô"),
+    0: t("type_manual", "Xe số"),
+    1: t("type_scooter", "Xe tay ga"),
+    2: t("type_clutch", "Xe tay côn"),
+    3: t("type_electric", "Xe điện"),
+    4: t("type_car", "Ô tô"),
+    5: t("type_electric_car", "Ô tô điện"),
   };
 
   const typeSpecs: Record<
@@ -94,6 +95,13 @@ export function VehicleCompareModal({
       terrain: "Đường trường, cao tốc, du lịch gia đình",
       keyType: "Smartkey Engine Start / Stop",
       advantage: "Không gian 4-7 chỗ rộng rãi, máy lạnh hai chiều, an toàn vượt trội",
+    },
+    5: {
+      fuelUsage: "0đ tiền xăng (Sạc ~15.000đ / 100km)",
+      trunkCapacity: "450 - 550 L (Chứa 3-4 vali cỡ lớn)",
+      terrain: "Đường trường, nội đô, cao tốc",
+      keyType: "Smartkey / Thẻ từ NFC / App",
+      advantage: "Êm ái tuyệt đối, không mùi xăng, công nghệ hiện đại, chi phí vận hành siêu rẻ",
     },
   };
 

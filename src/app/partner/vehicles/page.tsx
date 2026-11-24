@@ -825,7 +825,13 @@ function PartnerVehiclesContent() {
                   <div>
                     <div className="flex items-center gap-2 mb-1">
                       <Badge variant="outline" className="text-xs bg-white text-blue-700">
-                        {selectedModel.brand} • {selectedModel.type === 1 ? "Tay ga" : selectedModel.type === 0 ? "Xe số" : selectedModel.type === 2 ? "Côn tay" : selectedModel.type === 3 ? "Xe điện" : "Ô tô"}
+                        {selectedModel.brand} • {
+                          selectedModel.type === 1 ? "Xe tay ga" :
+                          selectedModel.type === 0 ? "Xe số" :
+                          selectedModel.type === 2 ? "Xe tay côn" :
+                          selectedModel.type === 3 ? "Xe điện" :
+                          selectedModel.type === 5 ? "Ô tô điện" : "Ô tô"
+                        }
                       </Badge>
                       <button
                         type="button"
@@ -1021,11 +1027,12 @@ function PartnerVehiclesContent() {
                   onChange={(e) => setModelType(Number(e.target.value))}
                   className="w-full h-10 px-3 text-xs rounded-lg border bg-background"
                 >
-                  <option value={1}>1: Xe tay ga</option>
-                  <option value={0}>0: Xe số phổ thông</option>
-                  <option value={2}>2: Xe côn tay / Phượt</option>
-                  <option value={3}>3: Xe điện thông minh</option>
-                  <option value={4}>4: Ô tô (4 - 7 chỗ)</option>
+                  <option value={1}>Xe tay ga</option>
+                  <option value={0}>Xe số</option>
+                  <option value={2}>Xe tay côn</option>
+                  <option value={3}>Xe điện</option>
+                  <option value={4}>Ô tô</option>
+                  <option value={5}>Ô tô điện</option>
                 </select>
               </div>
             </div>
@@ -1150,11 +1157,12 @@ function PartnerVehiclesContent() {
                   onChange={(e) => setEditModelType(Number(e.target.value))}
                   className="w-full h-10 px-3 text-xs rounded-lg border bg-background"
                 >
-                  <option value={1}>1: Xe tay ga</option>
-                  <option value={0}>0: Xe số phổ thông</option>
-                  <option value={2}>2: Xe côn tay / Phượt</option>
-                  <option value={3}>3: Xe điện thông minh</option>
-                  <option value={4}>4: Ô tô (4 - 7 chỗ)</option>
+                  <option value={1}>Xe tay ga</option>
+                  <option value={0}>Xe số</option>
+                  <option value={2}>Xe tay côn</option>
+                  <option value={3}>Xe điện</option>
+                  <option value={4}>Ô tô</option>
+                  <option value={5}>Ô tô điện</option>
                 </select>
               </div>
             </div>

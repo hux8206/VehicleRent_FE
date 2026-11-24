@@ -605,10 +605,11 @@ export default function AdminUsersPage() {
 
                 const typeLabels: Record<number, string> = {
                   0: "Xe số",
-                  1: "Tay ga",
-                  2: "Côn tay",
+                  1: "Xe tay ga",
+                  2: "Xe tay côn",
                   3: "Xe điện",
                   4: "Ô tô",
+                  5: "Ô tô điện",
                 };
 
                 const bookingStatusLabels: Record<number, { text: string; color: string }> = {

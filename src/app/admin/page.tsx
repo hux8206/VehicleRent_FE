@@ -219,9 +219,10 @@ export default function AdminDashboardPage() {
     return [
       { category: "Xe số", type: 0, total: 0, rented: 0 },
       { category: "Xe tay ga", type: 1, total: 0, rented: 0 },
-      { category: "Côn tay", type: 2, total: 0, rented: 0 },
+      { category: "Xe tay côn", type: 2, total: 0, rented: 0 },
       { category: "Xe điện", type: 3, total: 0, rented: 0 },
       { category: "Ô tô", type: 4, total: 0, rented: 0 },
+      { category: "Ô tô điện", type: 5, total: 0, rented: 0 },
     ];
   }, [platformStats]);
 

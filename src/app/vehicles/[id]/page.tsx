@@ -226,7 +226,7 @@ export default function VehicleDetailPage() {
                   <div className="flex items-center gap-2">
                     <Badge className="bg-blue-600 text-white font-semibold text-xs">{model.brand}</Badge>
                     <Badge variant="outline" className="text-xs">
-                      {model.type === 1 ? "Tay ga" : model.type === 0 ? "Xe số" : model.type === 2 ? "Côn tay" : model.type === 3 ? "Xe điện" : "Ô tô"}
+                      {model.type === 1 ? "Xe tay ga" : model.type === 0 ? "Xe số" : model.type === 2 ? "Xe tay côn" : model.type === 3 ? "Xe điện" : model.type === 5 ? "Ô tô điện" : "Ô tô"}
                     </Badge>
                   </div>
                   <Badge

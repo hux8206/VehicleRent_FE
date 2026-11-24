@@ -170,7 +170,7 @@ export interface VehicleModel {
   storeId: number;
   name: string;
   brand: string;
-  type: number; // 0: Xe so, 1: Tay ga, 2: Con tay, 3: O to/Xe dien
+  type: number; // 0: Xe số, 1: Xe tay ga, 2: Xe tay côn, 3: Xe điện, 4: Ô tô, 5: Ô tô điện
   rentPrice: number | string;
   specifications?: string;
   images?: string[];

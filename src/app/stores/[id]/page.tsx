@@ -242,7 +242,7 @@ export default function StoreDetailPage() {
                           />
                           <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 flex gap-1 sm:gap-1.5">
                             <span className="bg-white/95 text-slate-900 font-bold text-[9px] sm:text-[10px] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full shadow-xs">
-                              {v.type === 1 ? "Tay ga" : v.type === 0 ? "Xe số" : v.type === 2 ? "Côn tay" : v.type === 3 ? "Xe điện" : "Ô tô"}
+                              {v.type === 1 ? "Xe tay ga" : v.type === 0 ? "Xe số" : v.type === 2 ? "Xe tay côn" : v.type === 3 ? "Xe điện" : v.type === 5 ? "Ô tô điện" : "Ô tô"}
                             </span>
                             <span className="bg-slate-900/80 text-white font-semibold text-[9px] sm:text-[10px] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full">
                               {v.brand}

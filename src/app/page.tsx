@@ -330,10 +330,11 @@ export default function HomePage() {
 
   const typeLabels: Record<number, string> = {
     0: t("type_manual", "Xe số"),
-    1: t("type_scooter", "Tay ga"),
-    2: t("type_clutch", "Côn tay"),
+    1: t("type_scooter", "Xe tay ga"),
+    2: t("type_clutch", "Xe tay côn"),
     3: t("type_electric", "Xe điện"),
     4: t("type_car", "Ô tô"),
+    5: t("type_electric_car", "Ô tô điện"),
   };
 
   // Stagger entrance variants
@@ -518,6 +519,7 @@ export default function HomePage() {
                     { type: 2, label: t("type_clutch", "Xe tay côn") },
                     { type: 3, label: t("type_electric", "Xe điện") },
                     { type: 4, label: t("type_car", "Ô tô") },
+                    { type: 5, label: t("type_electric_car", "Ô tô điện") },
                   ].map((item) => (
                     <motion.button
                       key={item.type}
