@@ -30,10 +30,13 @@ import {
 } from "lucide-react";
 import { ZaloChatButton } from "@/components/common/zalo-chat-button";
 import { StoreReputationBadge } from "@/components/common/store-reputation-badge";
+import { useAuth } from "@/context/auth-context";
+import { toast } from "sonner";
 
 export default function VehicleDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const id = Number(params.id);
 
   const now = new Date();
@@ -455,7 +458,18 @@ export default function VehicleDetailPage() {
                 <Button
                   className="w-full h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md disabled:bg-slate-200 disabled:text-slate-500"
                   disabled={availableCount <= 0 || !isTimeValid || !isHoursValid}
-                  onClick={() => setIsBookingOpen(true)}
+                  onClick={() => {
+                    if (!user) {
+                      toast.info("Vui lòng đăng nhập để đặt xe!");
+                      const currentPath =
+                        typeof window !== "undefined"
+                          ? window.location.pathname + window.location.search
+                          : `/vehicles/${id}`;
+                      router.push(`/login?callbackUrl=${encodeURIComponent(currentPath)}`);
+                      return;
+                    }
+                    setIsBookingOpen(true);
+                  }}
                 >
                   {!isTimeValid
                     ? "Thời gian trả xe không hợp lệ"

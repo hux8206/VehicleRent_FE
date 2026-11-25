@@ -332,6 +332,17 @@ export function BookingModal({
   };
 
   const handleConfirmAndProceedToPayment = async () => {
+    if (!user) {
+      onClose();
+      toast.info("Vui lòng đăng nhập để đặt xe!");
+      const currentPath =
+        typeof window !== "undefined"
+          ? window.location.pathname + window.location.search
+          : "/";
+      router.push(`/login?callbackUrl=${encodeURIComponent(currentPath)}`);
+      return;
+    }
+
     setShowRefundConfirm(false);
     setIsSubmitting(true);
     try {
@@ -364,7 +375,18 @@ export function BookingModal({
       setTimeLeft(600);
       toast.success("Đã tạo phiên giữ xe 10 phút! Vui lòng thanh toán cọc.");
     } catch (err: any) {
-      toast.error(err.message || "Không thể đặt xe lúc này. Vui lòng thử lại!");
+      const msg = err?.message || "";
+      if (msg.toLowerCase().includes("unauthorized") || msg.includes("401")) {
+        onClose();
+        toast.info("Phiên đăng nhập đã hết hạn hoặc chưa đăng nhập. Vui lòng đăng nhập để đặt xe!");
+        const currentPath =
+          typeof window !== "undefined"
+            ? window.location.pathname + window.location.search
+            : "/";
+        router.push(`/login?callbackUrl=${encodeURIComponent(currentPath)}`);
+        return;
+      }
+      toast.error(msg || "Không thể đặt xe lúc này. Vui lòng thử lại!");
     } finally {
       setIsSubmitting(false);
     }
