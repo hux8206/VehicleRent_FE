@@ -553,7 +553,7 @@ export default function AdminTransactionsPage() {
               {walletHistories.length} {t("admin_tx_turns_label", "lượt")}
             </div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400">
-              {t("admin_tx_wallet_sub", "Nạp ví, hoa hồng 10%, hoàn cọc")}
+              Nạp ví, hoa hồng sàn, hoàn cọc
             </div>
           </Card>
         </div>
@@ -734,7 +734,7 @@ export default function AdminTransactionsPage() {
                 {activeTab === "wallet" && (
                   <>
                     <option value="0">{t("wallet_type_deposit", "Nạp ví (Deposit)")}</option>
-                    <option value="1">{t("wallet_type_commission", "Trừ hoa hồng sàn 10%")}</option>
+                    <option value="1">Trừ hoa hồng sàn</option>
                     <option value="2">{t("wallet_type_refund", "Hoàn tiền (Refund)")}</option>
                     <option value="3">{t("wallet_type_withdrawal", "Rút tiền (Withdrawal)")}</option>
                   </>
@@ -1295,7 +1295,7 @@ export default function AdminTransactionsPage() {
                             )}
                             {isCommission && (
                               <Badge className="bg-purple-50 text-purple-800 border-purple-300 text-[10px] gap-1">
-                                <Receipt className="h-3 w-3" /> Trừ hoa hồng 10%
+                                <Receipt className="h-3 w-3" /> Trừ hoa hồng sàn
                               </Badge>
                             )}
                             {isRefund && (

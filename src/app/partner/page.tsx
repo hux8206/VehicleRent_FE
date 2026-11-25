@@ -278,8 +278,12 @@ function PartnerDashboardContent() {
       setBookings(bookingsData || []);
       setHasOwnerPassword(!!passStatus?.hasOwnerPassword);
       setIsOwnerPasswordEnabled(passStatus?.isOwnerPasswordEnabled !== false);
-      setMinDepositConfig(Number(sysConfig?.minDepositPercent || 15));
-      setNewBranchDeposit(Number(sysConfig?.minDepositPercent || 15));
+      const fetchedMinDeposit =
+        sysConfig?.minDepositPercent !== undefined && sysConfig?.minDepositPercent !== null
+          ? Number(sysConfig.minDepositPercent)
+          : 15;
+      setMinDepositConfig(fetchedMinDeposit);
+      setNewBranchDeposit(fetchedMinDeposit);
       setUpdateRequests(requestsData || []);
     } finally {
       setIsLoading(false);
@@ -651,6 +655,7 @@ function PartnerDashboardContent() {
       setNewBranchAddress("");
       setNewBranchLat(undefined);
       setNewBranchLng(undefined);
+      setNewBranchDeposit(minDepositConfig);
       setNewBranchDesc("");
       setNewBranchImage("");
       setNewBranchOpenTime("07:00");
@@ -674,8 +679,9 @@ function PartnerDashboardContent() {
     setUpdateLng(selectedBranch.longitude);
     setUpdatePhone(selectedBranch.phoneContact);
     setUpdateDeposit(
-      selectedBranch.rentalPolicy?.depositPercent
-        ? Number(selectedBranch.rentalPolicy.depositPercent)
+      selectedBranch.rentalPolicy?.depositPercent !== undefined &&
+      selectedBranch.rentalPolicy?.depositPercent !== null
+        ? Math.max(minDepositConfig, Number(selectedBranch.rentalPolicy.depositPercent))
         : minDepositConfig
     );
     setUpdateDesc(selectedBranch.description || "");
@@ -881,7 +887,7 @@ function PartnerDashboardContent() {
   const pendingBranches = stores.filter((s) => s.status === 0);
 
   const balance = wallet?.balance !== undefined ? Number(wallet.balance) : 0;
-  const creditLimit = wallet?.creditLimit !== undefined ? Number(wallet.creditLimit) : 500000;
+  const creditLimit = wallet?.creditLimit !== undefined && wallet?.creditLimit !== null ? Number(wallet.creditLimit) : 500000;
 
   // Real calculations (Không dùng số liệu ảo để người dùng tự do test hệ thống)
   const completedBookings = bookings.filter((b) => b.status === 4);
@@ -1708,7 +1714,11 @@ function PartnerDashboardContent() {
                       <div className="flex items-center gap-2 text-xs">
                         <div className="text-right hidden sm:block mr-2">
                           <span className="text-slate-500">{t("partner_branch_deposit_rate", "Mức cọc:")} </span>
-                          <strong className="text-slate-900">{s.rentalPolicy?.depositPercent || 15}%</strong>
+                          <strong className="text-slate-900">
+                            {s.rentalPolicy?.depositPercent !== undefined && s.rentalPolicy?.depositPercent !== null
+                              ? Math.max(minDepositConfig, Number(s.rentalPolicy.depositPercent))
+                              : minDepositConfig}%
+                          </strong>
                         </div>
 
                         {[1, 3, 4].includes(s.status) && (
@@ -2223,7 +2233,7 @@ function PartnerDashboardContent() {
                             <span className="text-sm font-bold text-slate-500">VNĐ</span>
                           </div>
                           <span className="text-xs text-slate-500">
-                            Hạn mức tín dụng bảo lãnh: -{Number(wallet?.creditLimit || 500000).toLocaleString("vi-VN")} đ
+                            Hạn mức tín dụng bảo lãnh: -{creditLimit.toLocaleString("vi-VN")} đ
                           </span>
                         </div>
                         <div className="text-xs font-medium mt-1">
@@ -2231,13 +2241,17 @@ function PartnerDashboardContent() {
                             <span className="text-emerald-700 flex items-center gap-1">
                               <CheckCircle2 className="h-3.5 w-3.5" /> Số dư ví an toàn, tự động duyệt đơn mới
                             </span>
-                          ) : Number(wallet?.balance || 0) > -(Number(wallet?.creditLimit || 500000)) ? (
+                          ) : creditLimit === 0 && Number(wallet?.balance || 0) === 0 ? (
+                            <span className="text-slate-600 flex items-center gap-1">
+                              <AlertCircle className="h-3.5 w-3.5" /> Ví 0 đ (Hệ thống không cho phép nợ ví)
+                            </span>
+                          ) : Number(wallet?.balance || 0) > -creditLimit ? (
                             <span className="text-amber-700 flex items-center gap-1">
-                              <AlertCircle className="h-3.5 w-3.5" /> Đang dùng hạn mức bảo lãnh (-{Number(wallet?.creditLimit || 500000).toLocaleString("vi-VN")} đ)
+                              <AlertCircle className="h-3.5 w-3.5" /> Đang dùng hạn mức bảo lãnh (-{creditLimit.toLocaleString("vi-VN")} đ)
                             </span>
                           ) : (
                             <span className="text-rose-600 font-bold flex items-center gap-1">
-                              <AlertCircle className="h-3.5 w-3.5" /> Đã chạm trần nợ, đơn mới chuyển vào hàng chờ
+                              <AlertCircle className="h-3.5 w-3.5" /> Đã chạm trần nợ, cần nạp bù số dư
                             </span>
                           )}
                         </div>
@@ -2981,6 +2995,9 @@ function PartnerDashboardContent() {
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">
                   {t("partner_add_branch_deposit_label", "Tỷ lệ tiền cọc (%)")} <span className="text-red-500">*</span>
+                  <span className="ml-1 text-[10px] font-normal text-slate-400">
+                    (Tối thiểu {minDepositConfig}%)
+                  </span>
                 </Label>
                 <Input
                   type="number"
@@ -3162,6 +3179,9 @@ function PartnerDashboardContent() {
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">
                   Tỷ lệ tiền cọc (%) <span className="text-red-500">*</span>
+                  <span className="ml-1 text-[10px] font-normal text-slate-400">
+                    (Tối thiểu {minDepositConfig}%)
+                  </span>
                 </Label>
                 <Input
                   type="number"

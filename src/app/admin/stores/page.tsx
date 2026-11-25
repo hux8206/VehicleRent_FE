@@ -357,7 +357,9 @@ export default function AdminStoresPage() {
                                 <div>
                                   <span className="font-semibold text-slate-700">Tỷ lệ tiền cọc yêu cầu:</span>
                                   <p className="text-slate-900 font-bold">
-                                    {s.rentalPolicy?.depositPercent || 30}% giá trị đơn
+                                    {s.rentalPolicy?.depositPercent !== undefined && s.rentalPolicy?.depositPercent !== null
+                                      ? s.rentalPolicy.depositPercent
+                                      : 0}% giá trị đơn
                                   </p>
                                 </div>
                               </div>
@@ -555,7 +557,7 @@ export default function AdminStoresPage() {
                     changedItems.push({
                       key: "depositPercent",
                       label: "Tỷ lệ tiền cọc (%)",
-                      oldVal: `${originalStore?.rentalPolicy?.depositPercent || 15}%`,
+                      oldVal: `${originalStore?.rentalPolicy?.depositPercent ?? 0}%`,
                       newVal: `${req.depositPercent}%`,
                       type: "badge",
                     });

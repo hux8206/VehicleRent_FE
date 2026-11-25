@@ -301,7 +301,7 @@ export default function AdminDashboardPage() {
               Báo Cáo & Trung Tâm Điều Hành Sàn
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Giám sát trực quan dữ liệu doanh thu, hoa hồng tích lũy 10%, trạng thái vận hành và phê duyệt đối tác.
+              Giám sát trực quan dữ liệu doanh thu, hoa hồng tích lũy ({commissionRate}%), trạng thái vận hành và phê duyệt đối tác.
             </p>
           </div>
 
@@ -1046,7 +1046,7 @@ export default function AdminDashboardPage() {
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 leading-relaxed">
-                  Cửa hàng không thể cài mức cọc thấp hơn giá trị này. Mặc định <strong>15%</strong> toàn hệ thống.
+                  Cửa hàng không thể cài mức cọc thấp hơn giá trị này. Hiện đang áp dụng tối thiểu <strong>{minDepositPercent}%</strong> toàn hệ thống.
                 </p>
                 <div className="pt-2">
                   <Input

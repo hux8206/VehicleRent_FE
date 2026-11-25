@@ -698,7 +698,7 @@ export default function AdminUsersPage() {
                                 </div>
 
                                 <div className="text-xs text-slate-500 font-semibold">
-                                  Cọc: <strong className="text-slate-900">{s.rentalPolicy?.depositPercent || 15}%</strong>
+                                  Cọc: <strong className="text-slate-900">{s.rentalPolicy?.depositPercent ?? 0}%</strong>
                                 </div>
                               </div>
 
@@ -1046,7 +1046,7 @@ export default function AdminUsersPage() {
                         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                           <span className="text-slate-500 font-semibold">Hạn mức nợ âm sàn</span>
                           <div className="text-xl font-black text-slate-800">
-                            -{Number(userDetail.partnerWallet?.creditLimit || 500000).toLocaleString("vi-VN")} đ
+                            -{Number(userDetail.partnerWallet?.creditLimit !== undefined && userDetail.partnerWallet?.creditLimit !== null ? userDetail.partnerWallet.creditLimit : 500000).toLocaleString("vi-VN")} đ
                           </div>
                         </div>
 

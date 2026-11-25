@@ -119,7 +119,7 @@ function PartnerOnboardingContent() {
     setCloseTime(s.closeTime || "21:00");
     if (s.storeImage) setStoreImage(s.storeImage);
     if (s.rentalPolicy) {
-      setDepositPercent(Number(s.rentalPolicy.depositPercent));
+      setDepositPercent(Math.max(currentMinDeposit, Number(s.rentalPolicy.depositPercent)));
       if (s.rentalPolicy.cancelRule) setCancelRule(s.rentalPolicy.cancelRule);
       if (s.rentalPolicy.refundCondition) setRefundCondition(s.rentalPolicy.refundCondition);
     } else {
@@ -138,7 +138,7 @@ function PartnerOnboardingContent() {
         setStores(storesData || []);
 
         const currentMinDeposit =
-          sysConfig?.minDepositPercent !== undefined
+          sysConfig?.minDepositPercent !== undefined && sysConfig?.minDepositPercent !== null
             ? Number(sysConfig.minDepositPercent)
             : 15;
         setMinDepositPercent(currentMinDeposit);
@@ -591,7 +591,12 @@ function PartnerOnboardingContent() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Tỷ lệ tiền cọc (%) <span className="text-red-500">*</span></Label>
+                    <Label className="text-xs font-semibold">
+                      Tỷ lệ tiền cọc (%) <span className="text-red-500">*</span>
+                      <span className="ml-1 text-[10px] font-normal text-slate-400">
+                        (Tối thiểu {minDepositPercent}% theo cấu hình sàn)
+                      </span>
+                    </Label>
                     <Input
                       type="number"
                       min={minDepositPercent}

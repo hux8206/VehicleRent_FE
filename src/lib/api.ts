@@ -829,12 +829,13 @@ export const api = {
       try {
         return await request<{
           booking: Booking;
+          isZeroDeposit?: boolean;
           payment: {
             transactionRef: string;
             amount: number;
             paymentMethod: string;
           };
-          holdExpiresAt: string;
+          holdExpiresAt: string | null;
           message: string;
         }>("/customer/bookings", {
           method: "POST",

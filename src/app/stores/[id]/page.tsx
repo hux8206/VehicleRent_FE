@@ -33,13 +33,20 @@ export default function StoreDetailPage() {
 
   const [store, setStore] = useState<Store | null>(null);
   const [vehicles, setVehicles] = useState<VehicleModel[]>([]);
+  const [minDepositConfig, setMinDepositConfig] = useState<number>(15);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadStoreDetail() {
       setIsLoading(true);
       try {
-        const data = await api.customer.getStoreDetail(id);
+        const [data, sysCfg] = await Promise.all([
+          api.customer.getStoreDetail(id),
+          api.config.get().catch(() => null),
+        ]);
+        if (sysCfg?.minDepositPercent !== undefined && sysCfg?.minDepositPercent !== null) {
+          setMinDepositConfig(Number(sysCfg.minDepositPercent));
+        }
         setStore(data);
         if (data.vehicleModels && data.vehicleModels.length > 0) {
           setVehicles(data.vehicleModels as VehicleModel[]);
@@ -86,7 +93,12 @@ export default function StoreDetailPage() {
     );
   }
 
-  const depositPercent = store.rentalPolicy?.depositPercent || 30;
+  const rawDep =
+    store.rentalPolicy?.depositPercent !== undefined &&
+    store.rentalPolicy?.depositPercent !== null
+      ? Number(store.rentalPolicy.depositPercent)
+      : minDepositConfig;
+  const depositPercent = Math.max(minDepositConfig, rawDep);
   const rating = store.avgRating ? Number(store.avgRating).toFixed(1) : "5.0";
   const reviewCount = store.reviewCount ?? (store.reviews?.length || 0);
   const reviewsList = store.reviews || [];

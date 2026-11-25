@@ -107,6 +107,7 @@ function PartnerWalletContent() {
   const [depositAmount, setDepositAmount] = useState<number>(500000);
   const [depositQrInfo, setDepositQrInfo] = useState<any>(null);
   const [isGeneratingQr, setIsGeneratingQr] = useState(false);
+  const [commissionRateConfig, setCommissionRateConfig] = useState<number>(10);
 
   // Withdraw modal (Rút tiền về ngân hàng)
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
@@ -138,14 +139,18 @@ function PartnerWalletContent() {
     setIsLoading(true);
     try {
       const branchId = storeIdParam ? Number(storeIdParam) : undefined;
-      const [w, h, storesData] = await Promise.all([
+      const [w, h, storesData, sysCfg] = await Promise.all([
         api.partner.getWallet(),
         api.partner.getWalletHistory(1, 100, branchId),
         api.partner.getStores().catch(() => []),
+        api.config.get().catch(() => null),
       ]);
       setWallet(w);
       setHistories(h.histories);
       setStores(storesData || []);
+      if (sysCfg?.commissionRate !== undefined && sysCfg?.commissionRate !== null) {
+        setCommissionRateConfig(Number(sysCfg.commissionRate));
+      }
       if (storesData && storesData.length > 0) {
         const s = storesData[0];
         setBankInfo({
@@ -371,7 +376,7 @@ function PartnerWalletContent() {
   }, [histories, historySearch, historyFromDate, historyToDate, historyTypeFilter, isBranchStaffMode, currentBranch]);
 
   const balance = wallet?.balance !== undefined ? Number(wallet.balance) : 0;
-  const creditLimit = wallet?.creditLimit !== undefined ? Number(wallet.creditLimit) : 500000;
+  const creditLimit = wallet?.creditLimit !== undefined && wallet?.creditLimit !== null ? Number(wallet.creditLimit) : 500000;
 
   return (
     <div className="py-10 bg-slate-50/60 min-h-screen">
@@ -541,7 +546,7 @@ function PartnerWalletContent() {
                 Lịch Sử Biến Động Số Dư
               </CardTitle>
               <CardDescription className="text-xs">
-                Toàn bộ các giao dịch nạp tiền, trừ phí hoa hồng 10% sàn và hoàn tiền
+                Toàn bộ các giao dịch nạp tiền, trừ phí hoa hồng ({commissionRateConfig}%) sàn và hoàn tiền
               </CardDescription>
             </div>
             <span className="text-xs text-slate-500 font-medium">
@@ -590,7 +595,7 @@ function PartnerWalletContent() {
               >
                 <option value="ALL">Tất cả loại GD</option>
                 <option value="0">Nạp tiền vào ví (+)</option>
-                <option value="1">Trừ hoa hồng 10% (-)</option>
+                <option value="1">Trừ hoa hồng {commissionRateConfig}% (-)</option>
                 <option value="2">Hoàn tiền (+)</option>
                 <option value="3">Rút về ngân hàng (-)</option>
               </select>

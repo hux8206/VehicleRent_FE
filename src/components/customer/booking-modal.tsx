@@ -124,15 +124,18 @@ export function BookingModal({
   const isTierDiscounted = tieredCalc.isDiscounted;
   const maxAvailable = Math.max(1, model.availableCount ?? 1);
   const rentAmount = dayRent * unitPrice * quantity;
-  const rawDepositPercent = model.store?.rentalPolicy?.depositPercent !== undefined
-    ? Number(model.store.rentalPolicy.depositPercent)
-    : minDeposit;
+  const rawDepositPercent =
+    model.store?.rentalPolicy?.depositPercent !== undefined &&
+    model.store?.rentalPolicy?.depositPercent !== null
+      ? Number(model.store.rentalPolicy.depositPercent)
+      : minDeposit;
   // Tôn trọng mức cọc tối thiểu do Admin quy định
   const depositPercent = Math.max(minDeposit, rawDepositPercent);
   const discountAmount = appliedPromo ? appliedPromo.discountAmount : 0;
   const finalRentAmount = Math.max(0, rentAmount - discountAmount);
+  const requiredDepositAmount = Math.round((finalRentAmount * depositPercent) / 100);
   const depositAmount =
-    paymentType === 1 ? Math.round((finalRentAmount * depositPercent) / 100) : finalRentAmount;
+    paymentType === 1 ? requiredDepositAmount : finalRentAmount;
 
   // Giờ hoạt động của cửa hàng (Requirement 1)
   const storeOpenTime = model.store?.openTime || "07:00";
@@ -318,6 +321,12 @@ export function BookingModal({
       return;
     }
 
+    // Nếu đơn miễn cọc (0đ) -> xác nhận đơn ngay lập tức, không cần popup hoàn cọc hay QR
+    if (depositAmount <= 0) {
+      await handleConfirmAndProceedToPayment();
+      return;
+    }
+
     // Mở popup thông báo chính sách hoàn cọc trước khi qua màn hình quét mã QR
     setShowRefundConfirm(true);
   };
@@ -339,6 +348,15 @@ export function BookingModal({
       });
 
       setBookingResult(res);
+
+      // Nếu miễn cọc (0đ) hoặc đơn đã tự xác nhận -> hoàn tất ngay không cần gọi PayOS
+      if (res?.isZeroDeposit || res?.booking?.status === 1 || Number(res?.payment?.amount || 0) <= 0) {
+        toast.success("Đặt xe thành công (Miễn cọc 0đ)! Đơn hàng đã được xác nhận.");
+        onClose();
+        router.push("/customer/bookings");
+        return;
+      }
+
       // Fetch or generate QR
       const qrData = await api.customer.getPaymentQr(res.booking.id);
       setQrInfo(qrData);
@@ -795,10 +813,12 @@ export function BookingModal({
                     }`}
                   >
                     <div className="font-bold text-xs">
-                      {t("booking_deposit_opt", { percent: depositPercent }, `Cọc trước ${depositPercent}% giữ xe`)}
+                      {depositPercent === 0
+                        ? "Đặt giữ chỗ (Không cần cọc)"
+                        : t("booking_deposit_opt", { percent: depositPercent }, `Cọc trước ${depositPercent}% giữ xe`)}
                     </div>
                     <div className="text-xs text-blue-600 dark:text-blue-400 font-extrabold mt-1">
-                      {depositAmount.toLocaleString("vi-VN")} đ
+                      {depositPercent === 0 ? "0 đ (Thanh toán khi nhận xe)" : `${requiredDepositAmount.toLocaleString("vi-VN")} đ`}
                     </div>
                   </button>
                   <button

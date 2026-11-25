@@ -126,9 +126,11 @@ export default function VehicleDetailPage() {
   const pricePerDay = tieredCalc.pricePerDay;
   const isTierDiscounted = tieredCalc.isDiscounted;
   const rentAmount = dayRent * pricePerDay;
-  const rawDepositPercent = model.store?.rentalPolicy?.depositPercent !== undefined
-    ? Number(model.store.rentalPolicy.depositPercent)
-    : minDeposit;
+  const rawDepositPercent =
+    model.store?.rentalPolicy?.depositPercent !== undefined &&
+    model.store?.rentalPolicy?.depositPercent !== null
+      ? Number(model.store.rentalPolicy.depositPercent)
+      : minDeposit;
   const depositPercent = Math.max(minDeposit, rawDepositPercent);
   const depositAmount = Math.round((rentAmount * depositPercent) / 100);
 
@@ -586,7 +588,11 @@ export default function VehicleDetailPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-600">
                     <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
                       <span className="font-semibold text-slate-800 block mb-0.5">Mức đặt cọc giữ xe:</span>
-                      <span>Chỉ cần cọc <strong className="text-blue-600 font-bold">{depositPercent}%</strong> tổng tiền thuê.</span>
+                      {depositPercent === 0 ? (
+                        <span className="text-emerald-700 font-semibold">Miễn đặt cọc (0%) — Thanh toán khi nhận xe.</span>
+                      ) : (
+                        <span>Chỉ cần cọc <strong className="text-blue-600 font-bold">{depositPercent}%</strong> tổng tiền thuê.</span>
+                      )}
                     </div>
                     <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
                       <span className="font-semibold text-slate-800 block mb-0.5">Quy định hủy đơn:</span>

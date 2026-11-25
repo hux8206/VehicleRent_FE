@@ -30,6 +30,7 @@ export default function StoresPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProvince, setSelectedProvince] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
+  const [minDepositConfig, setMinDepositConfig] = useState<number>(15);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
 
@@ -37,8 +38,14 @@ export default function StoresPage() {
     setIsLoading(true);
     try {
       const activeCoords = coords !== undefined ? coords : userCoords;
-      const data = await api.customer.getStores(activeCoords || undefined);
+      const [data, sysCfg] = await Promise.all([
+        api.customer.getStores(activeCoords || undefined),
+        api.config.get().catch(() => null),
+      ]);
       setStores(data);
+      if (sysCfg?.minDepositPercent !== undefined && sysCfg?.minDepositPercent !== null) {
+        setMinDepositConfig(Number(sysCfg.minDepositPercent));
+      }
     } catch {
       // fallback
     } finally {
@@ -235,7 +242,12 @@ export default function StoresPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStores.map((store) => {
-              const depositPercent = store.rentalPolicy?.depositPercent || 30;
+              const rawDep =
+                store.rentalPolicy?.depositPercent !== undefined &&
+                store.rentalPolicy?.depositPercent !== null
+                  ? Number(store.rentalPolicy.depositPercent)
+                  : minDepositConfig;
+              const depositPercent = Math.max(minDepositConfig, rawDep);
               const vehicleCount = store._count?.vehicleModels ?? (store.vehicleModels?.length || 0);
               const rating = store.avgRating ? Number(store.avgRating).toFixed(1) : "5.0";
               const countReviews = store.reviewCount ?? (store.reviews?.length || 0);
