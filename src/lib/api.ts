@@ -117,6 +117,8 @@ export interface Store {
   storeImage?: string;
   openTime?: string;
   closeTime?: string;
+  telegramChatId?: string | null;
+  notifyEmail?: string | null;
   status: number; // 0: PENDING, 1: ACTIVE, 2: REJECTED
   rejectReason?: string;
   rentalPolicy?: RentalPolicy;

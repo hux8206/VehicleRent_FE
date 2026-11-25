@@ -72,6 +72,8 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  Bell,
+  Mail,
 } from "lucide-react";
 import {
   AreaChart,
@@ -241,6 +243,12 @@ function PartnerDashboardContent() {
   const [branchCloseTime, setBranchCloseTime] = useState("21:00");
   const [isSubmittingOperatingHours, setIsSubmittingOperatingHours] = useState(false);
 
+  // Branch Notification Settings (Telegram & Email)
+  const [branchTelegramChatId, setBranchTelegramChatId] = useState("");
+  const [branchNotifyEmail, setBranchNotifyEmail] = useState("");
+  const [isSavingNotifications, setIsSavingNotifications] = useState(false);
+  const telegramBotUsername = (process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "").replace(/^@/, "").trim();
+
   // New branch operating hours
   const [newBranchOpenTime, setNewBranchOpenTime] = useState("07:00");
   const [newBranchCloseTime, setNewBranchCloseTime] = useState("21:00");
@@ -336,6 +344,10 @@ function PartnerDashboardContent() {
 
   // Khi ở phân hệ chi nhánh, tải lịch sử giao dịch chỉ riêng của chi nhánh đó (Requirement 2)
   useEffect(() => {
+    if (selectedBranch) {
+      setBranchTelegramChatId(selectedBranch.telegramChatId || "");
+      setBranchNotifyEmail(selectedBranch.notifyEmail || "");
+    }
     if (currentMode === "branch" && selectedBranch?.id) {
       api.partner
         .getWalletHistory(1, 100, selectedBranch.id)
@@ -710,6 +722,43 @@ function PartnerDashboardContent() {
       toast.error(err.message || "Không thể cập nhật giờ hoạt động");
     } finally {
       setIsSubmittingOperatingHours(false);
+    }
+  };
+
+  const handleSaveBranchNotifications = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedBranch) return;
+    setIsSavingNotifications(true);
+    try {
+      const updated = await api.partner.updateStore(selectedBranch.id, {
+        telegramChatId: branchTelegramChatId.trim() || null,
+        notifyEmail: branchNotifyEmail.trim() || null,
+      });
+      setStores((prev) =>
+        prev.map((s) =>
+          s.id === selectedBranch.id
+            ? {
+                ...s,
+                telegramChatId: updated?.telegramChatId ?? (branchTelegramChatId.trim() || null),
+                notifyEmail: updated?.notifyEmail ?? (branchNotifyEmail.trim() || null),
+              }
+            : s
+        )
+      );
+      setSelectedBranch((prev) =>
+        prev
+          ? {
+              ...prev,
+              telegramChatId: updated?.telegramChatId ?? (branchTelegramChatId.trim() || null),
+              notifyEmail: updated?.notifyEmail ?? (branchNotifyEmail.trim() || null),
+            }
+          : null
+      );
+      toast.success("Đã lưu cài đặt nhận thông báo Telegram & Email cho chi nhánh!");
+    } catch (err: any) {
+      toast.error(err.message || "Không thể lưu cài đặt thông báo.");
+    } finally {
+      setIsSavingNotifications(false);
     }
   };
 
@@ -2272,6 +2321,132 @@ function PartnerDashboardContent() {
                       </Link>
                     </div>
                   </div>
+                </Card>
+
+                {/* ── Branch Notification Settings (Telegram Bot & Email) ── */}
+                <Card className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                    <div className="flex items-start gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center shrink-0">
+                        <Bell className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-base font-black text-slate-900">
+                            Cài đặt thông báo đơn hàng mới (Telegram & Email)
+                          </h3>
+                          {selectedBranch.telegramChatId ? (
+                            <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold gap-1">
+                              <CheckCircle2 className="h-3 w-3" /> Đã kết nối
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-bold gap-1">
+                              <AlertCircle className="h-3 w-3" /> Chưa kết nối
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Nhận tin nhắn Telegram và Email ngay khi có khách đặt xe thành công tại chi nhánh <strong>{selectedBranch.storeName}</strong>.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      {telegramBotUsername ? (
+                        <a
+                          href={`https://t.me/${telegramBotUsername}?start=store_${selectedBranch.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button
+                            type="button"
+                            size="sm"
+                            className="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs h-9 px-4 rounded-xl gap-1.5 shadow-xs cursor-pointer"
+                          >
+                            <Send className="h-3.5 w-3.5" />
+                            <span>Kết nối Telegram nhận thông báo đơn</span>
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </a>
+                      ) : (
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() =>
+                            toast.info(
+                              "Chưa cấu hình biến môi trường NEXT_PUBLIC_TELEGRAM_BOT_USERNAME. Bạn có thể nhập thủ công Telegram Chat ID bên dưới."
+                            )
+                          }
+                          className="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs h-9 px-4 rounded-xl gap-1.5 shadow-xs cursor-pointer"
+                        >
+                          <Send className="h-3.5 w-3.5" />
+                          <span>Kết nối Telegram nhận thông báo đơn</span>
+                        </Button>
+                      )}
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => loadAllData()}
+                        className="h-9 px-3 text-xs font-semibold rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 gap-1 cursor-pointer"
+                        title="Tải lại trạng thái kết nối từ Telegram"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        <span>Kiểm tra lại</span>
+                      </Button>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleSaveBranchNotifications} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                    <div className="md:col-span-5 space-y-1.5">
+                      <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                        <Send className="h-3.5 w-3.5 text-sky-600" />
+                        Telegram Chat ID (Tự động điền sau khi kết nối hoặc nhập tay)
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="VD: 123456789 hoặc -100..."
+                        value={branchTelegramChatId}
+                        onChange={(e) => setBranchTelegramChatId(e.target.value)}
+                        className="text-xs h-10 rounded-xl font-mono"
+                      />
+                    </div>
+
+                    <div className="md:col-span-5 space-y-1.5">
+                      <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                        <Mail className="h-3.5 w-3.5 text-blue-600" />
+                        Email nhận thông báo đơn (Mặc định lấy email tài khoản)
+                      </Label>
+                      <Input
+                        type="email"
+                        placeholder={user?.email || "nhaxe@gmail.com"}
+                        value={branchNotifyEmail}
+                        onChange={(e) => setBranchNotifyEmail(e.target.value)}
+                        className="text-xs h-10 rounded-xl"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <Button
+                        type="submit"
+                        disabled={isSavingNotifications}
+                        className="w-full h-10 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl gap-1.5 cursor-pointer"
+                      >
+                        {isSavingNotifications ? (
+                          <>
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            <span>Đang lưu...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Check className="h-3.5 w-3.5" />
+                            <span>Lưu cài đặt</span>
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </form>
                 </Card>
 
                 {/* ── Branch Analytics Dashboard & Charts (Requirement 2) ── */}

@@ -29,6 +29,13 @@ import {
   Trash2,
   Info,
   ArrowLeft,
+  Bell,
+  Send,
+  Mail,
+  ExternalLink,
+  RotateCcw,
+  AlertCircle,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ProvinceCombobox } from "@/components/common/province-combobox";
@@ -101,6 +108,10 @@ function PartnerOnboardingContent() {
   );
   const [openTime, setOpenTime] = useState<string>("07:00");
   const [closeTime, setCloseTime] = useState<string>("21:00");
+  const [telegramChatId, setTelegramChatId] = useState<string>("");
+  const [notifyEmail, setNotifyEmail] = useState<string>("");
+  const [isSavingNotifications, setIsSavingNotifications] = useState(false);
+  const telegramBotUsername = (process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "").replace(/^@/, "").trim();
   const [bankAccountNum, setBankAccountNum] = useState(
     user?.bankAccountNum || "9876543210"
   );
@@ -117,6 +128,8 @@ function PartnerOnboardingContent() {
     setDescription(s.description || "");
     setOpenTime(s.openTime || "07:00");
     setCloseTime(s.closeTime || "21:00");
+    setTelegramChatId(s.telegramChatId || "");
+    setNotifyEmail(s.notifyEmail || "");
     if (s.storeImage) setStoreImage(s.storeImage);
     if (s.rentalPolicy) {
       setDepositPercent(Math.max(currentMinDeposit, Number(s.rentalPolicy.depositPercent)));
@@ -672,6 +685,172 @@ function PartnerOnboardingContent() {
             </form>
           </CardContent>
         </Card>
+
+        {store && (
+          <Card className="rounded-2xl border-slate-200/80 shadow-sm bg-white">
+            <CardHeader className="p-6 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="h-10 w-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center shrink-0">
+                  <Bell className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <CardTitle className="text-base font-bold text-slate-900">
+                      Cài đặt thông báo đơn hàng (Telegram & Email)
+                    </CardTitle>
+                    {store.telegramChatId ? (
+                      <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold gap-1">
+                        <CheckCircle2 className="h-3 w-3" /> Đã kết nối
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-bold gap-1">
+                        <AlertCircle className="h-3 w-3" /> Chưa kết nối
+                      </Badge>
+                    )}
+                  </div>
+                  <CardDescription className="text-xs text-slate-500 mt-0.5">
+                    Cấu hình kênh nhận thông báo tức thì khi có đơn đặt xe mới cho chi nhánh này.
+                  </CardDescription>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                {telegramBotUsername ? (
+                  <a
+                    href={`https://t.me/${telegramBotUsername}?start=store_${store.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs h-9 px-4 rounded-xl gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <Send className="h-3.5 w-3.5" />
+                      <span>Kết nối Telegram nhận thông báo đơn</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </Button>
+                  </a>
+                ) : (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() =>
+                      toast.info(
+                        "Chưa cấu hình NEXT_PUBLIC_TELEGRAM_BOT_USERNAME. Bạn có thể nhập thủ công Telegram Chat ID bên dưới."
+                      )
+                    }
+                    className="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs h-9 px-4 rounded-xl gap-1.5 shadow-xs cursor-pointer"
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                    <span>Kết nối Telegram nhận thông báo đơn</span>
+                  </Button>
+                )}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      const storesList = await api.partner.getStores();
+                      const refreshed = (storesList || []).find((s) => s.id === store.id);
+                      if (refreshed) {
+                        setStore(refreshed);
+                        setTelegramChatId(refreshed.telegramChatId || "");
+                        setNotifyEmail(refreshed.notifyEmail || "");
+                        toast.success(
+                          refreshed.telegramChatId
+                            ? "Đã đồng bộ trạng thái: Telegram đã kết nối!"
+                            : "Chưa thấy kết nối Telegram. Hãy bấm Start trong bot Telegram rồi kiểm tra lại."
+                        );
+                      }
+                    } catch {
+                      toast.error("Không thể kiểm tra lại trạng thái.");
+                    }
+                  }}
+                  className="h-9 px-3 text-xs font-semibold rounded-xl border-slate-200 text-slate-700 hover:bg-slate-50 gap-1 cursor-pointer"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  <span>Kiểm tra lại</span>
+                </Button>
+              </div>
+            </CardHeader>
+
+            <CardContent className="p-6">
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setIsSavingNotifications(true);
+                  try {
+                    const updated = await api.partner.updateStore(store.id, {
+                      telegramChatId: telegramChatId.trim() || null,
+                      notifyEmail: notifyEmail.trim() || null,
+                    });
+                    setStore((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            telegramChatId: updated?.telegramChatId ?? (telegramChatId.trim() || null),
+                            notifyEmail: updated?.notifyEmail ?? (notifyEmail.trim() || null),
+                          }
+                        : null
+                    );
+                    toast.success("Đã lưu cài đặt thông báo Telegram & Email thành công!");
+                  } catch (err: any) {
+                    toast.error(err.message || "Không thể lưu cài đặt thông báo.");
+                  } finally {
+                    setIsSavingNotifications(false);
+                  }
+                }}
+                className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end"
+              >
+                <div className="sm:col-span-5 space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                    <Send className="h-3.5 w-3.5 text-sky-600" />
+                    Telegram Chat ID
+                  </Label>
+                  <Input
+                    type="text"
+                    placeholder="VD: 123456789"
+                    value={telegramChatId}
+                    onChange={(e) => setTelegramChatId(e.target.value)}
+                    className="text-xs h-10 rounded-xl font-mono"
+                  />
+                </div>
+
+                <div className="sm:col-span-5 space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                    <Mail className="h-3.5 w-3.5 text-blue-600" />
+                    Email nhận thông báo đơn
+                  </Label>
+                  <Input
+                    type="email"
+                    placeholder={user?.email || "nhaxe@gmail.com"}
+                    value={notifyEmail}
+                    onChange={(e) => setNotifyEmail(e.target.value)}
+                    className="text-xs h-10 rounded-xl"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <Button
+                    type="submit"
+                    disabled={isSavingNotifications}
+                    className="w-full h-10 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl gap-1.5 cursor-pointer"
+                  >
+                    {isSavingNotifications ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Check className="h-3.5 w-3.5" />
+                    )}
+                    <span>{isSavingNotifications ? "Đang lưu..." : "Lưu cài đặt"}</span>
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
