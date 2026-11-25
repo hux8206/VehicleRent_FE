@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { api, Booking, VehicleItem, VehicleModel, Store } from "@/lib/api";
+import { api, Booking, VehicleItem, VehicleModel, Store, getTieredPricePerDay } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -85,6 +85,7 @@ function PartnerBookingsContent() {
   const [walkInStartTime, setWalkInStartTime] = useState("");
   const [walkInEndTime, setWalkInEndTime] = useState("");
   const [walkInRentPrice, setWalkInRentPrice] = useState<number>(0);
+  const [isWalkInTierDiscounted, setIsWalkInTierDiscounted] = useState(false);
   const [walkInTotalAmount, setWalkInTotalAmount] = useState<number>(0);
   const [walkInNote, setWalkInNote] = useState("");
   const [walkInHandoverNow, setWalkInHandoverNow] = useState(true);
@@ -383,22 +384,29 @@ function PartnerBookingsContent() {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  const recalcWalkInPrices = (startStr: string, endStr: string, price: number, qty: number = 1) => {
+  const recalcWalkInPrices = (
+    startStr: string,
+    endStr: string,
+    qty: number = 1,
+    modelOverride?: VehicleModel
+  ) => {
+    const targetModel =
+      modelOverride || walkInModels.find((m) => m.id === walkInSelectedModelId);
+    const basePrice = targetModel ? Number(targetModel.rentPrice) || 0 : walkInRentPrice;
     const validQty = Math.max(1, qty);
-    if (!startStr || !endStr) {
-      setWalkInTotalAmount(price * validQty);
-      return;
+    let days = 1;
+    if (startStr && endStr) {
+      const start = new Date(startStr);
+      const end = new Date(endStr);
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end > start) {
+        const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        days = Math.max(1, Math.ceil(diffHours / 24));
+      }
     }
-    const start = new Date(startStr);
-    const end = new Date(endStr);
-    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
-      setWalkInTotalAmount(price * validQty);
-      return;
-    }
-    const diffHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-    const days = Math.max(1, Math.ceil(diffHours / 24));
-    const total = Math.round(days * price * validQty);
-    setWalkInTotalAmount(total);
+    const tiered = getTieredPricePerDay(basePrice, targetModel?.pricingTiers, days);
+    setWalkInRentPrice(tiered.pricePerDay);
+    setIsWalkInTierDiscounted(tiered.isDiscounted);
+    setWalkInTotalAmount(Math.round(days * tiered.pricePerDay * validQty));
   };
 
   const walkInDays = useMemo(() => {
@@ -464,9 +472,7 @@ function PartnerBookingsContent() {
       if (models && models.length > 0) {
         const firstModel = models[0];
         setWalkInSelectedModelId(firstModel.id);
-        const price = Number(firstModel.rentPrice) || 0;
-        setWalkInRentPrice(price);
-        recalcWalkInPrices(startStr, endStr, price, 1);
+        recalcWalkInPrices(startStr, endStr, 1, firstModel);
         await loadItemsForModel(firstModel.id);
       } else {
         setWalkInSelectedModelId(null);
@@ -483,10 +489,8 @@ function PartnerBookingsContent() {
   const handleWalkInModelChange = async (modelId: number) => {
     setWalkInSelectedModelId(modelId);
     const model = walkInModels.find((m) => m.id === modelId);
-    const price = model ? Number(model.rentPrice) || 0 : 0;
-    setWalkInRentPrice(price);
     setWalkInQuantity(1);
-    recalcWalkInPrices(walkInStartTime, walkInEndTime, price, 1);
+    recalcWalkInPrices(walkInStartTime, walkInEndTime, 1, model);
     await loadItemsForModel(modelId);
   };
 
@@ -503,7 +507,7 @@ function PartnerBookingsContent() {
     }
     setWalkInStartTime(startStr);
     setWalkInEndTime(adjustedEnd);
-    recalcWalkInPrices(startStr, adjustedEnd, walkInRentPrice, walkInQuantity);
+    recalcWalkInPrices(startStr, adjustedEnd, walkInQuantity);
   };
 
   const handleCreateWalkInBookingSubmit = async (e: React.FormEvent) => {
@@ -1258,7 +1262,7 @@ function PartnerBookingsContent() {
                       setWalkInQuantity(qty);
                       const newIds = walkInVehicleItems.slice(0, qty).map((it) => it.id);
                       setWalkInSelectedItemIds(newIds);
-                      recalcWalkInPrices(walkInStartTime, walkInEndTime, walkInRentPrice, qty);
+                      recalcWalkInPrices(walkInStartTime, walkInEndTime, qty);
                     }}
                     className="w-full h-9.5 px-3 text-xs rounded-xl border border-slate-300 bg-white text-slate-800 font-semibold focus:ring-2 focus:ring-amber-500/20"
                   >
@@ -1392,9 +1396,15 @@ function PartnerBookingsContent() {
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <Label className="text-xs font-semibold text-slate-700">
-                      Đơn giá thuê niêm yết
+                      Đơn giá áp dụng ({walkInDays} ngày)
                     </Label>
-                    <span className="text-[10px] text-slate-400 font-medium">Cố định theo dòng xe</span>
+                    {isWalkInTierDiscounted ? (
+                      <span className="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-bold">
+                        Ưu đãi dài ngày
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-slate-400 font-medium">Theo bảng giá dòng xe</span>
+                    )}
                   </div>
                   <Input
                     type="text"
